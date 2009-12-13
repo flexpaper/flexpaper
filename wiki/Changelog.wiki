@@ -1,5 +1,4 @@
 #labels Featured
-= Changelog =
 _Changes made to FlexPaper on each new version._
 
 This lists all changes made to FlexPaper, from newer to older.
