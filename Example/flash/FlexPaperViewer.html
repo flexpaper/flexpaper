@@ -6,8 +6,6 @@
 </head>
 <body>
   <div id="cb">
-    <!-- alternate content -->
-    <p>This application requires Flash Player to be installed</p>
   </div>
   
   <script type="text/javascript" src="js/swfobject/swfobject.js"></script>
@@ -15,7 +13,7 @@
   window.onload = function()
   {
     var params = {
-      SwfFile : "Paper3.swf",
+      SwfFile : "Paper.swf",
 	  SwfFile : 1
     }
     swfobject.embedSWF("FlexPaperViewer.swf","cb","500","500","9.0.0","js/swfobject/expressInstall.swf", params);
