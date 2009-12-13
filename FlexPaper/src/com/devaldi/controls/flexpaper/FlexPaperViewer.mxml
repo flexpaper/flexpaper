@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+	Copyright 2009 Erik Engström
+
+    This file is part of FlexPaper.
+
+    FlexPaper is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    FlexPaper is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with FlexPaper.  If not, see <http://www.gnu.org/licenses/>.	
+-->
+<mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml" width="100%" height="100%" verticalGap="0"  xmlns:fp="com.devaldi.controls.flexpaper.*" xmlns:ct="com.devaldi.controls.*" xmlns:st="com.devaldi.skinning.*" borderColor="#8a8a8a" borderThickness="1">
+<mx:Script>
+	<![CDATA[
+		import mx.events.SliderEvent;
+        import mx.controls.sliderClasses.Slider;
+
+		[Bindable]
+		public var Scale:Number = 1;
+		
+		[Bindable]
+		public var SwfFile:String = "";
+		
+		private function printPaper():void{
+			paper1.printPaper();
+		}
+		
+		private function papersLoadedHandler(event:Event):void{
+			spin1.visible = false;
+			spin1.stop();
+		}
+		
+		private function papersLoadingHandler(event:Event):void{
+			spin1.start();
+			spin1.visible = true;
+		}
+		
+		private function sliderChange(event:SliderEvent):void {
+                var currentSlider:Slider=Slider(event.currentTarget);
+                paper1.Zoom(currentSlider.value);
+        }		
+        
+ 		private function formatPct(item:Object):String {
+ 			var spct:String = (Math.round(Number(item)*100)) + "%";
+ 			txtPct.text = spct;
+            return spct;
+   		}
+   		
+   		private function txtPctKeyDown(event:KeyboardEvent):void{
+   			if(event.keyCode == Keyboard.ENTER && txtPct.text.length>1 && !isNaN(Number(txtPct.text.replace("%","")))){
+   				paper1.Zoom(new Number(txtPct.text.replace("%",""))/100);
+   			}
+   		}
+   		
+   		private function txtPageNumKeyDown(event:KeyboardEvent):void{
+   			if(event.keyCode == Keyboard.ENTER && txtPage.text.length>0 && !isNaN(Number(txtPage.text))){
+   				paper1.gotoPage(new Number(txtPage.text));
+   			}
+   		}
+	]]>
+</mx:Script>
+
+<mx:Style source="styles/default.css" />
+	<mx:Canvas styleName="toolbarBackground" width="{paper1.width}" height="23" borderStyle="solid">
+		<st:GradientImageButton top="1" icon="@Embed('/../assets/print-icon.gif')" styleName="toolbttn" width="20" click="paper1.printPaper()" />
+		<st:GradientImageButton top="0" left="22" icon="@Embed('/../assets/fit.gif')" styleName="toolbttn" width="20" click="paper1.fitWidth()" enabled="{paper1.ViewMode == 'Portrait'}" />
+		<st:GradientImageButton top="0" left="45" icon="@Embed('/../assets/pagefit.gif')" styleName="toolbttn" width="20"  click="paper1.fitHeight()" enabled="{paper1.ViewMode == 'Portrait'}" />
+		<st:GradientHSlider x="65" y="-1" maximum="5" change="sliderChange(event)" styleName="sliderbttn" dataTipFormatFunction="formatPct" liveDragging="true" snapInterval="0.1" minimum="0.1" value="{Scale}" width="120" enabled="{paper1.ViewMode == 'Portrait'}"/>
+		<st:GradientTextInput x="186" y="2" fontSize="8" height="17" width="40" id="txtPct" text="{formatPct(Scale)}" keyDown="txtPctKeyDown(event)" enabled="{paper1.ViewMode == 'Portrait'}"/>		
+		<st:GradientImageButton top="1" x="230" icon="@Embed('/../assets/thumbs.gif')" styleName="toolbttn" width="20" click="paper1.switchMode()"  />
+		<st:GradientTextInput x="255" y="2" fontSize="8" height="17" width="30" id="txtPage" text="{paper1.currPage}" keyDown="txtPageNumKeyDown(event)" enabled="{paper1.ViewMode == 'Portrait'}"/>
+		<st:GradientLabel x="288" y="2" fontSize="8" height="17" width="10" text="/"/>
+		<st:GradientLabel x="297" y="2" fontSize="8" height="17" width="30" text="{paper1.numPages}"/>
+		<ct:Spinner styleName="gradientlines" startImmediately="false" id="spin1" left="{paper1.width-22}" top="2"/>	
+	</mx:Canvas>
+	<fp:Viewer id="paper1"	onPapersLoaded="papersLoadedHandler(event)" 
+							onPapersLoading="papersLoadingHandler(event)" 
+							SwfFile="{SwfFile}" Scale="{Scale}" 
+							height="100%" width="100%" borderStyle="solid" />
+</mx:VBox>
