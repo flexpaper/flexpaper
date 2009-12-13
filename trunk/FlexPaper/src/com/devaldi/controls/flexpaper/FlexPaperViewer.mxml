@@ -22,7 +22,8 @@
 	<![CDATA[
 		import mx.events.SliderEvent;
         import mx.controls.sliderClasses.Slider;
-
+		import mx.controls.Alert;
+		
 		[Bindable]
 		public var Scale:Number = 1;
 		
@@ -65,6 +66,17 @@
    				paper1.gotoPage(new Number(txtPage.text));
    			}
    		}
+   		
+		private function showInfo():void {
+                Alert.yesLabel = "OK";
+
+                var messageAlert:Alert = Alert.show(
+                       "FlexPaper by Erik Engström\nFor more information see www.devaldi.com.",
+                       "FlexPaper",
+                        Alert.OK
+                    );
+				messageAlert.mx_internal::alertForm.mx_internal::textField.htmlText="FlexPaper by Erik Engström<br/>For more information see <a href='http://www.devaldi.com'><u>www.devaldi.com</u></a>.";
+            }   		
 	]]>
 </mx:Script>
 
@@ -77,8 +89,9 @@
 		<st:GradientTextInput x="186" y="2" fontSize="8" height="17" width="40" id="txtPct" text="{formatPct(Scale)}" keyDown="txtPctKeyDown(event)" enabled="{paper1.ViewMode == 'Portrait'}"/>		
 		<st:GradientImageButton top="1" x="230" icon="@Embed('/../assets/thumbs.gif')" styleName="toolbttn" width="20" click="paper1.switchMode()"  />
 		<st:GradientTextInput x="255" y="2" fontSize="8" height="17" width="30" id="txtPage" text="{paper1.currPage}" keyDown="txtPageNumKeyDown(event)" enabled="{paper1.ViewMode == 'Portrait'}"/>
-		<st:GradientLabel x="288" y="2" fontSize="8" height="17" width="10" text="/"/>
-		<st:GradientLabel x="297" y="2" fontSize="8" height="17" width="30" text="{paper1.numPages}"/>
+		<st:GradientLabel x="288" y="3" fontSize="8" height="17" width="10" text="/"/>
+		<st:GradientLabel x="297" y="3" fontSize="8" height="17" width="30" text="{paper1.numPages}"/>
+		<st:GradientImageButton top="0" left="{paper1.width-45}" icon="@Embed('/../assets/question_icon.gif')" styleName="toolbttn" width="20" height="20" click="showInfo();" />
 		<ct:Spinner styleName="gradientlines" startImmediately="false" id="spin1" left="{paper1.width-22}" top="2"/>	
 	</mx:Canvas>
 	<fp:Viewer id="paper1"	onPapersLoaded="papersLoadedHandler(event)" 
