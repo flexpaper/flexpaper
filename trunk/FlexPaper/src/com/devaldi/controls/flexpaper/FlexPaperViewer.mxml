@@ -23,6 +23,7 @@
 		import mx.events.SliderEvent;
         import mx.controls.sliderClasses.Slider;
 		import mx.controls.Alert;
+		import mx.managers.PopUpManager;
 		
 		[Bindable]
 		public var Scale:Number = 1;
@@ -68,15 +69,10 @@
    		}
    		
 		private function showInfo():void {
-                Alert.yesLabel = "OK";
-
-                var messageAlert:Alert = Alert.show(
-                       "FlexPaper by Erik Engström\nFor more information see www.devaldi.com.",
-                       "FlexPaper",
-                        Alert.OK
-                    );
-				messageAlert.mx_internal::alertForm.mx_internal::textField.htmlText="FlexPaper by Erik Engström<br/>For more information see <a href='http://www.devaldi.com'><u>www.devaldi.com</u></a>.";
-            }   		
+			var vabout:About = new About();
+			PopUpManager.addPopUp(vabout, this, true);
+            PopUpManager.centerPopUp(vabout);
+        }   		
 	]]>
 </mx:Script>
 
@@ -91,7 +87,7 @@
 		<st:GradientTextInput x="255" y="2" fontSize="8" height="17" width="30" id="txtPage" text="{paper1.currPage}" keyDown="txtPageNumKeyDown(event)" enabled="{paper1.ViewMode == 'Portrait'}"/>
 		<st:GradientLabel x="288" y="3" fontSize="8" height="17" width="10" text="/"/>
 		<st:GradientLabel x="297" y="3" fontSize="8" height="17" width="30" text="{paper1.numPages}"/>
-		<st:GradientImageButton top="0" left="{paper1.width-45}" icon="@Embed('/../assets/question_icon.gif')" styleName="toolbttn" width="20" height="20" click="showInfo();" />
+		<st:GradientImageButton top="0" left="{paper1.width-45}" icon="@Embed('/../assets/question.gif')" styleName="toolbttn" width="20" height="20" click="showInfo();" />
 		<ct:Spinner styleName="gradientlines" startImmediately="false" id="spin1" left="{paper1.width-22}" top="2"/>	
 	</mx:Canvas>
 	<fp:Viewer id="paper1"	onPapersLoaded="papersLoadedHandler(event)" 
