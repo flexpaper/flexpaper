@@ -356,7 +356,7 @@ package com.devaldi.controls.flexpaper
 		override protected function commitProperties():void {
 			super.commitProperties();
 			
-			if(_swfFileChanged){ // handler for when the Swf file has changed.
+			if(_swfFileChanged && _swfFile != null && _swfFile.length > 0){ // handler for when the Swf file has changed.
 			
 				dispatchEvent(new Event("onPapersLoading"));
 				
@@ -365,6 +365,7 @@ package com.devaldi.controls.flexpaper
 				 				
 				_swfFileChanged = false;
 			}
+			
 		}
 		
 		private function resizeMc(mc:MovieClip, maxW:Number, maxH:Number=0, constrainProportions:Boolean=true):void{
