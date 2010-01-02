@@ -1,6 +1,6 @@
-/*
+/* 
 Copyright 2009 Erik Engström
- 
+
 This file is part of FlexPaper.
 
 FlexPaper is free software: you can redistribute it and/or modify
@@ -16,33 +16,15 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with FlexPaper.  If not, see <http://www.gnu.org/licenses/>.	
 */
-
-package com.devaldi.streaming
+	
+package com.devaldi.controls.flexpaper
 {
-	import mx.controls.Image;
-	import mx.events.FlexEvent;
+	import flash.display.Shape;
 	
-	public class DupImage extends Image
+	public class ShapeMarker extends Shape
 	{
-		public var dupIndex:int = 0;
-	
-		public function DupImage()
+		public function ShapeMarker()
 		{
-		
-		}
-		
-		override public function set source(value:Object):void{
-			super.source = value;
-			
-			if(value!=null && value.content != null){
-				value.content.stop();
-			}
-		}
-		
-		public function removeAllChildren():void{
-			for(var i:int=0;i<this.numChildren;i++){
-				this.removeChildAt(i);
-			}
-		}
+		}		
 	}
 }

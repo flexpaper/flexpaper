@@ -5,13 +5,13 @@
 	import mx.events.CloseEvent;
 	import mx.managers.PopUpManager;
 	
-		private function Init():void{
-			this.addEventListener(CloseEvent.CLOSE, onClose);
-		}
+	private function Init():void{
+		this.addEventListener(CloseEvent.CLOSE, onClose);
+	}
 
-  		private function onClose(evt:CloseEvent):void {
-            PopUpManager.removePopUp(this);
-        }		
+  	private function onClose(evt:CloseEvent):void {
+        PopUpManager.removePopUp(this);
+    }		
 	]]>
 </mx:Script>
 	<mx:Button x="105.5" y="76" label="OK" click="PopUpManager.removePopUp(this);"/>
