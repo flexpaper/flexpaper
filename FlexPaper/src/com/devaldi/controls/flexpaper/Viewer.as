@@ -466,7 +466,13 @@ package com.devaldi.controls.flexpaper
 
 					for(var ti:int=0;ti<text.length;ti++){
 						tri = snap.getTextRunInfo(searchIndex+ti,searchIndex+ti);
-						searchShape.graphics.drawRect(tri[0].corner3x,tri[0].corner1y,tri[0].corner1x-tri[0].corner3x,tri[0].corner3y-tri[0].corner1y);
+						
+						// the drawRect below is going to fail if the fonts are not properly embedded
+						try{
+							searchShape.graphics.drawRect(tri[0].corner3x,tri[0].corner1y,tri[0].corner1x-tri[0].corner3x,tri[0].corner3y-tri[0].corner1y);
+						}catch(e:Error){ 
+							// dismiss for the meantime
+						}
 					}
 					
 					searchShape.graphics.endFill();
