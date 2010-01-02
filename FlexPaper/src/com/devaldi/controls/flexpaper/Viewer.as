@@ -440,6 +440,7 @@ package com.devaldi.controls.flexpaper
 		
 		public function searchText(text:String):void{
 			var tri:Array;
+			
 			if(prevSearchText != text){
 				searchIndex = -1;
 				searchPageIndex = -1;
@@ -465,13 +466,13 @@ package com.devaldi.controls.flexpaper
 					searchShape.graphics.beginFill(0x0095f7,0.3);
 
 					for(var ti:int=0;ti<text.length;ti++){
-						tri = snap.getTextRunInfo(searchIndex+ti,searchIndex+ti);
+						tri = snap.getTextRunInfo(searchIndex+ti,searchIndex+ti+1);
 						
-						// the drawRect below is going to fail if the fonts are not properly embedded
-						try{
+						// only draw the "selected" rect if fonts are embedded otherwise draw a line thingy
+						if((tri[0].corner1x-tri[0].corner3x)>0 && (tri[0].corner3y-tri[0].corner1y)>0){
 							searchShape.graphics.drawRect(tri[0].corner3x,tri[0].corner1y,tri[0].corner1x-tri[0].corner3x,tri[0].corner3y-tri[0].corner1y);
-						}catch(e:Error){ 
-							// dismiss for the meantime
+						}else{
+							searchShape.graphics.drawRect(tri[0].matrix_tx,tri[0].matrix_ty+1,tri[1].matrix_tx-tri[0].matrix_tx,4);
 						}
 					}
 					

@@ -100,14 +100,14 @@
 		<st:GradientTextInput x="274" y="1" fontSize="9" height="21" width="30" id="txtPage" text="{paper1.currPage}" keyDown="txtPageNumKeyDown(event)" enabled="{paper1.ViewMode == 'Portrait'}" toolTip="Current Page"/>
 		<st:GradientLabel x="307" y="3" fontSize="9" height="17" width="10" text="/"/>
 		<st:GradientLabel x="316" y="3" fontSize="9" height="19" width="28" text="{paper1.numPages}"/>
-		<st:GradientImageButton top="3" x="420" icon="@Embed('/../assets/find.gif')" styleName="toolbttn" width="20" click="paper1.searchText(txtSearch.text);" toolTip="Search"  />
+		<st:GradientImageButton top="3" x="418" icon="@Embed('/../assets/find.gif')" styleName="toolbttn" width="20" click="paper1.searchText(txtSearch.text);" toolTip="Search"  />
 		
-		<st:GradientImageButton id="bttnInfo" top="2" left="{paper1.width-22}" visible="false" icon="@Embed('/../assets/question.gif')" styleName="toolbttn" width="20" height="20" click="showInfo();" />
+		<st:GradientImageButton id="bttnInfo" top="2" left="{paper1.width-22}" visible="false" icon="@Embed('/../assets/question.gif')" styleName="toolbttn" width="20" height="20" click="showInfo();" toolTip="About" />
 		<ct:Spinner styleName="gradientlines" startImmediately="false" id="spin1" left="{paper1.width-22}" top="4"/>	
 		<mx:Image source="@Embed('/../assets/bar.gif')" width="3" height="21" x="95" y="1" />
 		<mx:Image source="@Embed('/../assets/bar.gif')" width="3" height="21" x="265" y="1" />
 		<mx:Image source="@Embed('/../assets/bar.gif')" width="3" height="21" x="344" y="1" />
-		<mx:Image source="@Embed('/../assets/bar.gif')" width="3" height="21" x="445" y="1" />
+		<mx:Image source="@Embed('/../assets/bar.gif')" width="3" height="21" x="440" y="1" />
 		<st:GradientTextInput x="352" y="1" fontSize="9" height="21" width="65" id="txtSearch" keyDown="txtSearchKeyDown(event)" enabled="{paper1.ViewMode == 'Portrait'}" toolTip="Search"/>
 	</mx:Canvas>
 	<fp:Viewer id="paper1"	onPapersLoaded="papersLoadedHandler(event)" 
