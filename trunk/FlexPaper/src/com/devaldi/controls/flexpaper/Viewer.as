@@ -288,7 +288,9 @@ package com.devaldi.controls.flexpaper
 					}
 						
 					if(checkIsVisible(i)){
-						if(_pageList[i].numChildren<2 || (_pageList[i].dupIndex == searchPageIndex && _pageList[i].numChildren<3)){
+						if(	 _pageList[i].numChildren<2 || 
+							(_pageList[i].dupIndex == searchPageIndex && _pageList[i].numChildren<3) ||
+							(_viewMode == "Tile" && _pageList[i].numChildren<3)){
 							_loaderList[loaderidx].content.gotoAndStop(_pageList[i].dupIndex);
 							_pageList[i].addChild(_loaderList[loaderidx]);
 						}
