@@ -288,8 +288,7 @@ package com.devaldi.controls.flexpaper
 					}
 						
 					if(checkIsVisible(i)){
-						if(	 _pageList[i].numChildren<2 || 
-							(_pageList[i].dupIndex == searchPageIndex && _pageList[i].numChildren<3) ||
+						if(	 _pageList[i].numChildren<3 || 
 							(_viewMode == "Tile" && _pageList[i].numChildren<3)){
 							_loaderList[loaderidx].content.gotoAndStop(_pageList[i].dupIndex);
 							_pageList[i].addChild(_loaderList[loaderidx]);
@@ -350,6 +349,14 @@ package com.devaldi.controls.flexpaper
 		}
 				
 		private function keyboardHandler(event:KeyboardEvent):void{
+			if(event.keyCode == Keyboard.DOWN){
+				_paperContainer.verticalScrollPosition = _paperContainer.verticalScrollPosition + 10;	
+			}
+
+			if(event.keyCode == Keyboard.UP){
+				_paperContainer.verticalScrollPosition = _paperContainer.verticalScrollPosition - 10;
+			}
+			
 			if(event.keyCode == Keyboard.PAGE_DOWN){
 				_paperContainer.verticalScrollPosition = _paperContainer.verticalScrollPosition + 300;  
 			}
@@ -470,7 +477,7 @@ package com.devaldi.controls.flexpaper
 						
 						// only draw the "selected" rect if fonts are embedded otherwise draw a line thingy
 						if((tri[0].corner1x-tri[0].corner3x)>0 && (tri[0].corner3y-tri[0].corner1y)>0){
-							searchShape.graphics.drawRect(tri[0].corner3x,tri[0].corner1y,tri[0].corner1x-tri[0].corner3x,tri[0].corner3y-tri[0].corner1y);
+							searchShape.graphics.drawRect(tri[0].corner3x,tri[0].corner1y,((tri[1].corner1y==tri[0].corner1y)?tri[1].corner3x:tri[0].corner3x)-tri[0].corner3x,tri[0].corner3y-tri[0].corner1y);
 						}else{
 							searchShape.graphics.drawRect(tri[0].matrix_tx,tri[0].matrix_ty+1,tri[1].matrix_tx-tri[0].matrix_tx,4);
 						}
