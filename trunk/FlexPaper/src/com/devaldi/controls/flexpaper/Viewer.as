@@ -34,8 +34,11 @@ package com.devaldi.controls.flexpaper
 	import flash.events.KeyboardEvent;
 	import flash.events.MouseEvent;
 	import flash.filters.DropShadowFilter;
+	import flash.geom.ColorTransform;
 	import flash.net.URLRequest;
 	import flash.printing.PrintJob;
+	import flash.text.StaticText;
+	import flash.text.TextSnapshot;
 	import flash.ui.Keyboard;
 	
 	import mx.containers.Canvas;
@@ -43,6 +46,7 @@ package com.devaldi.controls.flexpaper
 	import mx.core.Container;
 	import mx.core.UIComponent;
 	import mx.events.FlexEvent;
+	import flash.display.Shape;
 	
  
 	[Event(name="onPapersLoaded", type="flash.events.Event")]
@@ -109,8 +113,10 @@ package com.devaldi.controls.flexpaper
 		public function gotoPage(p:Number):void{
 			if(p<1 || p-1 >_pageList.length)
 				return;
-			else
+			else{
 				_paperContainer.verticalScrollPosition = _pageList[p-1].y;
+				repositionPapers();
+			}
 		}
 		
 		public function switchMode():void{
@@ -284,10 +290,18 @@ package com.devaldi.controls.flexpaper
 					}
 						
 					if(checkIsVisible(i)){
-						_loaderList[loaderidx].content.gotoAndStop(_pageList[i].dupIndex);
-						_pageList[i].addChild(_loaderList[loaderidx]);
-						loaderidx++;
+						if(_pageList[i].numChildren<2 || (_pageList[i].dupIndex == searchPageIndex && _pageList[i].numChildren<3)){
+							_loaderList[loaderidx].content.gotoAndStop(_pageList[i].dupIndex);
+							_pageList[i].addChild(_loaderList[loaderidx]);
+						}
+
+						if(_pageList[i].dupIndex == searchPageIndex && searchShape.parent != _pageList[i]){
+							_pageList[i].addChildAt(searchShape,_pageList[i].numChildren);
+						}else if(_pageList[i].dupIndex == searchPageIndex && searchShape.parent == _pageList[i]){
+							_pageList[i].setChildIndex(searchShape,_pageList[i].numChildren -1);
+						}
 						
+						loaderidx++;
 					}else{
 						if(_pageList[i].numChildren>0){
 						_pageList[i].source = null;
@@ -328,6 +342,7 @@ package com.devaldi.controls.flexpaper
 			_displayContainer.setStyle("verticalAlign", "center");
 			_displayContainer.percentHeight = 100;
 			_displayContainer.percentWidth = 96;
+			_displayContainer.useHandCursor = true;
 			
 			_paperContainer.addChild(_displayContainer);
 			
@@ -379,6 +394,7 @@ package com.devaldi.controls.flexpaper
 		
 		private function swfComplete(event:Event):void{
 			_libMC = event.currentTarget.content as MovieClip;
+
 			_swfLoaded = true
 			repaint();
 		}		
@@ -414,6 +430,48 @@ package com.devaldi.controls.flexpaper
 			
 			// kick off the first page to load
 			if(_loaderList.length>0){_bbusyloading = true; _loaderList[0].loadBytes(_libMC.loaderInfo.bytes);}			
+		}
+		
+		private var snap:TextSnapshot;
+		private var searchIndex:int = -1;		
+		private var searchPageIndex:int = -1;
+		private var searchShape:ShapeMarker;
+		
+		public function searchText(text:String):void{
+		var tri:Array;
+		if(searchShape!=null && searchShape.parent != null){searchShape.parent.removeChild(searchShape);}
+
+		_libMC.gotoAndStop(searchPageIndex);
+		
+			// start searching from the current page
+			if(searchPageIndex == -1){
+				searchPageIndex = currPage;
+			}else{
+				searchIndex = searchIndex + text.length;
+			}
+
+			while((searchPageIndex -1) < _libMC.framesLoaded){
+				snap = _libMC.textSnapshot;
+				searchIndex = snap.findText((searchIndex==-1?0:searchIndex),text,false);
+				
+				if(searchIndex > 0){ // found a new match
+					searchShape = new ShapeMarker();
+					searchShape.graphics.beginFill(0x0095f7,0.3);
+
+					for(var ti:int=0;ti<text.length;ti++){
+						tri = snap.getTextRunInfo(searchIndex+ti,searchIndex+ti);
+						searchShape.graphics.drawRect(tri[0].corner3x,tri[0].corner1y,tri[0].corner1x-tri[0].corner3x,tri[0].corner3y-tri[0].corner1y);
+					}
+					
+					searchShape.graphics.endFill();
+					gotoPage(searchPageIndex);
+					break;
+				}
+				
+				searchPageIndex++;
+				searchIndex = -1;
+				_libMC.gotoAndStop(searchPageIndex);
+			}
 		}
 		
 		private function createPaper(mc:MovieClip,index:int):void {

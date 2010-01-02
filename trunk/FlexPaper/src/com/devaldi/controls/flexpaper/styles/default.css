@@ -42,3 +42,8 @@
 		spinner-highlight-color: #000000;
 		spinner-color: #808080;
 	}	
+	
+	TextInput{
+		margin-left:0;
+		margin-top:0;
+	}
