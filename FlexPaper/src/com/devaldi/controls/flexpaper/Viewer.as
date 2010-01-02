@@ -34,10 +34,8 @@ package com.devaldi.controls.flexpaper
 	import flash.events.KeyboardEvent;
 	import flash.events.MouseEvent;
 	import flash.filters.DropShadowFilter;
-	import flash.geom.ColorTransform;
 	import flash.net.URLRequest;
 	import flash.printing.PrintJob;
-	import flash.text.StaticText;
 	import flash.text.TextSnapshot;
 	import flash.ui.Keyboard;
 	
@@ -46,11 +44,11 @@ package com.devaldi.controls.flexpaper
 	import mx.core.Container;
 	import mx.core.UIComponent;
 	import mx.events.FlexEvent;
-	import flash.display.Shape;
 	
  
 	[Event(name="onPapersLoaded", type="flash.events.Event")]
 	[Event(name="onPapersLoading", type="flash.events.Event")]
+	[Event(name="onNoMoreSearchResults", type="flash.events.Event")]
 	
 	public class Viewer extends Canvas
 	{
@@ -436,19 +434,25 @@ package com.devaldi.controls.flexpaper
 		private var searchIndex:int = -1;		
 		private var searchPageIndex:int = -1;
 		private var searchShape:ShapeMarker;
+		private var prevSearchText:String = "";
 		
 		public function searchText(text:String):void{
-		var tri:Array;
-		if(searchShape!=null && searchShape.parent != null){searchShape.parent.removeChild(searchShape);}
-
-		_libMC.gotoAndStop(searchPageIndex);
-		
+			var tri:Array;
+			if(prevSearchText != text){
+				searchIndex = -1;
+				searchPageIndex = -1;
+				prevSearchText = text;
+			}
+			if(searchShape!=null && searchShape.parent != null){searchShape.parent.removeChild(searchShape);}
+	
 			// start searching from the current page
 			if(searchPageIndex == -1){
 				searchPageIndex = currPage;
 			}else{
 				searchIndex = searchIndex + text.length;
 			}
+			
+			_libMC.gotoAndStop(searchPageIndex);
 
 			while((searchPageIndex -1) < _libMC.framesLoaded){
 				snap = _libMC.textSnapshot;
@@ -471,6 +475,11 @@ package com.devaldi.controls.flexpaper
 				searchPageIndex++;
 				searchIndex = -1;
 				_libMC.gotoAndStop(searchPageIndex);
+			}
+			
+			if(searchIndex == -1){ // searched the end of the doc.
+				dispatchEvent(new Event("onNoMoreSearchResults"));
+				prevSearchText = "";
 			}
 		}
 		

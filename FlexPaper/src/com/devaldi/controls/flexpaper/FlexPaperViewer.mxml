@@ -24,6 +24,7 @@
         import mx.controls.sliderClasses.Slider;
 		import mx.controls.Alert;
 		import mx.managers.PopUpManager;
+		import mx.controls.Alert;
 		
 		[Bindable]
 		public var Scale:Number = 1;
@@ -33,6 +34,10 @@
 		
 		private function printPaper():void{
 			paper1.printPaper();
+		}
+		
+		private function onNoMoreSearchResultsHandler(event:Event):void{
+			Alert.show("Finished searching the document. No more matches were found.","Search finished.",mx.controls.Alert.OK,this);
 		}
 		
 		private function papersLoadedHandler(event:Event):void{
@@ -97,8 +102,8 @@
 		<st:GradientLabel x="316" y="3" fontSize="9" height="19" width="28" text="{paper1.numPages}"/>
 		<st:GradientImageButton top="3" x="420" icon="@Embed('/../assets/find.gif')" styleName="toolbttn" width="20" click="paper1.searchText(txtSearch.text);" toolTip="Search"  />
 		
-		<st:GradientImageButton id="bttnInfo" top="0" left="{paper1.width-22}" visible="false" icon="@Embed('/../assets/question.gif')" styleName="toolbttn" width="20" height="20" click="showInfo();" />
-		<ct:Spinner styleName="gradientlines" startImmediately="false" id="spin1" left="{paper1.width-22}" top="2"/>	
+		<st:GradientImageButton id="bttnInfo" top="2" left="{paper1.width-22}" visible="false" icon="@Embed('/../assets/question.gif')" styleName="toolbttn" width="20" height="20" click="showInfo();" />
+		<ct:Spinner styleName="gradientlines" startImmediately="false" id="spin1" left="{paper1.width-22}" top="4"/>	
 		<mx:Image source="@Embed('/../assets/bar.gif')" width="3" height="21" x="95" y="1" />
 		<mx:Image source="@Embed('/../assets/bar.gif')" width="3" height="21" x="265" y="1" />
 		<mx:Image source="@Embed('/../assets/bar.gif')" width="3" height="21" x="344" y="1" />
@@ -107,6 +112,7 @@
 	</mx:Canvas>
 	<fp:Viewer id="paper1"	onPapersLoaded="papersLoadedHandler(event)" 
 							onPapersLoading="papersLoadingHandler(event)" 
+							onNoMoreSearchResults="onNoMoreSearchResultsHandler(event)"
 							SwfFile="{SwfFile}" Scale="{Scale}" 
 							height="100%" width="100%" borderStyle="solid" />
 </mx:VBox>
