@@ -20,7 +20,7 @@ along with FlexPaper.  If not, see <http://www.gnu.org/licenses/>.
 package com.devaldi.streaming
 {
 	import mx.controls.Image;
-	import mx.events.FlexEvent;
+	import flash.display.MovieClip;
 	
 	public class DupImage extends Image
 	{
@@ -34,14 +34,14 @@ package com.devaldi.streaming
 		override public function set source(value:Object):void{
 			super.source = value;
 			
-			if(value!=null && value.content != null){
+			if(value!=null && (value is MovieClip) && value.content != null){
 				value.content.stop();
 			}
 		}
 		
 		public function removeAllChildren():void{
 			for(var i:int=0;i<this.numChildren;i++){
-				this.removeChildAt(i);
+				delete(this.removeChildAt(i));
 			}
 		}
 	}
