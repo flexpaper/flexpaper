@@ -27,6 +27,8 @@ package com.devaldi.controls.flexpaper
 	import com.devaldi.streaming.DupLoader;
 	import com.devaldi.streaming.ForcibleLoader;
 	
+	import flash.display.Bitmap;
+	import flash.display.BitmapData;
 	import flash.display.DisplayObject;
 	import flash.display.Loader;
 	import flash.display.MovieClip;
@@ -36,6 +38,7 @@ package com.devaldi.controls.flexpaper
 	import flash.filters.DropShadowFilter;
 	import flash.net.URLRequest;
 	import flash.printing.PrintJob;
+	import flash.system.System;
 	import flash.text.TextSnapshot;
 	import flash.ui.Keyboard;
 	
@@ -158,25 +161,13 @@ package com.devaldi.controls.flexpaper
 			
 			var _target:DisplayObject;
 			_paperContainer.CenteringEnabled = true;
+											
+			_tweencount = _displayContainer.numChildren;
 			
-			if(_viewMode == "Tile"){// works but buggy, needs more work.
-				var im:Image;
-				
-				for(var ti:int=0;ti<_displayContainer.numChildren;ti++){
-					_target = _displayContainer.getChildAt(ti);
-					for(var ii:int=0;ii< (_target as mx.containers.Box).numChildren;ii++){			
-						im = (_target as mx.containers.Box).getChildAt(ii) as Image;
-						Tweener.addTween(im, {scaleX: factor, scaleY: factor, time: 0, transition: 'easeOut', onComplete: tweenComplete});
-					}					
-				}
-			}else{								
-				_tweencount = _displayContainer.numChildren;
-				
-				for(var i:int=0;i<_displayContainer.numChildren;i++){
-					_target = _displayContainer.getChildAt(i);
-					_target.filters = null;
-					Tweener.addTween(_target, {scaleX: factor, scaleY: factor, time: 0.6, transition: 'easeOut', onComplete: tweenComplete});
-				}
+			for(var i:int=0;i<_displayContainer.numChildren;i++){
+				_target = _displayContainer.getChildAt(i);
+				_target.filters = null;
+				Tweener.addTween(_target, {scaleX: factor, scaleY: factor, time: 0.6, transition: 'easeOut', onComplete: tweenComplete});
 			}
 		}
 		
@@ -290,6 +281,8 @@ package com.devaldi.controls.flexpaper
 			if(!_bbusyloading){
 				var loaderidx:int=0;
 				var bFoundFirst:Boolean = false;
+				var _thumb:Bitmap;
+				var _thumbData:BitmapData;
 				
 					for(var i:int=0;i<_pageList.length;i++){
 						if(!bFoundFirst && ((i) * (_pageList[i].height + 6)) >= _paperContainer.verticalScrollPosition){
@@ -298,23 +291,33 @@ package com.devaldi.controls.flexpaper
 					}
 						
 					if(checkIsVisible(i)){
-						if(	 _pageList[i].numChildren<3 || 
-							(_viewMode == "Tile" && _pageList[i].numChildren<3)){
-							_loaderList[loaderidx].content.gotoAndStop(_pageList[i].dupIndex);
-							_pageList[i].addChild(_loaderList[loaderidx]);
+						if(_pageList[i].numChildren<3){
+							if(ViewMode == "Portrait"){ // if in portrait mode, add as mc, otherwise will use bitmap
+								_loaderList[loaderidx].content.gotoAndStop(_pageList[i].dupIndex);
+								_pageList[i].addChild(_loaderList[loaderidx]);
+							}else if(ViewMode == "Tile" && _pageList[i].source == null){
+						    	_libMC.gotoAndStop(_pageList[i].dupIndex);
+							    _thumbData = new BitmapData(_libMC.width, _libMC.height, false, 0xFFBC1C);
+							    _thumb = new Bitmap(_thumbData);
+							    _thumb.scaleX = _thumb.scaleY = _scale;
+								_pageList[i].source = _thumb;
+								_thumbData.draw(_libMC);
+							}
 						}
 
-						if(_pageList[i].dupIndex == searchPageIndex && searchShape.parent != _pageList[i]){
-							_pageList[i].addChildAt(searchShape,_pageList[i].numChildren);
-						}else if(_pageList[i].dupIndex == searchPageIndex && searchShape.parent == _pageList[i]){
-							_pageList[i].setChildIndex(searchShape,_pageList[i].numChildren -1);
+						if(_viewMode != "Tile"){
+							if(_pageList[i].dupIndex == searchPageIndex && searchShape.parent != _pageList[i]){
+								_pageList[i].addChildAt(searchShape,_pageList[i].numChildren);
+							}else if(_pageList[i].dupIndex == searchPageIndex && searchShape.parent == _pageList[i]){
+								_pageList[i].setChildIndex(searchShape,_pageList[i].numChildren -1);
+							}
 						}
 						
 						loaderidx++;
 					}else{
-						if(_pageList[i].numChildren>0){
-						_pageList[i].source = null;
-						_pageList[i].removeChildAt(0);
+						if(_pageList[i].numChildren>0 || _pageList[i].source != null){
+							_pageList[i].source = null;
+							_pageList[i].removeAllChildren();
 						}					
 					}
 				}
@@ -337,7 +340,15 @@ package com.devaldi.controls.flexpaper
 		}		
 		
 		private function createDisplayContainer():void{
+			try{
+ 			new flash.net.LocalConnection().connect('devaldiGCdummy');
+   			new flash.net.LocalConnection().connect('devaldiGCdummy');
+   			} catch (e:*) {}
+			
+			flash.system.System.gc();
+
 			if(_paperContainer.numChildren>0){_paperContainer.removeAllChildren();}
+			if(_displayContainer!=null){_displayContainer.removeAllChildren();}
 			
 			if(_viewMode == "Tile"){
 				_displayContainer = new FlowBox();
@@ -358,7 +369,6 @@ package com.devaldi.controls.flexpaper
 			_displayContainer.addEventListener(MouseEvent.MOUSE_UP,displayContainerMouseUpHandler);
 			
 			_paperContainer.addChild(_displayContainer);
-
 			
 			_initialized=true;
 		}
@@ -456,18 +466,19 @@ package com.devaldi.controls.flexpaper
 			_libMC.stop();
 			_libMC.gotoAndStop(1);
 			
-			if(_viewMode == "Tile"){
+			/*if(_viewMode == "Tile"){
 				_loaderList = new Array((Math.round(_paperContainer.height/(_libMC.height*0.23))) * ((Math.round(_paperContainer.width/(_libMC.width*0.23)))) + ((Math.round(_paperContainer.width/(_libMC.width*0.23)))*3));
 				if(_loaderList.length>_libMC.framesLoaded){_loaderList = new Array(_libMC.framesLoaded);}
-			}else{
+			}else{*/
+			if(_viewMode == "Portrait"){
 				_loaderList = new Array(Math.round(_paperContainer.height/(_libMC.height*0.1))+1);
+				for(var li:int=0;li<_loaderList.length;li++){
+					_loaderList[li] = new DupLoader();
+		        	_loaderList[li].contentLoaderInfo.addEventListener(Event.COMPLETE, bytesLoaded);
+					//_loaderList[li].addEventListener(Event.ENTER_FRAME,onframeenter);
+				}
 			}
-			
-			for(var li:int=0;li<_loaderList.length;li++){
-				_loaderList[li] = new DupLoader();
-	        	_loaderList[li].contentLoaderInfo.addEventListener(Event.COMPLETE, bytesLoaded);
-				_loaderList[li].addEventListener(Event.ENTER_FRAME,onframeenter);
-			}
+			//}
 			
 			for(var i:int=0;i<_libMC.framesLoaded;i++){
 				createPaper(_libMC,i+1);
@@ -476,7 +487,7 @@ package com.devaldi.controls.flexpaper
 			addPages();
 			
 			// kick off the first page to load
-			if(_loaderList.length>0){_bbusyloading = true; _loaderList[0].loadBytes(_libMC.loaderInfo.bytes);}			
+			if(_loaderList.length>0 && _viewMode == "Portrait"){_bbusyloading = true; _loaderList[0].loadBytes(_libMC.loaderInfo.bytes);}			
 		}
 		
 		private var snap:TextSnapshot;
@@ -548,25 +559,25 @@ package com.devaldi.controls.flexpaper
 		    di.addEventListener(MouseEvent.MOUSE_OVER,dupImageMoverHandler);
 		    di.addEventListener(MouseEvent.MOUSE_OUT,dupImageMoutHandler);
 		    di.addEventListener(MouseEvent.CLICK,dupImageClickHandler);
-			_pageList[index-1] = di;
+		    _pageList[index-1] = di;
 		}	
 				
 		private function dupImageClickHandler(event:MouseEvent):void{
-			if(_viewMode == "Tile" && event.target != null){
+			if(_viewMode == "Tile" && event.target != null && event.target is DupImage){
 				ViewMode = 'Portrait';
-				_scrollToPage = (event.target.parent as DupImage).dupIndex;
+				_scrollToPage = (event.target as DupImage).dupIndex;
 			}
 		}
 		
 		private function dupImageMoverHandler(event:MouseEvent):void{
-			if(_viewMode == "Tile" && event.target != null){
-				addGlowFilter(event.target.parent as DupImage);
+			if(_viewMode == "Tile" && event.target != null && event.target is DupImage){
+				addGlowFilter(event.target as DupImage);
 			}
 		}
 		
 		private function dupImageMoutHandler(event:MouseEvent):void{
-			if(_viewMode == "Tile" && event.target != null){
-				(event.target.parent as DupImage).filters = null;
+			if(_viewMode == "Tile" && event.target != null && event.target is DupImage){
+				(event.target as DupImage).filters = null;
 			}
 		}
 				

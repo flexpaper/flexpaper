@@ -19,14 +19,13 @@ along with FlexPaper.  If not, see <http://www.gnu.org/licenses/>.
 
 package com.devaldi.controls
 {
+ import flash.display.DisplayObject;
+ import flash.events.Event;
+ 
+ import mx.collections.ArrayCollection;
  import mx.containers.Box;
-    import mx.collections.ArrayCollection;
-    import mx.containers.BoxDirection;
-    import flash.display.DisplayObject;
-    import mx.controls.Alert;
-    import flash.events.Event;
-    import mx.events.ResizeEvent;
-    import mx.core.IUIComponent;
+ import mx.containers.BoxDirection;
+ import mx.events.ResizeEvent;
 
     [DefaultProperty("children")]
     public class FlowBox extends Box
@@ -267,7 +266,10 @@ package com.devaldi.controls
         {
             return _children.getItemIndex( child );
         }
-    
+		
+		public function getItemAt(i:int):DisplayObject{
+			return _children.getItemAt(i) as DisplayObject;
+		}    
         
         /**
          * This property recieves the child components
