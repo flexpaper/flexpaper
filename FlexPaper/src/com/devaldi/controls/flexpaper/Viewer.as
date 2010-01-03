@@ -352,29 +352,35 @@ package com.devaldi.controls.flexpaper
 			_displayContainer.percentHeight = 100;
 			_displayContainer.percentWidth = 96;
 			_displayContainer.useHandCursor = true;
+			_displayContainer.addEventListener(MouseEvent.ROLL_OVER,displayContainerrolloverHandler);
+			_displayContainer.addEventListener(MouseEvent.ROLL_OUT,displayContainerrolloutHandler);
+			_displayContainer.addEventListener(MouseEvent.MOUSE_DOWN,displayContainerMouseDownHandler);
+			_displayContainer.addEventListener(MouseEvent.MOUSE_UP,displayContainerMouseUpHandler);
 			
 			_paperContainer.addChild(_displayContainer);
 
-			this.addEventListener(MouseEvent.ROLL_OVER,displayContainerrolloverHandler);
-			this.addEventListener(MouseEvent.ROLL_OUT,displayContainerrolloutHandler);
-			this.addEventListener(MouseEvent.MOUSE_DOWN,displayContainerMouseDownHandler);
-			this.addEventListener(MouseEvent.MOUSE_UP,displayContainerMouseUpHandler);
 			
 			_initialized=true;
 		}
 		
 		private function displayContainerrolloverHandler(event:Event):void{
-			grabCursorID = CursorManager.setCursor(grabCursor);
+			if(_viewMode == "Portrait"){
+				grabCursorID = CursorManager.setCursor(grabCursor);
+			}
 		}
 
 		private function displayContainerMouseUpHandler(event:Event):void{
-			CursorManager.removeCursor(grabbingCursorID);
-			grabCursorID = CursorManager.setCursor(grabCursor);
+			if(_viewMode == "Portrait"){
+				CursorManager.removeCursor(grabbingCursorID);
+				grabCursorID = CursorManager.setCursor(grabCursor);
+			}
 		}
 
 		private function displayContainerMouseDownHandler(event:Event):void{
-			CursorManager.removeCursor(grabCursorID);
-			grabbingCursorID = CursorManager.setCursor(grabbingCursor);
+			if(_viewMode == "Portrait"){
+				CursorManager.removeCursor(grabCursorID);
+				grabbingCursorID = CursorManager.setCursor(grabbingCursor);
+			}
 		}
 		
 		private function displayContainerrolloutHandler(event:Event):void{
