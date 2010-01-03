@@ -44,6 +44,7 @@ package com.devaldi.controls.flexpaper
 	import mx.core.Container;
 	import mx.core.UIComponent;
 	import mx.events.FlexEvent;
+	import mx.managers.CursorManager;
 	
  
 	[Event(name="onPapersLoaded", type="flash.events.Event")]
@@ -71,6 +72,15 @@ package com.devaldi.controls.flexpaper
 		private var _tweencount:Number = 0;
 		private var _bbusyloading:Boolean = true;
 		private var _loaderList:Array;
+		
+		[Embed(source="/../assets/grab.gif")]
+		public var grabCursor:Class;	  
+		
+		[Embed(source="/../assets/grabbing.gif")]
+		public var grabbingCursor:Class;	  	  
+		
+		private var grabCursorID:Number = 0;
+		private var grabbingCursorID:Number = 0;
 		
 		public function Viewer(){
 			super();
@@ -344,9 +354,33 @@ package com.devaldi.controls.flexpaper
 			_displayContainer.useHandCursor = true;
 			
 			_paperContainer.addChild(_displayContainer);
+
+			this.addEventListener(MouseEvent.ROLL_OVER,displayContainerrolloverHandler);
+			this.addEventListener(MouseEvent.ROLL_OUT,displayContainerrolloutHandler);
+			this.addEventListener(MouseEvent.MOUSE_DOWN,displayContainerMouseDownHandler);
+			this.addEventListener(MouseEvent.MOUSE_UP,displayContainerMouseUpHandler);
 			
 			_initialized=true;
 		}
+		
+		private function displayContainerrolloverHandler(event:Event):void{
+			grabCursorID = CursorManager.setCursor(grabCursor);
+		}
+
+		private function displayContainerMouseUpHandler(event:Event):void{
+			CursorManager.removeCursor(grabbingCursorID);
+			grabCursorID = CursorManager.setCursor(grabCursor);
+		}
+
+		private function displayContainerMouseDownHandler(event:Event):void{
+			CursorManager.removeCursor(grabCursorID);
+			grabbingCursorID = CursorManager.setCursor(grabbingCursor);
+		}
+		
+		private function displayContainerrolloutHandler(event:Event):void{
+			CursorManager.removeAllCursors();
+		}		
+		
 				
 		private function keyboardHandler(event:KeyboardEvent):void{
 			if(event.keyCode == Keyboard.DOWN){
