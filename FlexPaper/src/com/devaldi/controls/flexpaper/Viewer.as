@@ -27,6 +27,7 @@ package com.devaldi.controls.flexpaper
 	import com.devaldi.streaming.DupLoader;
 	import com.devaldi.streaming.ForcibleLoader;
 	
+	import flash.geom.Matrix;
 	import flash.display.Bitmap;
 	import flash.display.BitmapData;
 	import flash.display.DisplayObject;
@@ -292,16 +293,15 @@ package com.devaldi.controls.flexpaper
 						
 					if(checkIsVisible(i)){
 						if(_pageList[i].numChildren<3){
-							if(ViewMode == "Portrait"){ // if in portrait mode, add as mc, otherwise will use bitmap
+							if(ViewMode == "Portrait"){ 
 								_loaderList[loaderidx].content.gotoAndStop(_pageList[i].dupIndex);
 								_pageList[i].addChild(_loaderList[loaderidx]);
 							}else if(ViewMode == "Tile" && _pageList[i].source == null){
 						    	_libMC.gotoAndStop(_pageList[i].dupIndex);
-							    _thumbData = new BitmapData(_libMC.width, _libMC.height, false, 0xFFBC1C);
+							    _thumbData = new BitmapData(_libMC.width*_scale, _libMC.height*_scale, false, 0xFFFFFF);
 							    _thumb = new Bitmap(_thumbData);
-							    _thumb.scaleX = _thumb.scaleY = _scale;
 								_pageList[i].source = _thumb;
-								_thumbData.draw(_libMC);
+								_thumbData.draw(_libMC,new Matrix(_scale, 0, 0, _scale),null,null,null,true);
 							}
 						}
 
@@ -466,10 +466,6 @@ package com.devaldi.controls.flexpaper
 			_libMC.stop();
 			_libMC.gotoAndStop(1);
 			
-			/*if(_viewMode == "Tile"){
-				_loaderList = new Array((Math.round(_paperContainer.height/(_libMC.height*0.23))) * ((Math.round(_paperContainer.width/(_libMC.width*0.23)))) + ((Math.round(_paperContainer.width/(_libMC.width*0.23)))*3));
-				if(_loaderList.length>_libMC.framesLoaded){_loaderList = new Array(_libMC.framesLoaded);}
-			}else{*/
 			if(_viewMode == "Portrait"){
 				_loaderList = new Array(Math.round(_paperContainer.height/(_libMC.height*0.1))+1);
 				for(var li:int=0;li<_loaderList.length;li++){
@@ -478,7 +474,6 @@ package com.devaldi.controls.flexpaper
 					//_loaderList[li].addEventListener(Event.ENTER_FRAME,onframeenter);
 				}
 			}
-			//}
 			
 			for(var i:int=0;i<_libMC.framesLoaded;i++){
 				createPaper(_libMC,i+1);
