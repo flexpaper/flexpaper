@@ -535,7 +535,7 @@ package com.devaldi.controls.flexpaper
 			
 			if(searchIndex == -1){ // searched the end of the doc.
 				dispatchEvent(new Event("onNoMoreSearchResults"));
-				prevSearchText = "";
+				searchPageIndex = 1;
 			}
 		}
 		
