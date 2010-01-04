@@ -2,21 +2,6 @@
 <Module>
   <ModulePrefs title="hello world example" /> 
   <Content type="html">
-     <![CDATA[ 
-	<div id="cb">
-	  </div>
-	  
-	  <script type="text/javascript" src="js/swfobject/swfobject.js"></script>
-	  <script type="text/javascript">
-	  window.onload = function()
-	  {
-		var params = {
-		  SwfFile : "Paper.swf?v=1.1b1",
-		  Scale : 0.6
-		}
-		swfobject.embedSWF("FlexPaperViewer.swf?v=1.2b1","cb","500","500","9.0.0","js/swfobject/expressInstall.swf", params);
-	  }
-	  </script>       
-     ]]>
+     <iframe src="http://flexpaper.googlecode.com/svn/trunk/Example/flash/FlexPaperViewer.html" width="520" height="540" frameborder="0"></iframe>
   </Content> 
 </Module>
