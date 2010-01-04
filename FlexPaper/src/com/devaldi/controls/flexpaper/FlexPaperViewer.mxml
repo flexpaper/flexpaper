@@ -113,7 +113,7 @@
 		
 		<st:GradientImageButton id="bttnInfo" top="2" left="{paper1.width-25}" visible="false" icon="@Embed('/../assets/question.gif')" styleName="toolbttn" width="20" height="20" click="showInfo();" toolTip="About" />
 		<ct:Spinner styleName="gradientlines" startImmediately="false" id="spin1" spinnerType="gradientcircle" left="{paper1.width-27}" top="0" width="24" height="24"/>
-		<st:GradientLabel id="lblProgress" x="{paper1.width-31}" textAlign="center" y="5" fontSize="8" height="19" width="32" text="100"/>
+		<st:GradientLabel id="lblProgress" x="{paper1.width-31}" textAlign="center" y="5" fontSize="8" height="19" width="32" text=""/>
 		<mx:Image source="@Embed('/../assets/bar.gif')" width="3" height="21" x="95" y="1" />
 		<mx:Image source="@Embed('/../assets/bar.gif')" width="3" height="21" x="265" y="1" />
 		<mx:Image source="@Embed('/../assets/bar.gif')" width="3" height="21" x="344" y="1" />
