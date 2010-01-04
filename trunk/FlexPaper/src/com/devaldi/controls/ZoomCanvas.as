@@ -35,6 +35,7 @@ public class ZoomCanvas extends Canvas {
 	  private var rX:Number;
 	  private var rY:Number;
 	  private var lVscrollPos:Number;
+	  private var lHscrollPos:Number;
 	  private var _childrenDoDrag:Boolean = true;
 	
 	  public function ZoomCanvas() {
@@ -67,6 +68,7 @@ public class ZoomCanvas extends Canvas {
 			    rY = event.stageY;
 			    
 			    lVscrollPos = this.verticalScrollPosition;
+			    lHscrollPos = this.horizontalScrollPosition;
 			    
 			    systemManager.addEventListener(
 			        MouseEvent.MOUSE_MOVE, systemManager_mouseMoveHandler, true);
@@ -91,6 +93,7 @@ public class ZoomCanvas extends Canvas {
 		    event.stopImmediatePropagation();
 		    
 		    this.verticalScrollPosition = lVscrollPos - (event.stageY - rY);
+		    this.horizontalScrollPosition = lHscrollPos - (event.stageX - rX);
 	  }
 	  
 	  private function systemManager_mouseUpHandler(event:MouseEvent):void

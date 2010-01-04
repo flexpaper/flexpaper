@@ -27,7 +27,6 @@ package com.devaldi.controls.flexpaper
 	import com.devaldi.streaming.DupLoader;
 	import com.devaldi.streaming.ForcibleLoader;
 	
-	import flash.geom.Matrix;
 	import flash.display.Bitmap;
 	import flash.display.BitmapData;
 	import flash.display.DisplayObject;
@@ -36,7 +35,9 @@ package com.devaldi.controls.flexpaper
 	import flash.events.Event;
 	import flash.events.KeyboardEvent;
 	import flash.events.MouseEvent;
+	import flash.events.ProgressEvent;
 	import flash.filters.DropShadowFilter;
+	import flash.geom.Matrix;
 	import flash.net.URLRequest;
 	import flash.printing.PrintJob;
 	import flash.system.System;
@@ -54,6 +55,7 @@ package com.devaldi.controls.flexpaper
 	[Event(name="onPapersLoaded", type="flash.events.Event")]
 	[Event(name="onPapersLoading", type="flash.events.Event")]
 	[Event(name="onNoMoreSearchResults", type="flash.events.Event")]
+	[Event(name="onLoadingProgress", type="flash.events.ProgressEvent")]
 	
 	public class Viewer extends Canvas
 	{
@@ -433,8 +435,9 @@ package com.devaldi.controls.flexpaper
 				dispatchEvent(new Event("onPapersLoading"));
 				
 				var fLoader:ForcibleLoader = new ForcibleLoader(_loader);
+				fLoader.stream.addEventListener(ProgressEvent.PROGRESS, onLoadProgress);
 				fLoader.load(new URLRequest(_swfFile));
-				 				
+
 				_swfFileChanged = false;
 			}
 			
@@ -448,6 +451,13 @@ package com.devaldi.controls.flexpaper
 		        mc.scaleX < mc.scaleY ? mc.scaleY = mc.scaleX : mc.scaleX = mc.scaleY;
 		    }
 		}		
+		
+		private function onLoadProgress(event:ProgressEvent):void{
+			var e:ProgressEvent = new ProgressEvent("onLoadingProgress")
+			e.bytesTotal = event.bytesTotal;
+			e.bytesLoaded = event.bytesLoaded;
+			dispatchEvent(e);
+		}
 		
 		private function swfComplete(event:Event):void{
 			_libMC = event.currentTarget.content as MovieClip;
@@ -467,7 +477,7 @@ package com.devaldi.controls.flexpaper
 			_libMC.gotoAndStop(1);
 			
 			if(_viewMode == "Portrait"){
-				_loaderList = new Array(Math.round(_paperContainer.height/(_libMC.height*0.1))+1);
+				_loaderList = new Array(Math.round(getCalculatedHeight(_paperContainer)/(_libMC.height*0.1))+1);
 				for(var li:int=0;li<_loaderList.length;li++){
 					_loaderList[li] = new DupLoader();
 		        	_loaderList[li].contentLoaderInfo.addEventListener(Event.COMPLETE, bytesLoaded);
@@ -483,6 +493,22 @@ package com.devaldi.controls.flexpaper
 			
 			// kick off the first page to load
 			if(_loaderList.length>0 && _viewMode == "Portrait"){_bbusyloading = true; _loaderList[0].loadBytes(_libMC.loaderInfo.bytes);}			
+		}
+		
+		private function getCalculatedHeight(obj:DisplayObject):Number{
+			var pHeight:Number = 0;
+			var oPercHeight:Number = 0;
+			
+			pHeight = obj.height;
+			if(pHeight>0){return pHeight;}
+			if((obj as Container).percentHeight>0){oPercHeight=(obj as Container).percentHeight;}
+			
+			while(obj.parent != null){
+				if(obj.parent.height>0){pHeight = obj.parent.height * (oPercHeight/100);break;}
+				obj = obj.parent;
+			}
+			
+			return pHeight;
 		}
 		
 		private var snap:TextSnapshot;
