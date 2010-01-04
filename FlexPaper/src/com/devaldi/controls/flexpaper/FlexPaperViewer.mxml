@@ -17,7 +17,7 @@
     You should have received a copy of the GNU General Public License
     along with FlexPaper.  If not, see <http://www.gnu.org/licenses/>.	
 -->
-<mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml" width="100%" height="100%" verticalGap="0"  xmlns:fp="com.devaldi.controls.flexpaper.*" xmlns:ct="com.devaldi.controls.*" xmlns:st="com.devaldi.skinning.*" borderColor="#8a8a8a" borderThickness="1">
+<mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml" width="100%" height="100%" verticalGap="0"  xmlns:fp="com.devaldi.controls.flexpaper.*" xmlns:ct="com.devaldi.controls.*" xmlns:st="com.devaldi.skinning.*" borderColor="#8a8a8a" borderThickness="1" creationComplete="Init()">
 <mx:Script>
 	<![CDATA[
 		import mx.events.SliderEvent;
@@ -31,6 +31,10 @@
 		
 		[Bindable]
 		public var SwfFile:String = "";
+		
+		private function Init():void{
+			//systemManager.stage.showDefaultContextMenu = false;
+		}
 		
 		private function printPaper():void{
 			paper1.printPaper();
