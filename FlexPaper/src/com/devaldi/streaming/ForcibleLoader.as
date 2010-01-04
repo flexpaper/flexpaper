@@ -25,6 +25,7 @@ package com.devaldi.streaming
         import flash.events.IOErrorEvent;
         import flash.events.SecurityErrorEvent;
         import flash.events.Event;
+        import flash.events.ProgressEvent;
         import flash.utils.ByteArray;
         import flash.utils.Endian;
         import flash.errors.EOFError;
@@ -51,6 +52,11 @@ package com.devaldi.streaming
                 
                 private var _loader:Loader;
                 private var _stream:URLStream;
+                
+                public function get stream():URLStream
+                {
+                        return _stream;
+                }
                 
                 public function get loader():Loader
                 {

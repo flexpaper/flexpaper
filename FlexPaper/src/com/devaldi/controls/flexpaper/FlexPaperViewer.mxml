@@ -46,6 +46,7 @@
 		
 		private function papersLoadedHandler(event:Event):void{
 			spin1.visible = false;
+			lblProgress.visible = false;
 			spin1.stop();
 			bttnInfo.visible = true;
 		}
@@ -84,6 +85,10 @@
    			}
    		}
    		
+   		private function onDocumentLoadingProgressHandler(event:ProgressEvent):void{
+			lblProgress.text = String(Math.round(event.bytesLoaded/event.bytesTotal*100));			
+   		}
+   		
 		private function showInfo():void {
 			var vabout:About = new About();
 			PopUpManager.addPopUp(vabout, this, true);
@@ -93,7 +98,7 @@
 </mx:Script>
 
 <mx:Style source="styles/default.css" />
-	<mx:Canvas styleName="toolbarBackground" width="{paper1.width}" height="26" borderStyle="solid">
+	<mx:Canvas styleName="toolbarBackground" width="{paper1.width}" height="26" borderStyle="solid" verticalScrollPolicy="off" horizontalScrollPolicy="off">
 		<st:GradientImageButton top="3" icon="@Embed('/../assets/print-icon.gif')" styleName="toolbttn" width="20" click="paper1.printPaper()" toolTip="Print" />
 		<mx:Image source="@Embed('/../assets/bar.gif')" width="3" height="21" x="22" y="1" />
 		<st:GradientImageButton top="2" left="28" icon="@Embed('/../assets/fit.gif')" styleName="toolbttn" width="20" click="paper1.fitWidth()" enabled="{paper1.ViewMode == 'Portrait'}" toolTip="Fit Width" />
@@ -106,8 +111,9 @@
 		<st:GradientLabel x="316" y="3" fontSize="9" height="19" width="28" text="{paper1.numPages}"/>
 		<st:GradientImageButton top="3" x="418" icon="@Embed('/../assets/find.gif')" styleName="toolbttn" width="20" click="paper1.searchText(txtSearch.text);" toolTip="Search"  />
 		
-		<st:GradientImageButton id="bttnInfo" top="2" left="{paper1.width-22}" visible="false" icon="@Embed('/../assets/question.gif')" styleName="toolbttn" width="20" height="20" click="showInfo();" toolTip="About" />
-		<ct:Spinner styleName="gradientlines" startImmediately="false" id="spin1" left="{paper1.width-22}" top="4"/>	
+		<st:GradientImageButton id="bttnInfo" top="2" left="{paper1.width-25}" visible="false" icon="@Embed('/../assets/question.gif')" styleName="toolbttn" width="20" height="20" click="showInfo();" toolTip="About" />
+		<ct:Spinner styleName="gradientlines" startImmediately="false" id="spin1" spinnerType="gradientcircle" left="{paper1.width-27}" top="0" width="24" height="24"/>
+		<st:GradientLabel id="lblProgress" x="{paper1.width-31}" textAlign="center" y="5" fontSize="8" height="19" width="32" text="100"/>
 		<mx:Image source="@Embed('/../assets/bar.gif')" width="3" height="21" x="95" y="1" />
 		<mx:Image source="@Embed('/../assets/bar.gif')" width="3" height="21" x="265" y="1" />
 		<mx:Image source="@Embed('/../assets/bar.gif')" width="3" height="21" x="344" y="1" />
@@ -117,6 +123,7 @@
 	<fp:Viewer id="paper1"	onPapersLoaded="papersLoadedHandler(event)" 
 							onPapersLoading="papersLoadingHandler(event)" 
 							onNoMoreSearchResults="onNoMoreSearchResultsHandler(event)"
+							onLoadingProgress="onDocumentLoadingProgressHandler(event)"
 							SwfFile="{SwfFile}" Scale="{Scale}" 
 							height="100%" width="100%" borderStyle="solid" />
 </mx:VBox>
