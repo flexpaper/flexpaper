@@ -110,9 +110,8 @@
 		<st:GradientLabel x="307" y="3" fontSize="9" height="17" width="10" text="/"/>
 		<st:GradientLabel x="316" y="3" fontSize="9" height="19" width="28" text="{paper1.numPages}"/>
 		<st:GradientImageButton top="3" x="418" icon="@Embed('/../assets/find.gif')" styleName="toolbttn" width="20" click="paper1.searchText(txtSearch.text);" toolTip="Search"  />
-		
-		<st:GradientImageButton id="bttnInfo" top="2" left="{paper1.width-25}" visible="false" icon="@Embed('/../assets/question.gif')" styleName="toolbttn" width="20" height="20" click="showInfo();" toolTip="About" />
-		<ct:Spinner styleName="gradientlines" startImmediately="false" id="spin1" spinnerType="gradientcircle" left="{paper1.width-27}" top="0" width="24" height="24"/>
+		<st:GradientImageButton id="bttnInfo" top="1" left="{paper1.width-27}" visible="false" icon="@Embed('/../assets/logosmallgray.png')" styleName="toolbttn" width="22" height="22" click="showInfo();" toolTip="About" />
+		<ct:Spinner styleName="gradientlines" startImmediately="false" id="spin1" spinnerType="gradientcircle" left="{paper1.width-27}" top="1" width="22" height="22"/>
 		<st:GradientLabel id="lblProgress" x="{paper1.width-31}" textAlign="center" y="5" fontSize="8" height="19" width="32" text=""/>
 		<mx:Image source="@Embed('/../assets/bar.gif')" width="3" height="21" x="95" y="1" />
 		<mx:Image source="@Embed('/../assets/bar.gif')" width="3" height="21" x="265" y="1" />
