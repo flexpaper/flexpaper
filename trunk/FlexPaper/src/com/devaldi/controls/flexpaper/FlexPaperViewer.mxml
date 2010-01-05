@@ -24,7 +24,6 @@
         import mx.controls.sliderClasses.Slider;
 		import mx.controls.Alert;
 		import mx.managers.PopUpManager;
-		import mx.controls.Alert;
 		
 		[Bindable]
 		public var Scale:Number = 1;
@@ -32,12 +31,25 @@
 		[Bindable]
 		public var SwfFile:String = "";
 		
+		private var prd:PrintRangeDialog;
+		
 		private function Init():void{
 			//systemManager.stage.showDefaultContextMenu = false;
 		}
 		
 		private function printPaper():void{
-			paper1.printPaper();
+			prd = new PrintRangeDialog(); 
+			PopUpManager.addPopUp(prd, this, true);
+            PopUpManager.centerPopUp(prd);
+            prd["bttnPrint"].addEventListener("click", printHandler); 
+		}
+		
+		private function printHandler(event:Event):void{
+			if(prd.PrintRange != "" && prd.validated){
+				paper1.printPaperRange(prd.PrintRange);
+			}else if(prd.validated){
+				paper1.printPaper();
+			}
 		}
 		
 		private function onNoMoreSearchResultsHandler(event:Event):void{
@@ -99,7 +111,7 @@
 
 <mx:Style source="styles/default.css" />
 	<mx:Canvas styleName="toolbarBackground" width="{paper1.width}" height="26" borderStyle="solid" verticalScrollPolicy="off" horizontalScrollPolicy="off">
-		<st:GradientImageButton top="3" icon="@Embed('/../assets/print-icon.gif')" styleName="toolbttn" width="20" click="paper1.printPaper()" toolTip="Print" />
+		<st:GradientImageButton top="3" icon="@Embed('/../assets/print-icon.gif')" styleName="toolbttn" width="20" click="printPaper()" toolTip="Print" />
 		<mx:Image source="@Embed('/../assets/bar.gif')" width="3" height="21" x="22" y="1" />
 		<st:GradientImageButton top="2" left="28" icon="@Embed('/../assets/fit.gif')" styleName="toolbttn" width="20" click="paper1.fitWidth()" enabled="{paper1.ViewMode == 'Portrait'}" toolTip="Fit Width" />
 		<st:GradientImageButton top="2" left="51" icon="@Embed('/../assets/pagefit.gif')" styleName="toolbttn" width="20"  click="paper1.fitHeight()" enabled="{paper1.ViewMode == 'Portrait'}" toolTip="Fit Page" />
