@@ -7,8 +7,8 @@
 		import mx.controls.Alert;
 		
 		public var PrintRange:String = "";
-		private const range_exp:RegExp = /^[0-9]*[-][0-9]*$/i;
-		private const numb_exp:RegExp = /^[0-9]*$/i;
+		private const range_exp:RegExp = /^[0-9]+[-][0-9]+$/i;
+		private const numb_exp:RegExp = /^[0-9]+$/i;
 		public var validated:Boolean = true;
 		
 		private function Init():void{
