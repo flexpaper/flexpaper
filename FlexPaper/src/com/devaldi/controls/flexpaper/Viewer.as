@@ -622,6 +622,41 @@ package com.devaldi.controls.flexpaper
 			}
 		}
 		
+		public function printPaperRange(range:String):void{
+			var pageNumList:Array = new Array();
+
+			if(range == "Current"){
+				pageNumList[currPage] = true;
+			}else{
+				var splitPageNumList:Array = range.split(",");
+				for(var i:int=0;i<splitPageNumList.length;i++){
+					if(splitPageNumList[i].toString().indexOf("-")>-1){
+						var rs:int = Number(splitPageNumList[i].toString().substr(0,splitPageNumList[i].toString().indexOf("-")));
+						var re:int = Number(splitPageNumList[i].toString().substr(splitPageNumList[i].toString().indexOf("-")+1));
+						for(var irs:int=rs;irs<re+1;irs++){
+							pageNumList[irs] = true;
+						}
+					}else{
+						pageNumList[int(Number(splitPageNumList[i].toString()))] = true;
+					}
+				}
+			}
+
+			var pj:PrintJob = new PrintJob();
+			if(pj.start()){
+				_libMC.stop();
+				
+				for(var ip:int=0;ip<_libMC.framesLoaded;ip++){
+					if(pageNumList[ip+1] != null){
+						_libMC.gotoAndStop(ip+1);
+						pj.addPage(_swfContainer);
+					}
+				}			
+				
+				pj.send();
+			}			
+		}
+		
 		private function addGlowFilter(img:Image):void{
 			var filter : flash.filters.GlowFilter = new flash.filters.GlowFilter(0x111111, 1, 5, 5, 2, 1, false, false);
 			 img.filters = [ filter ];   

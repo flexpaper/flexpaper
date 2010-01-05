@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:TitleWindow xmlns:mx="http://www.adobe.com/2006/mxml" layout="absolute" width="234" height="222" title="Select print range" creationComplete="Init()">
+<mx:Script>
+	<![CDATA[
+		import mx.events.CloseEvent;
+		import mx.managers.PopUpManager;
+		import mx.controls.Alert;
+		
+		public var PrintRange:String = "";
+		private const range_exp:RegExp = /^[0-9]*[-][0-9]*$/i;
+		private const numb_exp:RegExp = /^[0-9]*$/i;
+		public var validated:Boolean = true;
+		
+		private function Init():void{
+			this.addEventListener(CloseEvent.CLOSE, onClose);
+			bttnPrint.setFocus();
+		}
+	
+	  	private function onClose(evt:CloseEvent):void {
+	        PopUpManager.removePopUp(this);
+	    }		
+	    
+	    private function validateClose(event:Event):void{
+	    	var valmsg:String = "";
+	    	
+	    	if(bttnPrintCurrentPage.selected){PrintRange = "Current";}
+	    	if(bttnPrintRange.selected){
+	    		var pageList:Array = txtPrintRange.text.split(",");
+	    		for(var i:int=0;i<pageList.length;i++){
+	    			validated = (pageList[i].toString().indexOf("-")>-1 && range_exp.test(pageList[i].toString())) || (numb_exp.test(pageList[i].toString()));
+	    			if(!validated){break;}
+	    		}
+	    		
+	    		if(validated){
+	    			PrintRange=txtPrintRange.text;
+	    		}else{
+	    			valmsg = "Incorrect range specified.";
+	    		}
+	    	}
+	    	
+	    	if(validated){
+	    		PopUpManager.removePopUp(this);
+	    	}else{
+	    		Alert.show(valmsg,"Incorrect Range",mx.controls.Alert.OK,this);
+	    	}
+	    }
+	]]>
+</mx:Script>
+	<mx:RadioButtonGroup id="printRangeBttnGrp"/>
+	<mx:RadioButton x="10" y="10" label="All" groupName="printRangeBttnGrp" selected="true" id="bttnPrintAll"/>
+	<mx:RadioButton x="10" y="36" label="Current Page" groupName="printRangeBttnGrp" id="bttnPrintCurrentPage"/>
+	<mx:RadioButton x="10" y="62" label="Pages:" groupName="printRangeBttnGrp" id="bttnPrintRange"/>
+	<mx:TextInput x="82" y="62" restrict="0-9\-," width="122" id="txtPrintRange" enabled="{bttnPrintRange.selected}"/>
+	<mx:Text x="10" y="92" text="Enter page numbers and/or page ranges separated by commas. For example 1,3,5-12" height="46" width="194"/>
+	<mx:Button x="10" y="150" label="Print" id="bttnPrint" width="90" click="validateClose(event)"/>
+	<mx:Button x="114" y="150" label="Cancel" width="90" id="bttnCancel" click="PopUpManager.removePopUp(this);"/>
+</mx:TitleWindow>
