@@ -108,7 +108,6 @@
         }   		
 	]]>
 </mx:Script>
-
 <mx:Style source="styles/default.css" />
 	<mx:Canvas styleName="toolbarBackground" width="{paper1.width}" height="26" borderStyle="solid" verticalScrollPolicy="off" horizontalScrollPolicy="off">
 		<st:GradientImageButton top="3" icon="@Embed('/../assets/print-icon.gif')" styleName="toolbttn" width="20" click="printPaper()" toolTip="Print" />
