@@ -128,7 +128,7 @@ package com.devaldi.controls.flexpaper
 			if(p<1 || p-1 >_pageList.length)
 				return;
 			else{
-				_paperContainer.verticalScrollPosition = _pageList[p-1].y;
+				_paperContainer.verticalScrollPosition = _pageList[p-1].y-1;
 				repositionPapers();
 			}
 		}
