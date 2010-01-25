@@ -37,6 +37,7 @@
 	    			valmsg = "Incorrect range specified.";
 	    		}
 	    	}
+	    	if(bttnPrintAll.selected){PrintRange = "";}
 	    	
 	    	if(validated){
 	    		PopUpManager.removePopUp(this);
