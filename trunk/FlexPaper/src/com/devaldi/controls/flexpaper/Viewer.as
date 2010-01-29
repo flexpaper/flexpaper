@@ -289,39 +289,39 @@ package com.devaldi.controls.flexpaper
 				
 					for(var i:int=0;i<_pageList.length;i++){
 						if(!bFoundFirst && ((i) * (_pageList[i].height + 6)) >= _paperContainer.verticalScrollPosition){
-						bFoundFirst = true;
-						currPage = i + 1;
-					}
-						
-					if(checkIsVisible(i)){
-						if(_pageList[i].numChildren<3){
-							if(ViewMode == "Portrait"){ 
-								_loaderList[loaderidx].content.gotoAndStop(_pageList[i].dupIndex);
-								_pageList[i].addChild(_loaderList[loaderidx]);
-							}else if(ViewMode == "Tile" && _pageList[i].source == null){
-						    	_libMC.gotoAndStop(_pageList[i].dupIndex);
-							    _thumbData = new BitmapData(_libMC.width*_scale, _libMC.height*_scale, false, 0xFFFFFF);
-							    _thumb = new Bitmap(_thumbData);
-								_pageList[i].source = _thumb;
-								_thumbData.draw(_libMC,new Matrix(_scale, 0, 0, _scale),null,null,null,true);
-							}
-						}
-
-						if(_viewMode != "Tile"){
-							if(_pageList[i].dupIndex == searchPageIndex && searchShape.parent != _pageList[i]){
-								_pageList[i].addChildAt(searchShape,_pageList[i].numChildren);
-							}else if(_pageList[i].dupIndex == searchPageIndex && searchShape.parent == _pageList[i]){
-								_pageList[i].setChildIndex(searchShape,_pageList[i].numChildren -1);
-							}
+							bFoundFirst = true;
+							currPage = i + 1;
 						}
 						
-						loaderidx++;
-					}else{
-						if(_pageList[i].numChildren>0 || _pageList[i].source != null){
-							_pageList[i].source = null;
-							_pageList[i].removeAllChildren();
-						}					
-					}
+						if(checkIsVisible(i)){
+							if(_pageList[i].numChildren<3){
+								if(ViewMode == "Portrait"){ 
+									_loaderList[(i==_pageList.length-1)?loaderidx+3:loaderidx].content.gotoAndStop(_pageList[i].dupIndex);
+									_pageList[i].addChild(_loaderList[(i==_pageList.length-1)?loaderidx+3:loaderidx]);
+								}else if(ViewMode == "Tile" && _pageList[i].source == null){
+							    	_libMC.gotoAndStop(_pageList[i].dupIndex);
+								    _thumbData = new BitmapData(_libMC.width*_scale, _libMC.height*_scale, false, 0xFFFFFF);
+								    _thumb = new Bitmap(_thumbData);
+									_pageList[i].source = _thumb;
+									_thumbData.draw(_libMC,new Matrix(_scale, 0, 0, _scale),null,null,null,true);
+								}
+							}
+	
+							if(_viewMode != "Tile"){
+								if(_pageList[i].dupIndex == searchPageIndex && searchShape.parent != _pageList[i]){
+									_pageList[i].addChildAt(searchShape,_pageList[i].numChildren);
+								}else if(_pageList[i].dupIndex == searchPageIndex && searchShape.parent == _pageList[i]){
+									_pageList[i].setChildIndex(searchShape,_pageList[i].numChildren -1);
+								}
+							}
+							
+							loaderidx++;
+						}else{
+							if(_pageList[i].numChildren>0 || _pageList[i].source != null){
+								_pageList[i].source = null;
+								_pageList[i].removeAllChildren();
+							}					
+						}
 				}
 			}			
 		}
