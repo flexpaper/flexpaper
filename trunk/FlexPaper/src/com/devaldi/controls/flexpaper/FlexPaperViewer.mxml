@@ -146,7 +146,6 @@
 		<st:GradientLabel x="348" y="3" fontSize="9" height="17" width="10" text="/"/>
 		<st:GradientLabel x="357" y="3" fontSize="9" height="19" width="28" text="{paper1.numPages}"/>
 		<st:GradientImageButton top="3" x="478" icon="@Embed('/../assets/find.gif')" styleName="toolbttn" width="20" click="paper1.searchText(txtSearch.text);" toolTip="Search"   tabIndex="11"/>
-		<st:GradientImageButton id="bttnInfo" top="1" left="{paper1.width-27}" visible="false" icon="@Embed('/../assets/logosmallgray.png')" styleName="toolbttn" width="22" height="22" click="showInfo();" toolTip="About" />
 		<ct:Spinner styleName="gradientlines" startImmediately="false" id="spin1" spinnerType="gradientcircle" left="{paper1.width-27}" top="1" width="22" height="22"/>
 		<st:GradientLabel id="lblProgress" x="{paper1.width-31}" textAlign="center" y="5" fontSize="8" height="19" width="32" text="" tabIndex="0"/>
 		<mx:Image source="@Embed('/../assets/bar.gif')" width="3" height="21" x="95" y="1" />
@@ -157,6 +156,8 @@
 		<st:GradientImageButton icon="@Embed('/../assets/icon-arrow-right.gif')" styleName="toolbttn" toolTip="Next Page"  width="20" height="20"  x="381" y="2" click="mvNext();"   tabIndex="9"/>
 		<st:GradientImageButton icon="@Embed('/../assets/icon-arrow-left.gif')" styleName="toolbttn" toolTip="Previous Page"  width="20" height="20"  x="293" y="2" click="mvPrev();"   tabIndex="7"/>
 		<st:GradientImageButton icon="@Embed('/../assets/fullscreen.gif')" styleName="toolbttn" toolTip="Fullscreen"  width="20" height="20"  x="264" y="2" click="toggleFullScreen();"   tabIndex="6"/>
+		
+		<st:GradientImageButton id="bttnInfo" top="1" left="{paper1.width-27}" visible="false" icon="@Embed('/../assets/logosmallgray.png')" styleName="toolbttn" width="22" height="22" click="showInfo();" toolTip="About" />
 	</mx:Canvas> 
 	<fp:Viewer id="paper1"	onPapersLoaded="papersLoadedHandler(event)" 
 							onPapersLoading="papersLoadingHandler(event)" 
