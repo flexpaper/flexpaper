@@ -48,6 +48,8 @@
 		public var FitWidthOnLoad:Boolean = false;
 		
 		private var prd:PrintRangeDialog;
+		private var _fixedWidth:Number = -1;
+		private var _fixedHeight:Number = -1;
 			
 		private function printPaper():void{
 			prd = new PrintRangeDialog(); 
@@ -134,9 +136,15 @@
 		
 		private function toggleFullScreen():void {
             try {
+            	if(this.stage.displayState == StageDisplayState.NORMAL){
+	            	_fixedWidth = paper1.width;
+	            	_fixedHeight = paper1.height;
+            	}
+            	
                 switch (this.stage.displayState) {
                     case StageDisplayState.FULL_SCREEN:
                         this.stage.displayState = StageDisplayState.NORMAL;
+                        paper1.setActualSize(_fixedWidth,_fixedHeight);
                         break;
                     default:
                         this.stage.displayState = StageDisplayState.FULL_SCREEN;
