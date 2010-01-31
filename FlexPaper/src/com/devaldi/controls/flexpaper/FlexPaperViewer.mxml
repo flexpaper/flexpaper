@@ -183,17 +183,17 @@
 		<st:GradientHSlider id="slidPctScale" x="99" y="1" maximum="5" change="sliderChange(event)" styleName="sliderbttn" dataTipFormatFunction="formatPct" liveDragging="true" snapInterval="{ZoomInterval}" minimum="0.1" value="{Scale}" width="120" enabled="{paper1.ViewMode == 'Portrait'}" toolTip="Scale"  tabIndex="4"/>
 		<st:GradientTextInput x="220" y="1" fontSize="9" height="21" width="40" id="txtPct" text="{formatPct(Scale)}" keyDown="txtPctKeyDown(event)" enabled="{paper1.ViewMode == 'Portrait'}" toolTip="Scale" tabIndex="5"/>		
 		<st:GradientImageButton top="2" x="73" icon="@Embed('/../assets/thumbs.gif')" styleName="toolbttn" width="20" click="paper1.switchMode()" toolTip="Thumb View"   tabIndex="3"/>
-		<st:GradientTextInput x="315" y="1" fontSize="9" height="21" width="30" id="txtPage" text="{paper1.currPage}" keyDown="txtPageNumKeyDown(event)" enabled="{paper1.ViewMode == 'Portrait'}" toolTip="Current Page" tabIndex="8"/>
-		<st:GradientLabel x="348" y="3" fontSize="9" height="17" width="10" text="/"/>
-		<st:GradientLabel x="357" y="3" fontSize="9" height="19" width="28" text="{paper1.numPages}"/>
-		<st:GradientImageButton top="3" x="478" icon="@Embed('/../assets/find.gif')" styleName="toolbttn" width="20" click="paper1.searchText(txtSearch.text);" toolTip="Search"   tabIndex="11"/>
+		<st:GradientTextInput x="315" y="1" fontSize="9" height="21" width="40" id="txtPage" text="{paper1.currPage}" keyDown="txtPageNumKeyDown(event)" enabled="{paper1.ViewMode == 'Portrait'}" toolTip="Current Page" tabIndex="8"/>
+		<st:GradientLabel x="359" y="3" fontSize="9" height="17" width="10" text="/"/>
+		<st:GradientLabel x="368" y="3" fontSize="9" height="19" width="28" text="{paper1.numPages}"/>
+		<st:GradientImageButton top="3" x="489" icon="@Embed('/../assets/find.gif')" styleName="toolbttn" width="20" click="paper1.searchText(txtSearch.text);" toolTip="Search"   tabIndex="11"/>
 		<st:GradientLabel id="lblProgress" x="{paper1.width-31}" textAlign="center" y="5" fontSize="8" height="19" width="32" text="" tabIndex="0"/>
 		<mx:Image source="@Embed('/../assets/bar.gif')" width="3" height="21" x="95" y="1" />
 		<mx:Image source="@Embed('/../assets/bar.gif')" width="3" height="21" x="288" y="1" />
-		<mx:Image source="@Embed('/../assets/bar.gif')" width="3" height="21" x="404" y="1" />
-		<mx:Image source="@Embed('/../assets/bar.gif')" width="3" height="21" x="500" y="1" />
-		<st:GradientTextInput x="412" y="1" fontSize="9" height="21" width="65" id="txtSearch" keyDown="txtSearchKeyDown(event)" enabled="{paper1.ViewMode == 'Portrait'}" toolTip="Search" tabIndex="10"/>
-		<st:GradientImageButton icon="@Embed('/../assets/icon-arrow-right.gif')" styleName="toolbttn" toolTip="Next Page"  width="20" height="20"  x="381" y="2" click="mvNext();"   tabIndex="9"/>
+		<mx:Image source="@Embed('/../assets/bar.gif')" width="3" height="21" x="415" y="1" />
+		<mx:Image source="@Embed('/../assets/bar.gif')" width="3" height="21" x="511" y="1" />
+		<st:GradientTextInput x="423" y="1" fontSize="9" height="21" width="65" id="txtSearch" keyDown="txtSearchKeyDown(event)" enabled="{paper1.ViewMode == 'Portrait'}" toolTip="Search" tabIndex="10"/>
+		<st:GradientImageButton icon="@Embed('/../assets/icon-arrow-right.gif')" styleName="toolbttn" toolTip="Next Page"  width="20" height="20"  x="392" y="2" click="mvNext();"   tabIndex="9"/>
 		<st:GradientImageButton icon="@Embed('/../assets/icon-arrow-left.gif')" styleName="toolbttn" toolTip="Previous Page"  width="20" height="20"  x="293" y="2" click="mvPrev();"   tabIndex="7"/>
 		<st:GradientImageButton icon="@Embed('/../assets/fullscreen.gif')" styleName="toolbttn" toolTip="Fullscreen"  width="20" height="20"  x="264" y="2" click="toggleFullScreen();"   tabIndex="6"/>
 		

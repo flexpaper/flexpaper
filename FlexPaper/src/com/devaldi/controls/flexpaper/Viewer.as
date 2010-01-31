@@ -217,7 +217,7 @@ package com.devaldi.controls.flexpaper
 			
 			var _target:DisplayObject;
 			_paperContainer.CenteringEnabled = true;
-			var factor:Number = (_paperContainer.width / _loader.width) - 0.031; //- 0.03; 
+			var factor:Number = (_paperContainer.width / _loader.width) - 0.032; //- 0.03; 
 			_scale = factor;
 			
 			for(var i:int=0;i<_displayContainer.numChildren;i++){
@@ -262,7 +262,7 @@ package com.devaldi.controls.flexpaper
 			// Call the createChildren() method of the superclass.
     		super.createChildren();
     		this.styleName = "viewerBackground";
-			    		
+    		
     		// Bind events
     		_loader.contentLoaderInfo.addEventListener(Event.COMPLETE, swfComplete);
 			addEventListener(Event.RESIZE, sizeChanged);
@@ -307,7 +307,8 @@ package com.devaldi.controls.flexpaper
 		
 		private function bytesLoaded(event:Event):void{
 			event.target.loader.loaded = true;
-	
+			event.target.loader.content.stop();			
+			
 			var bFound:Boolean=false;
 			for(var i:int=0;i<_loaderList.length;i++){
 				if(!_loaderList[i].loaded){
@@ -347,9 +348,10 @@ package com.devaldi.controls.flexpaper
 							if(_pageList[i].numChildren<3){
 								if(ViewMode == "Portrait"){ 		
 									uloaderidx = (i==_pageList.length-1&&loaderidx+3<_loaderList.length)?loaderidx+3:loaderidx;									
-									if(_pageList[i].numChildren==0||(_pageList[i]!=null&&_loaderList[uloaderidx].content.currentFrame!=_pageList[i].dupIndex)){
-									_loaderList[uloaderidx].content.gotoAndStop(_pageList[i].dupIndex);
-									_pageList[i].addChild(_loaderList[uloaderidx]);
+									
+									if(i<2||_pageList[i].numChildren==0||(_pageList[i]!=null&&_loaderList[uloaderidx].content.currentFrame!=_pageList[i].dupIndex)){
+										_loaderList[uloaderidx].content.gotoAndStop(_pageList[i].dupIndex);
+										_pageList[i].addChild(_loaderList[uloaderidx]);
 									}
 								}else if(ViewMode == "Tile" && _pageList[i].source == null){
 							    	_libMC.gotoAndStop(_pageList[i].dupIndex);
