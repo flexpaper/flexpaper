@@ -20,6 +20,6 @@
 	<mx:Label x="10" y="52" text="Developed by Erik Engström"/>
 	<mx:Label x="10" y="68" text="For more information, see"/>
 	<mx:LinkButton x="159" y="66" label="devaldi.com" click="navigateToURL(new URLRequest('http://www.devaldi.com/?ref=FlexPaper'), 'devaldi')" fontWeight="normal" textDecoration="underline" color="#4134EB"/>
-	<mx:Label x="58" y="22" text="FlexPaper version 1.1.2 "/>
+	<mx:Label x="58" y="22" text="FlexPaper version 1.2b "/>
 	
 </mx:TitleWindow>

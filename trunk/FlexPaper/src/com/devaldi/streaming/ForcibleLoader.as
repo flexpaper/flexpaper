@@ -20,15 +20,15 @@ along with FlexPaper.  If not, see <http://www.gnu.org/licenses/>.
 package com.devaldi.streaming
 {
         import flash.display.Loader;
+        import flash.errors.EOFError;
+        import flash.events.Event;
+        import flash.events.IOErrorEvent;
+        import flash.events.ProgressEvent;
+        import flash.events.SecurityErrorEvent;
         import flash.net.URLRequest;
         import flash.net.URLStream;
-        import flash.events.IOErrorEvent;
-        import flash.events.SecurityErrorEvent;
-        import flash.events.Event;
-        import flash.events.ProgressEvent;
         import flash.utils.ByteArray;
         import flash.utils.Endian;
-        import flash.errors.EOFError;
         
         /**
          * Usage:
@@ -46,6 +46,7 @@ package com.devaldi.streaming
                         
                         _stream = new URLStream();
                         _stream.addEventListener(Event.COMPLETE, completeHandler);
+                        _stream.addEventListener(ProgressEvent.PROGRESS , streamProgressHandler);
                         _stream.addEventListener(IOErrorEvent.IO_ERROR, ioErrorHandler);
                         _stream.addEventListener(SecurityErrorEvent.SECURITY_ERROR, securityErrorHandler);
                 }
@@ -71,6 +72,10 @@ package com.devaldi.streaming
                 public function load(request:URLRequest):void
                 {
                         _stream.load(request);
+                }
+                
+                private function streamProgressHandler(event:Event):void{
+                	
                 }
                 
                 private function completeHandler(event:Event):void
