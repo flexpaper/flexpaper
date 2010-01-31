@@ -41,6 +41,12 @@
 		[Bindable]
 		public var ZoomInterval:Number = 0.1;
 		
+		[Bindable]
+		public var FitPageOnLoad:Boolean = false;
+		
+		[Bindable]
+		public var FitWidthOnLoad:Boolean = false;
+		
 		private var prd:PrintRangeDialog;
 			
 		private function printPaper():void{
@@ -182,6 +188,13 @@
 							onNoMoreSearchResults="onNoMoreSearchResultsHandler(event)"
 							onLoadingProgress="onDocumentLoadingProgressHandler(event)"
 							onScaleChanged="onScaleChanged(event)"
-							SwfFile="{SwfFile}" Scale="{Scale}" ZoomTransition="{ZoomTransition}" ZoomTime="{ZoomTime}"
+							
+							SwfFile="{SwfFile}" 
+							Scale="{Scale}" 
+							ZoomTransition="{ZoomTransition}" 
+							ZoomTime="{ZoomTime}"
+							FitPageOnLoad="{FitPageOnLoad}"
+							FitWidthOnLoad="{FitWidthOnLoad}"
+											
 							height="100%" width="100%" borderStyle="solid"  tabIndex="0"/>
 </mx:VBox>

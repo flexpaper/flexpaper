@@ -81,6 +81,8 @@ package com.devaldi.controls.flexpaper
 		private var _loaderList:Array;
 		private var _zoomtransition:String = "easeOut";
 		private var _zoomtime:Number = 0.6; 
+		private var _fitPageOnLoad:Boolean = false;
+		private var _fitWidthOnLoad:Boolean = false;
 		
 		[Embed(source="/../assets/grab.gif")]
 		public var grabCursor:Class;	  
@@ -143,6 +145,22 @@ package com.devaldi.controls.flexpaper
 			_currPage = n;
 		}		
 		
+		public function get FitWidthOnLoad():Boolean {
+		    return _fitWidthOnLoad;
+		}	
+		
+		public function set FitWidthOnLoad(b1:Boolean):void {
+			_fitWidthOnLoad = b1;
+		}
+		
+		public function get FitPageOnLoad():Boolean {
+		    return _fitPageOnLoad;
+		}	
+		
+		public function set FitPageOnLoad(b2:Boolean):void {
+			_fitPageOnLoad = b2;
+		}				
+						
 		public function gotoPage(p:Number):void{
 			if(p<1 || p-1 >_pageList.length)
 				return;
@@ -304,6 +322,10 @@ package com.devaldi.controls.flexpaper
 				_bbusyloading = false;
 				repositionPapers();
 				_paperContainer.verticalScrollPosition = 0;
+				
+				if(_fitPageOnLoad){fitHeight();}
+					
+				if(_fitWidthOnLoad){fitWidth();}
 			}			
 		}
 		
