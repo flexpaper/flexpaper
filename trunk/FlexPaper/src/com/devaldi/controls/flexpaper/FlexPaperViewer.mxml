@@ -47,11 +47,14 @@
 		[Bindable]
 		public var FitWidthOnLoad:Boolean = false;
 		
+		[Bindable]
+		public var PrintEnabled:Boolean = true;
+		
 		private var prd:PrintRangeDialog;
 		private var _fixedWidth:Number = -1;
 		private var _fixedHeight:Number = -1;
 			
-		private function printPaper():void{
+		private function printPaper(e:Event):void{
 			prd = new PrintRangeDialog(); 
 			PopUpManager.addPopUp(prd, this, true);
             PopUpManager.centerPopUp(prd);
@@ -120,7 +123,7 @@
    			slidPctScale.value = Number(paper1.Scale);
    		}
    		
-		private function showInfo():void {
+		private function showInfo(e:Event):void {
 			var vabout:About = new About();
 			PopUpManager.addPopUp(vabout, this, true);
             PopUpManager.centerPopUp(vabout);
@@ -165,6 +168,20 @@
         
         private function bindStageEvents(e:Event):void{
 			stage.addEventListener(FullScreenEvent.FULL_SCREEN, fullScreenRedraw);
+			
+			var cmi_about:ContextMenuItem = new ContextMenuItem('About FlexPaper');
+			cmi_about.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, showInfo);
+			
+			contextMenu = new ContextMenu();
+			contextMenu.customItems.push(cmi_about);
+
+			if(PrintEnabled){
+				var cmi_print:ContextMenuItem = new ContextMenuItem('Print ..');
+				cmi_print.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, printPaper);
+				contextMenu.customItems.push(cmi_print);
+			}			
+			
+			contextMenu.hideBuiltInItems();
         }
         
         private function fullScreenRedraw(event:FullScreenEvent):void{
@@ -176,7 +193,7 @@
 </mx:Script>
 <mx:Style source="styles/default.css" />
 	<mx:Canvas styleName="toolbarBackground" width="{paper1.width}" height="26" borderStyle="solid" verticalScrollPolicy="off" horizontalScrollPolicy="off">
-		<st:GradientImageButton top="3" icon="@Embed('/../assets/print-icon.gif')" styleName="toolbttn" width="20" click="printPaper()" toolTip="Print" />
+		<st:GradientImageButton top="3" icon="@Embed('/../assets/print-icon.gif')" styleName="toolbttn" width="20" click="printPaper(event)" toolTip="Print" enabled="{PrintEnabled}" />
 		<mx:Image source="@Embed('/../assets/bar.gif')" width="3" height="21" x="22" y="1" />
 		<st:GradientImageButton top="2" left="28" icon="@Embed('/../assets/fit.gif')" styleName="toolbttn" width="20" click="paper1.fitWidth()" enabled="{paper1.ViewMode == 'Portrait'}" toolTip="Fit Width"  tabIndex="1"/>
 		<st:GradientImageButton top="2" left="51" icon="@Embed('/../assets/pagefit.gif')" styleName="toolbttn" width="20"  click="paper1.fitHeight()" enabled="{paper1.ViewMode == 'Portrait'}" toolTip="Fit Page"  tabIndex="2"/>
@@ -198,7 +215,7 @@
 		<st:GradientImageButton icon="@Embed('/../assets/fullscreen.gif')" styleName="toolbttn" toolTip="Fullscreen"  width="20" height="20"  x="264" y="2" click="toggleFullScreen();"   tabIndex="6"/>
 		
 		<ct:Spinner styleName="gradientlines" startImmediately="false" id="spin1" spinnerType="gradientcircle" left="{paper1.width-27}" top="1" width="22" height="22"/>
-		<st:GradientImageButton id="bttnInfo" top="1" left="{paper1.width-27}" visible="false" icon="@Embed('/../assets/logosmallgray.png')" styleName="toolbttn" width="22" height="22" click="showInfo();" toolTip="About" />
+		<st:GradientImageButton id="bttnInfo" top="1" left="{paper1.width-27}" visible="false" icon="@Embed('/../assets/logosmallgray.png')" styleName="toolbttn" width="22" height="22" click="showInfo(event);" toolTip="About" />
 	</mx:Canvas> 
 	<fp:Viewer id="paper1"	onPapersLoaded="papersLoadedHandler(event)" 
 							onPapersLoading="papersLoadingHandler(event)" 
