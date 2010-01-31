@@ -56,6 +56,7 @@ package com.devaldi.controls.flexpaper
 	[Event(name="onPapersLoading", type="flash.events.Event")]
 	[Event(name="onNoMoreSearchResults", type="flash.events.Event")]
 	[Event(name="onLoadingProgress", type="flash.events.ProgressEvent")]
+	[Event(name="onScaleChanged", type="flash.events.Event")]
 	
 	public class Viewer extends Canvas
 	{
@@ -78,6 +79,8 @@ package com.devaldi.controls.flexpaper
 		private var _tweencount:Number = 0;
 		private var _bbusyloading:Boolean = true;
 		private var _loaderList:Array;
+		private var _zoomtransition:String = "easeOut";
+		private var _zoomtime:Number = 0.6; 
 		
 		[Embed(source="/../assets/grab.gif")]
 		public var grabCursor:Class;	  
@@ -104,7 +107,23 @@ package com.devaldi.controls.flexpaper
 				if(_initialized && _swfLoaded){createDisplayContainer();repaint();}
 			}
 		}
-
+		
+		public function get ZoomTransition():String {
+		    return _zoomtransition;
+		}	
+		
+		public function set ZoomTransition(s:String):void {
+			_zoomtransition = s;
+		}
+		
+		public function get ZoomTime():Number {
+		    return _zoomtime;
+		}	
+		
+		public function set ZoomTime(n:Number):void {
+			_zoomtime = n;
+		}		
+		
 		[Bindable]
 		public function get numPages():Number {
 		    return _numPages;
@@ -152,6 +171,7 @@ package com.devaldi.controls.flexpaper
             invalidateDisplayList();			 
 		}
 		
+		[Bindable]
 		public function get Scale():String {
 		    return _scale.toString();
 		}				
@@ -170,7 +190,7 @@ package com.devaldi.controls.flexpaper
 			for(var i:int=0;i<_displayContainer.numChildren;i++){
 				_target = _displayContainer.getChildAt(i);
 				_target.filters = null;
-				Tweener.addTween(_target, {scaleX: factor, scaleY: factor, time: 0.6, transition: 'easeOut', onComplete: tweenComplete});
+				Tweener.addTween(_target, {scaleX: factor, scaleY: factor, time: _zoomtime, transition: _zoomtransition, onComplete: tweenComplete});
 			}
 		}
 		
@@ -180,12 +200,15 @@ package com.devaldi.controls.flexpaper
 			var _target:DisplayObject;
 			_paperContainer.CenteringEnabled = true;
 			var factor:Number = (_paperContainer.width / _loader.width) - 0.031; //- 0.03; 
+			_scale = factor;
 			
 			for(var i:int=0;i<_displayContainer.numChildren;i++){
 				_target = _displayContainer.getChildAt(i);
 				_target.filters = null;
-				Tweener.addTween(_target, {scaleX:factor, scaleY:factor,time: 0, transition: 'easeOut', onComplete: tweenComplete});
-			}			
+				Tweener.addTween(_target, {scaleX:factor, scaleY:factor,time: 0, transition: 'easenone', onComplete: tweenComplete});
+			}
+			
+			dispatchEvent(new Event("onScaleChanged"));
 		}
 		
 		public function fitHeight():void{
@@ -194,12 +217,15 @@ package com.devaldi.controls.flexpaper
 			var _target:DisplayObject;
 			_paperContainer.CenteringEnabled = true;
 			var factor:Number = (_paperContainer.height / _loader.height); 
+			_scale = factor;
 			
 			for(var i:int=0;i<_displayContainer.numChildren;i++){
 				_target = _displayContainer.getChildAt(i);
 				_target.filters = null;
-				Tweener.addTween(_target, {scaleX:factor, scaleY:factor,time: 0, transition: 'easeOut', onComplete: tweenComplete});
-			}					
+				Tweener.addTween(_target, {scaleX:factor, scaleY:factor,time: 0, transition: 'easenone', onComplete: tweenComplete});
+			}			
+			
+			dispatchEvent(new Event("onScaleChanged"));		
 		}
 		
 		private function tweenComplete():void{
@@ -277,6 +303,7 @@ package com.devaldi.controls.flexpaper
 				dispatchEvent(new Event("onPapersLoaded"));
 				_bbusyloading = false;
 				repositionPapers();
+				_paperContainer.verticalScrollPosition = 0;
 			}			
 		}
 		
@@ -286,6 +313,7 @@ package com.devaldi.controls.flexpaper
 				var bFoundFirst:Boolean = false;
 				var _thumb:Bitmap;
 				var _thumbData:BitmapData;
+				var uloaderidx:int=0;
 				
 					for(var i:int=0;i<_pageList.length;i++){
 						if(!bFoundFirst && ((i) * (_pageList[i].height + 6)) >= _paperContainer.verticalScrollPosition){
@@ -295,9 +323,10 @@ package com.devaldi.controls.flexpaper
 						
 						if(checkIsVisible(i)){
 							if(_pageList[i].numChildren<3){
-								if(ViewMode == "Portrait"){ 
-									_loaderList[(i==_pageList.length-1&&loaderidx+3<_loaderList.length)?loaderidx+3:loaderidx].content.gotoAndStop(_pageList[i].dupIndex);
-									_pageList[i].addChild(_loaderList[(i==_pageList.length-1&&loaderidx+3<_loaderList.length)?loaderidx+3:loaderidx]);
+								if(ViewMode == "Portrait"){ 		
+									uloaderidx = (i==_pageList.length-1&&loaderidx+3<_loaderList.length)?loaderidx+3:loaderidx;									
+									_loaderList[uloaderidx].content.gotoAndStop(_pageList[i].dupIndex);
+									_pageList[i].addChild(_loaderList[uloaderidx]);
 								}else if(ViewMode == "Tile" && _pageList[i].source == null){
 							    	_libMC.gotoAndStop(_pageList[i].dupIndex);
 								    _thumbData = new BitmapData(_libMC.width*_scale, _libMC.height*_scale, false, 0xFFFFFF);
