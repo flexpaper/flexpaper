@@ -17,7 +17,7 @@
     You should have received a copy of the GNU General Public License
     along with FlexPaper.  If not, see <http://www.gnu.org/licenses/>.	
 -->
-<mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml" width="100%" height="100%" verticalGap="0"  xmlns:fp="com.devaldi.controls.flexpaper.*" xmlns:ct="com.devaldi.controls.*" xmlns:st="com.devaldi.skinning.*" borderColor="#8a8a8a" borderThickness="1">
+<mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml" width="100%" height="100%" verticalGap="0"  xmlns:fp="com.devaldi.controls.flexpaper.*" xmlns:ct="com.devaldi.controls.*" xmlns:st="com.devaldi.skinning.*" borderColor="#8a8a8a" borderThickness="1" addedToStage="bindStageEvents(event)">
 <mx:Script>
 	<![CDATA[
 		import mx.events.SliderEvent;
@@ -144,7 +144,6 @@
                 switch (this.stage.displayState) {
                     case StageDisplayState.FULL_SCREEN:
                         this.stage.displayState = StageDisplayState.NORMAL;
-                        paper1.setActualSize(_fixedWidth,_fixedHeight);
                         break;
                     default:
                         this.stage.displayState = StageDisplayState.FULL_SCREEN;
@@ -163,6 +162,16 @@
 		public function fitHeight():void{
         	paper1.fitWidth();
         }		
+        
+        private function bindStageEvents(e:Event):void{
+			stage.addEventListener(FullScreenEvent.FULL_SCREEN, fullScreenRedraw);
+        }
+        
+        private function fullScreenRedraw(event:FullScreenEvent):void{
+        	if(!event.fullScreen && _fixedWidth>0){
+        		paper1.setActualSize(_fixedWidth,_fixedHeight);
+        	}
+        }
 	]]>
 </mx:Script>
 <mx:Style source="styles/default.css" />
