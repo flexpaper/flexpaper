@@ -322,7 +322,7 @@ package com.devaldi.controls.flexpaper
 				dispatchEvent(new Event("onPapersLoaded"));
 				_bbusyloading = false;
 				repositionPapers();
-				_paperContainer.verticalScrollPosition = 0;
+				//_paperContainer.verticalScrollPosition = 0;
 				
 				if(_fitPageOnLoad){fitHeight();}
 					
@@ -475,6 +475,9 @@ package com.devaldi.controls.flexpaper
 			}
 			if(event.keyCode == Keyboard.END){
 				_paperContainer.verticalScrollPosition = _paperContainer.maxVerticalScrollPosition;
+			}
+			if(event.keyCode == Keyboard.SPACE){
+				_paperContainer.verticalScrollPosition = _paperContainer.verticalScrollPosition + 300;
 			}
 		}
 		
