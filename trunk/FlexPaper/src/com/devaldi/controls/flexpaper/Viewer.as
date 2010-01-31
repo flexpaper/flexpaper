@@ -475,7 +475,7 @@ package com.devaldi.controls.flexpaper
 		}
 		
 		private function sizeChanged(evt:Event):void{
-			repaint();
+			//repaint();
 		}
 		
 		override protected function commitProperties():void {
