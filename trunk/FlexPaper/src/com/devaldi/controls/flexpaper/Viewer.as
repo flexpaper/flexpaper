@@ -347,8 +347,10 @@ package com.devaldi.controls.flexpaper
 							if(_pageList[i].numChildren<3){
 								if(ViewMode == "Portrait"){ 		
 									uloaderidx = (i==_pageList.length-1&&loaderidx+3<_loaderList.length)?loaderidx+3:loaderidx;									
+									if(_pageList[i].numChildren==0||(_pageList[i]!=null&&_loaderList[uloaderidx].content.currentFrame!=_pageList[i].dupIndex)){
 									_loaderList[uloaderidx].content.gotoAndStop(_pageList[i].dupIndex);
 									_pageList[i].addChild(_loaderList[uloaderidx]);
+									}
 								}else if(ViewMode == "Tile" && _pageList[i].source == null){
 							    	_libMC.gotoAndStop(_pageList[i].dupIndex);
 								    _thumbData = new BitmapData(_libMC.width*_scale, _libMC.height*_scale, false, 0xFFFFFF);
