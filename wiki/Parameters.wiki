@@ -4,7 +4,7 @@ The following parameters can be used in FlexPaper
 
  * *SwfFile* (_String_) : The document FlexPaper should open
 
- * *Scale* (_Number_) : The initial zoom factor that should be used. Should be a number between 0 and 1
+ * *Scale* (_Number_) : The initial zoom factor that should be used. Should be a number above 0 (1=100%)
 
  * *ZoomTransition* (_String_) The zoom transition that should be used when zooming in FlexPaper. It uses the same Transition modes as the Tweener. The default value is easeOut. Some examples: easenone, easeout, linear, easeoutquad
 
