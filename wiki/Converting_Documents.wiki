@@ -1,6 +1,6 @@
 =Converting your documents using PDF2SWF=
 
-Converting your documents using PDF2SWF if fairly straight forward. Documents are preferrably converted using the executable (not the UI). The following example shows the recommended setting for converting your document is:
+Converting your documents using PDF2SWF if fairly straight forward. Documents are preferrably converted using the executable (not the UI). The following example shows the recommended setting for converting your document:
 
 *C:\SWFTools\pdf2swf.exe Paper.pdf -o Paper.swf -f -T 9 -t -G*
 
