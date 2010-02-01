@@ -4,7 +4,7 @@ Converting your documents using PDF2SWF if fairly straight forward. Documents ar
 
 *C:\SWFTools\pdf2swf.exe Paper.pdf -o Paper.swf -f -T 9 -t -G*
 
-The last 5 parameters specifies that:
+The last 4 parameters specifies that:
  * *-f* : Fonts should be embedded, improves searchability in the document
  * *-T 9* : Sets the target flash version to 9, improves stability
  * *-t* : Inserts a stop between each frame, improves stability
