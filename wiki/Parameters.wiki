@@ -2,7 +2,7 @@
 
 The following parameters can be used in FlexPaper
 
-*SwfFile* _String_
+ * *SwfFile* _String_
 The document FlexPaper should open
  
  
