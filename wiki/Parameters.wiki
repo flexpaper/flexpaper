@@ -17,3 +17,33 @@ The following parameters can be used in FlexPaper
  * *FitWidthOnLoad* (_Boolean_) Fits the width on initial load. Same effect as using the fit-width button in the toolbar.
 
  * *PrintEnabled* (_Boolean_) Disables or enables print for the document. Please note that this in no way sufficient by itself to protect your intellectual property rights. It is merely a way of disabling the functionality for the average user and is in no way any final digital rights management or copyright protection.
+
+The parameters are passed using flashvars or by setting properties on the flexpaper component inside flex, depending on your choice of usage. The code block below shows an example of how the parameters can be passed using the pre-compiled flash version
+
+{{{
+var flashvars = { 
+                  SwfFile :       "Paper.swf",
+				  Scale : 0.6,
+				  ZoomTransition : "easeOut",
+				  ZoomTime : 0.5,
+  				  ZoomInterval : 0.1,
+  				  FitPageOnLoad : false,
+  				  FitWidthOnLoad : false,
+  				  PrintEnabled : false
+				  };
+			 var params = {
+				
+			    }
+            params.quality = "high";
+            params.bgcolor = "#ffffff";
+            params.allowscriptaccess = "sameDomain";
+            params.allowfullscreen = "true";
+            var attributes = {};
+            attributes.id = "FlexPaperViewer";
+            attributes.name = "FlexPaperViewer";
+            swfobject.embedSWF(
+                "FlexPaperViewer.swf", "flashContent", 
+                "600", "500", 
+                swfVersionStr, xiSwfUrlStr, 
+                flashvars, params, attributes);
+}}}
