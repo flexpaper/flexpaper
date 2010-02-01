@@ -8,7 +8,7 @@ The following parameters can be used in FlexPaper
 
  * *ZoomTransition* (_String_) The zoom transition that should be used when zooming in FlexPaper. It uses the same Transition modes as the Tweener. The default value is easeOut. Some examples: easenone, easeout, linear, easeoutquad
 
- * *ZoomTime* (_Number_) The time it should take for the zoom to reach the new zoom factor. Should be a 0 or greater. 
+ * *ZoomTime* (_Number_) The time it should take for the zoom to reach the new zoom factor. Should be 0 or greater. 
 
  * *ZoomInterval* (_Number_) The interval which the zoom slider should be using. Basically how big the "step" should be between each zoom factor. The default value is 0.1. Should be a positive number.
 
