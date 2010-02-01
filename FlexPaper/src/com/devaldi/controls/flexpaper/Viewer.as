@@ -43,6 +43,7 @@ package com.devaldi.controls.flexpaper
 	import flash.system.System;
 	import flash.text.TextSnapshot;
 	import flash.ui.Keyboard;
+	import flash.display.StageDisplayState;
 	
 	import mx.containers.Canvas;
 	import mx.controls.Image;
@@ -476,9 +477,9 @@ package com.devaldi.controls.flexpaper
 			if(event.keyCode == Keyboard.END){
 				_paperContainer.verticalScrollPosition = _paperContainer.maxVerticalScrollPosition;
 			}
-			if(event.keyCode == Keyboard.SPACE){
+			/*if(event.keyCode == Keyboard.SPACE && stage.displayState == StageDisplayState.FULL_SCREEN){
 				_paperContainer.verticalScrollPosition = _paperContainer.verticalScrollPosition + 300;
-			}
+			}*/
 		}
 		
 		private function sizeChanged(evt:Event):void{
