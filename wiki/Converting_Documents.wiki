@@ -6,7 +6,7 @@ Converting your documents using PDF2SWF if fairly straight forward. Documents ar
 
 The last 5 parameters specifies that:
  * *-f* : Fonts should be embedded, improves searchability in the document
- * *-T 9* : The target flash version is 9, improves stability since the viewer is built for v 9
+ * *-T 9* : Sets the target flash version to 9, improves stability since the viewer is built for v 9
  * *-t* : Inserts a stop between each frame, improves stability
  * *-G* : Makes the document smaller and faster to render
 
