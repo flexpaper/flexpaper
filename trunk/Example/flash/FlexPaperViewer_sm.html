@@ -19,7 +19,7 @@
             var xiSwfUrlStr = "${expressInstallSwf}";
             var flashvars = { 
                   SwfFile : "imf.swf",
-				  Scale : 0.7,
+				  Scale : 0.5,
 				  ZoomTransition : "easeOut",
 				  ZoomTime : 0.5,
   				  ZoomInterval : 0.1,
@@ -39,7 +39,7 @@
             attributes.name = "FlexPaperViewer";
             swfobject.embedSWF(
                 "FlexPaperViewer.swf?v1", "flashContent", 
-                "540", "340", 
+                "540", "460", 
                 swfVersionStr, xiSwfUrlStr, 
                 flashvars, params, attributes);
 			swfobject.createCSS("#flashContent", "display:block;text-align:left;");
