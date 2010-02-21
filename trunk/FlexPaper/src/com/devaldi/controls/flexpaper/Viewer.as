@@ -84,7 +84,6 @@ package com.devaldi.controls.flexpaper
 		private var _zoomtime:Number = 0.6; 
 		private var _fitPageOnLoad:Boolean = false;
 		private var _fitWidthOnLoad:Boolean = false;
-		private var fLoader:ForcibleLoader;
 		
 		[Embed(source="/../assets/grab.gif")]
 		public var grabCursor:Class;	  
@@ -309,7 +308,7 @@ package com.devaldi.controls.flexpaper
 		
 		private function bytesLoaded(event:Event):void{
 			event.target.loader.loaded = true;
-			//event.target.loader.content.stop();			
+			event.target.loader.content.stop();			
 			
 			var bFound:Boolean=false;
 			for(var i:int=0;i<_loaderList.length;i++){
@@ -494,7 +493,7 @@ package com.devaldi.controls.flexpaper
 			
 				dispatchEvent(new Event("onPapersLoading"));
 				
-				fLoader = new ForcibleLoader(_loader);
+				var fLoader:ForcibleLoader = new ForcibleLoader(_loader);
 				fLoader.stream.addEventListener(ProgressEvent.PROGRESS, onLoadProgress);
 				fLoader.load(new URLRequest(_swfFile));
 
