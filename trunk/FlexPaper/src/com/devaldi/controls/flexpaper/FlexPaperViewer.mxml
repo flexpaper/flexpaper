@@ -219,7 +219,6 @@
 		<ct:Spinner styleName="gradientlines" startImmediately="false" id="spin1" spinnerType="gradientcircle" left="{paper1.width-27}" top="1" width="22" height="22"/>
 		<st:GradientImageButton id="bttnInfo" top="1" left="{paper1.width-27}" visible="false" icon="@Embed('/../assets/logosmallgray.png')" styleName="toolbttn" width="22" height="22" click="showInfo(event);" toolTip="@Resource(key='About', bundle='FlexPaper')" />
 	</mx:Canvas> 
-	
 	<fp:Viewer id="paper1"	onPapersLoaded="papersLoadedHandler(event)" 
 							onPapersLoading="papersLoadingHandler(event)" 
 							onNoMoreSearchResults="onNoMoreSearchResultsHandler(event)"
