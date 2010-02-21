@@ -1,5 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
-<mx:TitleWindow xmlns:mx="http://www.adobe.com/2006/mxml" layout="absolute" width="234" height="222" title="Select print range" creationComplete="Init()">
+<mx:TitleWindow xmlns:mx="http://www.adobe.com/2006/mxml" layout="absolute" width="234" height="244" title="@Resource(key='Selectprintrange', bundle='FlexPaper')" creationComplete="Init()">
+<mx:Metadata>
+  [ResourceBundle("FlexPaper")]
+</mx:Metadata>
 <mx:Script>
 	<![CDATA[
 		import mx.events.CloseEvent;
@@ -34,7 +37,7 @@
 	    		if(validated){
 	    			PrintRange=txtPrintRange.text;
 	    		}else{
-	    			valmsg = "Incorrect range specified.";
+	    			valmsg = resourceManager.getString("FlexPaper", "Incorrectrangespecified");
 	    		}
 	    	}
 	    	if(bttnPrintAll.selected){PrintRange = "";}
@@ -42,17 +45,17 @@
 	    	if(validated){
 	    		PopUpManager.removePopUp(this);
 	    	}else{
-	    		Alert.show(valmsg,"Incorrect Range",mx.controls.Alert.OK,this);
+	    		Alert.show(valmsg,resourceManager.getString("FlexPaper", "IncorrectRange"),mx.controls.Alert.OK,this);
 	    	}
 	    }
 	]]>
 </mx:Script>
 	<mx:RadioButtonGroup id="printRangeBttnGrp"/>
-	<mx:RadioButton x="10" y="10" label="All" groupName="printRangeBttnGrp" selected="true" id="bttnPrintAll"/>
-	<mx:RadioButton x="10" y="36" label="Current Page" groupName="printRangeBttnGrp" id="bttnPrintCurrentPage"/>
-	<mx:RadioButton x="10" y="62" label="Pages:" groupName="printRangeBttnGrp" id="bttnPrintRange"/>
+	<mx:RadioButton x="10" y="10" label="@Resource(key='All', bundle='FlexPaper')" groupName="printRangeBttnGrp" selected="true" id="bttnPrintAll"/>
+	<mx:RadioButton x="10" y="36" label="@Resource(key='CurrentPage', bundle='FlexPaper')" groupName="printRangeBttnGrp" id="bttnPrintCurrentPage"/>
+	<mx:RadioButton x="10" y="62" label="@Resource(key='Pages', bundle='FlexPaper')" groupName="printRangeBttnGrp" id="bttnPrintRange"/>
 	<mx:TextInput x="82" y="62" restrict="0-9\-," width="122" id="txtPrintRange" enabled="{bttnPrintRange.selected}"/>
-	<mx:Text x="10" y="92" text="Enter page numbers and/or page ranges separated by commas. For example 1,3,5-12" height="46" width="194"/>
-	<mx:Button x="10" y="150" label="Print" id="bttnPrint" width="90" click="validateClose(event)"/>
-	<mx:Button x="114" y="150" label="Cancel" width="90" id="bttnCancel" click="PopUpManager.removePopUp(this);"/>
+	<mx:Text x="10" y="92" text="@Resource(key='Enterpagenumbers', bundle='FlexPaper')" height="72" width="194"/>
+	<mx:Button x="10" y="172" label="@Resource(key='Print', bundle='FlexPaper')" id="bttnPrint" width="90" click="validateClose(event)"/>
+	<mx:Button x="114" y="172" label="@Resource(key='Cancel', bundle='FlexPaper')" width="90" id="bttnCancel" click="PopUpManager.removePopUp(this);"/>
 </mx:TitleWindow>

@@ -1,5 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
-<mx:TitleWindow xmlns:mx="http://www.adobe.com/2006/mxml" layout="absolute" width="274" height="164" title="About" showCloseButton="true" creationComplete="Init()">
+<mx:TitleWindow xmlns:mx="http://www.adobe.com/2006/mxml" layout="absolute" width="274" height="164" title="@Resource(key='About', bundle='FlexPaper')" showCloseButton="true" creationComplete="Init()">
+<mx:Metadata>
+  [ResourceBundle("FlexPaper")]
+</mx:Metadata>
 <mx:Script>
 	<![CDATA[
 	import mx.events.CloseEvent;
@@ -17,9 +20,9 @@
 </mx:Script>
 	<mx:Button x="105.5" y="94" id="bttnOk" label="OK" click="PopUpManager.removePopUp(this);"/>
 	<mx:Image x="10" y="10"  source="@Embed('/../assets/logosmall.png')" width="40" height="40"/>
-	<mx:Label x="10" y="52" text="Developed by Erik Engström"/>
-	<mx:Label x="10" y="68" text="For more information, see"/>
-	<mx:LinkButton x="159" y="66" label="devaldi.com" click="navigateToURL(new URLRequest('http://www.devaldi.com/?ref=FlexPaper'), 'devaldi')" fontWeight="normal" textDecoration="underline" color="#4134EB"/>
+	<mx:Label x="10" y="52" text="@Resource(key='Developedby', bundle='FlexPaper')"/>
+	<mx:Label x="10" y="68" text="@Resource(key='Formoreinformation', bundle='FlexPaper')"/>
+	<mx:LinkButton x="159" y="66" label="devaldi.com" click="navigateToURL(new URLRequest('http://flexpaper.devaldi.com/?ref=FlexPaper'), 'devaldi')" fontWeight="normal" textDecoration="underline" color="#4134EB"/>
 	<mx:Label x="58" y="22" text="FlexPaper version 1.2b "/>
 	
 </mx:TitleWindow>
