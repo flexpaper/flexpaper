@@ -46,14 +46,15 @@ package com.devaldi.streaming
                         
                         _stream = new URLStream();
                         _stream.addEventListener(Event.COMPLETE, completeHandler);
-                        _stream.addEventListener(ProgressEvent.PROGRESS , streamProgressHandler);
+                        //_stream.addEventListener(ProgressEvent.PROGRESS , streamProgressHandler);
                         _stream.addEventListener(IOErrorEvent.IO_ERROR, ioErrorHandler);
                         _stream.addEventListener(SecurityErrorEvent.SECURITY_ERROR, securityErrorHandler);
                 }
                 
                 private var _loader:Loader;
                 private var _stream:URLStream;
-                
+                private var _inputBytes:ByteArray;
+                 
                 public function get stream():URLStream
                 {
                         return _stream;
@@ -72,10 +73,16 @@ package com.devaldi.streaming
                 public function load(request:URLRequest):void
                 {
                         _stream.load(request);
+                        _inputBytes = new ByteArray();
                 }
                 
                 private function streamProgressHandler(event:Event):void{
+                	//if there are no bytes do nothing
+                	if( _stream.bytesAvailable == 0 ) return
                 	
+                	if(_stream.connected){ _stream.readBytes(_inputBytes,_inputBytes.length);}
+                	_loader.unload();
+                	_loader.loadBytes(_inputBytes);
                 }
                 
                 private function completeHandler(event:Event):void
@@ -89,7 +96,7 @@ package com.devaldi.streaming
                                 uncompress(inputBytes);
                         }
                         
-                        var version:uint = uint(inputBytes[3]);
+                        version = uint(inputBytes[3]);
                         
                         if (version <= 9) {
                                 if (version == 8 || version == 9) {
@@ -120,6 +127,10 @@ package com.devaldi.streaming
                         bytes[0] = 0x46;
                         cBytes.length = 0;
                 }
+                
+                
+                public var version:uint = 0;
+                private var numframes:int = -1;
                 
                 private function getBodyPosition(bytes:ByteArray):uint
                 {

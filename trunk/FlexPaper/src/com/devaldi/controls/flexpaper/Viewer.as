@@ -84,6 +84,7 @@ package com.devaldi.controls.flexpaper
 		private var _zoomtime:Number = 0.6; 
 		private var _fitPageOnLoad:Boolean = false;
 		private var _fitWidthOnLoad:Boolean = false;
+		private var fLoader:ForcibleLoader;
 		
 		[Embed(source="/../assets/grab.gif")]
 		public var grabCursor:Class;	  
@@ -308,7 +309,7 @@ package com.devaldi.controls.flexpaper
 		
 		private function bytesLoaded(event:Event):void{
 			event.target.loader.loaded = true;
-			event.target.loader.content.stop();			
+			//event.target.loader.content.stop();			
 			
 			var bFound:Boolean=false;
 			for(var i:int=0;i<_loaderList.length;i++){
@@ -493,7 +494,7 @@ package com.devaldi.controls.flexpaper
 			
 				dispatchEvent(new Event("onPapersLoading"));
 				
-				var fLoader:ForcibleLoader = new ForcibleLoader(_loader);
+				fLoader = new ForcibleLoader(_loader);
 				fLoader.stream.addEventListener(ProgressEvent.PROGRESS, onLoadProgress);
 				fLoader.load(new URLRequest(_swfFile));
 
@@ -529,8 +530,8 @@ package com.devaldi.controls.flexpaper
 			if(!_swfLoaded){return;}
 			
 			_displayContainer.removeAllChildren();
-			_pageList = new Array(_libMC.framesLoaded);			
-			numPages = _libMC.framesLoaded;
+			_pageList = new Array(_libMC.totalFrames);			
+			numPages = _libMC.totalFrames;
 			
 			_libMC.stop();
 			_libMC.gotoAndStop(1);
@@ -544,7 +545,7 @@ package com.devaldi.controls.flexpaper
 				}
 			}
 			
-			for(var i:int=0;i<_libMC.framesLoaded;i++){
+			for(var i:int=0;i<_libMC.totalFrames;i++){
 				createPaper(_libMC,i+1);
 			}
 			
@@ -595,7 +596,7 @@ package com.devaldi.controls.flexpaper
 			
 			_libMC.gotoAndStop(searchPageIndex);
 
-			while((searchPageIndex -1) < _libMC.framesLoaded){
+			while((searchPageIndex -1) < _libMC.totalFrames){
 				snap = _libMC.textSnapshot;
 				searchIndex = snap.findText((searchIndex==-1?0:searchIndex),text,false);
 				
@@ -672,7 +673,7 @@ package com.devaldi.controls.flexpaper
 			if(pj.start()){
 				_libMC.stop();
 				
-				for(var i:int=0;i<_libMC.framesLoaded;i++){
+				for(var i:int=0;i<_libMC.totalFrames;i++){
 					_libMC.gotoAndStop(i+1);
 					pj.addPage(_swfContainer);
 				}			
@@ -705,7 +706,7 @@ package com.devaldi.controls.flexpaper
 			if(pj.start()){
 				_libMC.stop();
 				
-				for(var ip:int=0;ip<_libMC.framesLoaded;ip++){
+				for(var ip:int=0;ip<_libMC.totalFrames;ip++){
 					if(pageNumList[ip+1] != null){
 						_libMC.gotoAndStop(ip+1);
 						pj.addPage(_swfContainer);
