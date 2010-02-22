@@ -39,6 +39,6 @@
 	<mx:Label x="10" y="65" text="@Resource(key='Developedby', bundle='FlexPaper')"/>
 	<mx:Label x="10" y="81" text="@Resource(key='Formoreinformation', bundle='FlexPaper')"/>
 	<mx:LinkButton x="159" y="79" label="devaldi.com" click="navigateToURL(new URLRequest('http://flexpaper.devaldi.com/?ref=FlexPaper'), 'devaldi')" fontWeight="normal" textDecoration="underline" color="#4134EB"/>
-	<mx:Label x="162" y="19" text="1.3"/>
+	<mx:Label x="162" y="19" text="1.2.1"/>
 	
 </mx:TitleWindow>
