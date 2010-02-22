@@ -169,15 +169,15 @@
         
         private function bindStageEvents(e:Event):void{
 			stage.addEventListener(FullScreenEvent.FULL_SCREEN, fullScreenRedraw);
+			contextMenu = new ContextMenu();
 			
 			var cmi_about:ContextMenuItem = new ContextMenuItem(resourceManager.getString("FlexPaper", "About")+' FlexPaper');
 			cmi_about.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, showInfo);
 			
-			contextMenu = new ContextMenu();
 			contextMenu.customItems.push(cmi_about);
-
+			
 			if(PrintEnabled){
-				var cmi_print:ContextMenuItem = new ContextMenuItem(resourceManager.getString("FlexPaper", "About"));
+				var cmi_print:ContextMenuItem = new ContextMenuItem(resourceManager.getString("FlexPaper", "Print") + " ...");
 				cmi_print.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, printPaper);
 				contextMenu.customItems.push(cmi_print);
 			}			
