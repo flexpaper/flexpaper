@@ -30,7 +30,7 @@ var flashvars = {
   				  FitPageOnLoad : false,
   				  FitWidthOnLoad : false,
   				  PrintEnabled : false,
-  				  localeChain : "en_US
+  				  localeChain : "en_US"
 				  };
 			 var params = {
 				
