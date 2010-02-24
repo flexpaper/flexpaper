@@ -29,7 +29,8 @@ var flashvars = {
   				  ZoomInterval : 0.1,
   				  FitPageOnLoad : false,
   				  FitWidthOnLoad : false,
-  				  PrintEnabled : false
+  				  PrintEnabled : false,
+  				  localeChain: "en_US
 				  };
 			 var params = {
 				
