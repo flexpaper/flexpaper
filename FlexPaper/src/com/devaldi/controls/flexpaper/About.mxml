@@ -15,7 +15,7 @@
 
     You should have received a copy of the GNU General Public License
     along with FlexPaper.  If not, see <http://www.gnu.org/licenses/>.	
---><mx:TitleWindow xmlns:mx="http://www.adobe.com/2006/mxml" layout="absolute" width="274" height="180" title="@Resource(key='About', bundle='FlexPaper')" showCloseButton="true" creationComplete="Init()">
+--><mx:TitleWindow xmlns:mx="http://www.adobe.com/2006/mxml" layout="absolute" width="276" height="204" title="@Resource(key='About', bundle='FlexPaper')" showCloseButton="true" creationComplete="Init()">
 <mx:Metadata>
   [ResourceBundle("FlexPaper")]
 </mx:Metadata>
@@ -34,11 +34,12 @@
     }		
 	]]>
 </mx:Script>
-	<mx:Button x="105.5" y="107" id="bttnOk" label="OK" click="PopUpManager.removePopUp(this);"/>
-	<mx:Image x="10" y="10"  source="@Embed('/../assets/logosmall.png')" width="157" height="41"/>
-	<mx:Label x="10" y="65" text="@Resource(key='Developedby', bundle='FlexPaper')"/>
-	<mx:Label x="10" y="81" text="@Resource(key='Formoreinformation', bundle='FlexPaper')"/>
-	<mx:LinkButton x="159" y="79" label="devaldi.com" click="navigateToURL(new URLRequest('http://flexpaper.devaldi.com/?ref=FlexPaper'), 'devaldi')" fontWeight="normal" textDecoration="underline" color="#4134EB"/>
-	<mx:Label x="162" y="19" text="1.2.1"/>
+	<mx:Button x="105.5" y="127" id="bttnOk" label="OK" click="PopUpManager.removePopUp(this);"/>
+	<mx:Image x="13" y="10"  source="@Embed('/../assets/logosmall.png')" width="157" height="41"/>
+	<mx:Label x="10" y="62" text="@Resource(key='Developedby', bundle='FlexPaper')"/>
+	<mx:Label x="10" y="98" text="@Resource(key='Formoreinformation', bundle='FlexPaper')"/>
+	<mx:LinkButton x="160" y="98" label="devaldi.com" click="navigateToURL(new URLRequest('http://flexpaper.devaldi.com/?ref=FlexPaper'), 'devaldi')" fontWeight="normal" textDecoration="underline" color="#4134EB" paddingBottom="0" paddingLeft="0" paddingRight="0" paddingTop="0"/>
+	<mx:Label x="165" y="19" text="1.2.1"/>
+	<mx:Label x="10" y="80" text="GPL 3 (non-commercial) License."/>
 	
 </mx:TitleWindow>
