@@ -40,7 +40,7 @@ package com.devaldi.streaming
 		
 		public function removeAllChildren():void{
 			for(var i:int=0;i<this.numChildren;i++){
-				delete(this.removeChildAt(i));
+				delete(this.removeChildAt(0));
 			}
 		}
 	}
