@@ -22,10 +22,10 @@ package com.devaldi.streaming
         import flash.errors.EOFError;
         import flash.events.Event;
         import flash.events.IOErrorEvent;
-        import flash.events.ProgressEvent;
         import flash.events.SecurityErrorEvent;
         import flash.net.URLRequest;
         import flash.net.URLStream;
+        import flash.system.LoaderContext;
         import flash.utils.ByteArray;
         import flash.utils.Endian;
         
@@ -53,7 +53,8 @@ package com.devaldi.streaming
                 private var _loader:Loader;
                 private var _stream:URLStream;
                 private var _inputBytes:ByteArray;
-                 
+                private var _loaderCtx:LoaderContext;
+                
                 public function get stream():URLStream
                 {
                         return _stream;
@@ -69,7 +70,7 @@ package com.devaldi.streaming
                         _loader = value;
                 }
                 
-                public function load(request:URLRequest):void
+                public function load(request:URLRequest, loaderCtx:LoaderContext):void
                 {
                         _stream.load(request);
                         _inputBytes = new ByteArray();
@@ -107,7 +108,7 @@ package com.devaldi.streaming
                                 updateVersion(inputBytes, 9);
                         }
                         
-                        loader.loadBytes(inputBytes);
+                        loader.loadBytes(inputBytes,_loaderCtx);
                 }
                 
                 private function isCompressed(bytes:ByteArray):Boolean
@@ -213,5 +214,6 @@ package com.devaldi.streaming
                 {
                         loader.contentLoaderInfo.dispatchEvent(new SecurityErrorEvent(SecurityErrorEvent.SECURITY_ERROR));
                 }
+                
         }
 }

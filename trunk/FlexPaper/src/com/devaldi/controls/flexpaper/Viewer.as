@@ -16,7 +16,6 @@ You should have received a copy of the GNU General Public License
 along with FlexPaper.  If not, see <http://www.gnu.org/licenses/>.	
 */
 	
-	
 package com.devaldi.controls.flexpaper
 {
 	import caurina.transitions.Tweener;
@@ -43,7 +42,8 @@ package com.devaldi.controls.flexpaper
 	import flash.system.System;
 	import flash.text.TextSnapshot;
 	import flash.ui.Keyboard;
-	import flash.display.StageDisplayState;
+	import flash.system.LoaderContext;
+	import flash.system.LoaderContext;
 	
 	import mx.containers.Canvas;
 	import mx.controls.Image;
@@ -84,6 +84,7 @@ package com.devaldi.controls.flexpaper
 		private var _zoomtime:Number = 0.6; 
 		private var _fitPageOnLoad:Boolean = false;
 		private var _fitWidthOnLoad:Boolean = false;
+		private var loaderCtx:LoaderContext;
 		
 		[Embed(source="/../assets/grab.gif")]
 		public var grabCursor:Class;	  
@@ -313,7 +314,7 @@ package com.devaldi.controls.flexpaper
 			var bFound:Boolean=false;
 			for(var i:int=0;i<_loaderList.length;i++){
 				if(!_loaderList[i].loaded){
-					_loaderList[i].loadBytes(_libMC.loaderInfo.bytes);
+					_loaderList[i].loadBytes(_libMC.loaderInfo.bytes,getExecutionContext());
 					bFound = true;
 					break;
 				}
@@ -495,7 +496,7 @@ package com.devaldi.controls.flexpaper
 				
 				var fLoader:ForcibleLoader = new ForcibleLoader(_loader);
 				fLoader.stream.addEventListener(ProgressEvent.PROGRESS, onLoadProgress);
-				fLoader.load(new URLRequest(_swfFile));
+				fLoader.load(new URLRequest(_swfFile),getExecutionContext());
 
 				_swfFileChanged = false;
 			}
@@ -551,7 +552,7 @@ package com.devaldi.controls.flexpaper
 			addPages();
 			
 			// kick off the first page to load
-			if(_loaderList.length>0 && _viewMode == "Portrait"){_bbusyloading = true; _loaderList[0].loadBytes(_libMC.loaderInfo.bytes);}			
+			if(_loaderList.length>0 && _viewMode == "Portrait"){_bbusyloading = true; _loaderList[0].loadBytes(_libMC.loaderInfo.bytes,getExecutionContext());}			
 		}
 		
 		private function getCalculatedHeight(obj:DisplayObject):Number{
@@ -733,6 +734,18 @@ package com.devaldi.controls.flexpaper
 			 filter.distance = 6;
 			 filter.inner = false;
 			 img.filters = [ filter ];           
-		 }		
+		 }	
+		 
+		 	public function getExecutionContext():LoaderContext{
+				   	if(loaderCtx == null){
+				   		loaderCtx = new LoaderContext();
+				   	
+					   	if(loaderCtx.hasOwnProperty("allowLoadBytesCodeExecution")){
+		   					loaderCtx["allowLoadBytesCodeExecution"] = true;
+		   				}
+	   				
+	   				}
+	   				return loaderCtx; 
+			}       
 	}
 }
