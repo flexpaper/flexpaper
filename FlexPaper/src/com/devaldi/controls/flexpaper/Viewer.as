@@ -494,7 +494,7 @@ package com.devaldi.controls.flexpaper
 			
 				dispatchEvent(new Event("onPapersLoading"));
 				
-				var fLoader:ForcibleLoader = new ForcibleLoader(_loader);
+				var fLoader:ForcibleLoader = new ForcibleLoader(_loader,getExecutionContext());
 				fLoader.stream.addEventListener(ProgressEvent.PROGRESS, onLoadProgress);
 				fLoader.load(new URLRequest(_swfFile),getExecutionContext());
 
