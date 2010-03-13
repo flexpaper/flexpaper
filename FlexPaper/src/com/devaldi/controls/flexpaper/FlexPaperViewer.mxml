@@ -179,7 +179,7 @@
              		uv.PrintEnabled = PrintEnabled;
              		uv.FullScreenAsMaxWindow = FullScreenAsMaxWindow;
              		ur.data = uv;
-             		navigateToURL(ur,"_new");
+             		navigateToURL(ur,"FlexPaperFullScreen");
              	}
             } catch (err:SecurityError) {
                 
