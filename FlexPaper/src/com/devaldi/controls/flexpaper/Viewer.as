@@ -404,7 +404,7 @@ package com.devaldi.controls.flexpaper
    			new flash.net.LocalConnection().connect('devaldiGCdummy');
    			} catch (e:*) {}
 			
-			flash.system.System.gc();
+			try{flash.system.System.gc();} catch (e:*) {}
 
 			if(_paperContainer.numChildren>0){_paperContainer.removeAllChildren();}
 			if(_displayContainer!=null){_displayContainer.removeAllChildren();}
