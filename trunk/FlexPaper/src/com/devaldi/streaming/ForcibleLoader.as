@@ -39,10 +39,11 @@ package com.devaldi.streaming
          */
         public class ForcibleLoader
         {
-                public function ForcibleLoader(loader:Loader)
+                public function ForcibleLoader(loader:Loader, loaderCtx:LoaderContext)
                 {
                         this.loader = loader;
                         
+                        _loaderCtx = loaderCtx;
                         _stream = new URLStream();
                         _stream.addEventListener(Event.COMPLETE, completeHandler);
                         //_stream.addEventListener(ProgressEvent.PROGRESS , streamProgressHandler);
@@ -82,7 +83,7 @@ package com.devaldi.streaming
                 	
                 	if(_stream.connected){ _stream.readBytes(_inputBytes,_inputBytes.length);}
                 	_loader.unload();
-                	_loader.loadBytes(_inputBytes);
+                	_loader.loadBytes(_inputBytes,_loaderCtx);
                 }
                 
                 private function completeHandler(event:Event):void

@@ -16,7 +16,7 @@
     You should have received a copy of the GNU General Public License
     along with FlexPaper.  If not, see <http://www.gnu.org/licenses/>.	
 -->
-<mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml" width="100%" height="100%" verticalGap="0"  xmlns:fp="com.devaldi.controls.flexpaper.*" xmlns:ct="com.devaldi.controls.*" xmlns:st="com.devaldi.skinning.*" borderColor="#8a8a8a" borderThickness="1" addedToStage="bindStageEvents(event)" creationComplete="Init()">
+<mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml" width="100%" height="100%" verticalGap="0"  xmlns:fp="com.devaldi.controls.flexpaper.*" xmlns:ct="com.devaldi.controls.*" xmlns:st="com.devaldi.skinning.*" borderColor="#8a8a8a" borderThickness="1" addedToStage="bindStageEvents(event)" creationComplete="Init()" verticalScrollPolicy="off" horizontalScrollPolicy="off">
 <mx:Metadata>
   [ResourceBundle("FlexPaper")]
 </mx:Metadata>
@@ -66,7 +66,7 @@
 		private function Init():void{
 			_browserManager = BrowserManager.getInstance();
 		}	
-			
+		
 		private function printPaper(e:Event):void{
 			prd = new PrintRangeDialog(); 
 			PopUpManager.addPopUp(prd, this, true);
@@ -221,7 +221,7 @@
 	]]>
 </mx:Script>
 <mx:Style source="styles/default.css" />
-	<mx:Canvas styleName="toolbarBackground" width="{paper1.width}" height="26" borderStyle="solid" verticalScrollPolicy="off" horizontalScrollPolicy="off">
+	<mx:Canvas styleName="toolbarBackground" width="100%" height="26" borderStyle="solid" verticalScrollPolicy="off" horizontalScrollPolicy="off">
 		<st:GradientImageButton top="3" icon="@Embed('/../assets/print-icon.gif')" styleName="toolbttn" width="20" click="printPaper(event)" toolTip="@Resource(key='Print', bundle='FlexPaper')" enabled="{PrintEnabled}" />
 		<mx:Image source="@Embed('/../assets/bar.gif')" width="3" height="21" x="22" y="1" />
 		<st:GradientImageButton top="2" left="28" icon="@Embed('/../assets/fit.gif')" styleName="toolbttn" width="20" click="paper1.fitWidth()" enabled="{paper1.ViewMode == 'Portrait'}" toolTip="@Resource(key='FitWidth', bundle='FlexPaper')"  tabIndex="1"/>
@@ -250,7 +250,7 @@
 							onNoMoreSearchResults="onNoMoreSearchResultsHandler(event)"
 							onLoadingProgress="onDocumentLoadingProgressHandler(event)"
 							onScaleChanged="onScaleChanged(event)"
-							
+						
 							SwfFile="{SwfFile}" 
 							Scale="{Scale}" 
 							ZoomTransition="{ZoomTransition}" 
