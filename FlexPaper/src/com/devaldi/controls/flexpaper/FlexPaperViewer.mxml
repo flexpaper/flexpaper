@@ -82,6 +82,10 @@
 			}
 		}
 		
+		public function setViewerFocus():void{
+			paper1.setPaperFocus();	
+		}
+		
 		private function onNoMoreSearchResultsHandler(event:Event):void{
 			Alert.show(resourceManager.getString("FlexPaper", "Finishedsearching"),resourceManager.getString("FlexPaper", "Searchfinished"),mx.controls.Alert.OK,this);
 		}
