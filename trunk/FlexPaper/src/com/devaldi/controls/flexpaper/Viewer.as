@@ -112,6 +112,10 @@ package com.devaldi.controls.flexpaper
 			}
 		}
 		
+		public function setPaperFocus():void{
+			_paperContainer.setFocus();
+		}
+		
 		public function get ZoomTransition():String {
 		    return _zoomtransition;
 		}	
@@ -269,6 +273,7 @@ package com.devaldi.controls.flexpaper
     		_loader.contentLoaderInfo.addEventListener(Event.COMPLETE, swfComplete);
 			addEventListener(Event.RESIZE, sizeChanged);
 			systemManager.stage.addEventListener(KeyboardEvent.KEY_DOWN, keyboardHandler);
+            systemManager.addEventListener(MouseEvent.MOUSE_WHEEL, wheelHandler);
 
 			// Create a visible container for the swf
 			_swfContainer = new Canvas();
@@ -456,6 +461,9 @@ package com.devaldi.controls.flexpaper
 			CursorManager.removeAllCursors();
 		}		
 		
+		private function wheelHandler(evt:MouseEvent):void {
+			
+		}
 				
 		private function keyboardHandler(event:KeyboardEvent):void{
 			if(event.keyCode == Keyboard.DOWN){
