@@ -44,6 +44,7 @@ package com.devaldi.controls.flexpaper
 	import flash.ui.Keyboard;
 	import flash.system.LoaderContext;
 	import flash.system.LoaderContext;
+	import flash.utils.Timer;
 	
 	import mx.containers.Canvas;
 	import mx.controls.Image;
@@ -273,7 +274,6 @@ package com.devaldi.controls.flexpaper
     		_loader.contentLoaderInfo.addEventListener(Event.COMPLETE, swfComplete);
 			addEventListener(Event.RESIZE, sizeChanged);
 			systemManager.stage.addEventListener(KeyboardEvent.KEY_DOWN, keyboardHandler);
-            systemManager.addEventListener(MouseEvent.MOUSE_WHEEL, wheelHandler);
 
 			// Create a visible container for the swf
 			_swfContainer = new Canvas();
@@ -290,6 +290,7 @@ package com.devaldi.controls.flexpaper
 			_paperContainer.percentWidth = 100;
 			_paperContainer.addEventListener(FlexEvent.UPDATE_COMPLETE,updComplete);
 			_paperContainer.x = 2.5;
+			_paperContainer.addEventListener(MouseEvent.MOUSE_WHEEL, wheelHandler);
 			this.addChild(_paperContainer);
 			
 			createDisplayContainer();
@@ -462,8 +463,18 @@ package com.devaldi.controls.flexpaper
 		}		
 		
 		private function wheelHandler(evt:MouseEvent):void {
+			_paperContainer.removeEventListener(MouseEvent.MOUSE_WHEEL, wheelHandler);
 			
+			var t:Timer = new Timer(1,1);
+			t.addEventListener("timer", addMouseScrollListener);
+			t.start();
+			
+			_paperContainer.dispatchEvent(evt.clone());
 		}
+		
+		private function addMouseScrollListener(e:Event):void {
+			_paperContainer.addEventListener(MouseEvent.MOUSE_WHEEL, wheelHandler);
+		}		
 				
 		private function keyboardHandler(event:KeyboardEvent):void{
 			if(event.keyCode == Keyboard.DOWN){
