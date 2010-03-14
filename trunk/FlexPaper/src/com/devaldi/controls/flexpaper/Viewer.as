@@ -39,11 +39,10 @@ package com.devaldi.controls.flexpaper
 	import flash.geom.Matrix;
 	import flash.net.URLRequest;
 	import flash.printing.PrintJob;
+	import flash.system.LoaderContext;
 	import flash.system.System;
 	import flash.text.TextSnapshot;
 	import flash.ui.Keyboard;
-	import flash.system.LoaderContext;
-	import flash.system.LoaderContext;
 	import flash.utils.Timer;
 	
 	import mx.containers.Canvas;
@@ -74,7 +73,8 @@ package com.devaldi.controls.flexpaper
 		private var _pscale:Number = 1;
 		private var _swfLoaded:Boolean  = false;
 		private var _pageList:Array;
-		private var _viewMode:String = "Portrait"; 
+		private var _viewMode:String = ViewModeEnum.PORTRAIT;
+		private var _fitMode:String = FitModeEnum.FITNONE; 
 		private var _scrollToPage:Number = 0;
 		private var _numPages:Number = 0;
 		private var _currPage:Number = 1;
@@ -85,6 +85,7 @@ package com.devaldi.controls.flexpaper
 		private var _zoomtime:Number = 0.6; 
 		private var _fitPageOnLoad:Boolean = false;
 		private var _fitWidthOnLoad:Boolean = false;
+		
 		private var loaderCtx:LoaderContext;
 		
 		[Embed(source="/../assets/grab.gif")]
@@ -105,11 +106,32 @@ package com.devaldi.controls.flexpaper
 		    return _viewMode;
 		}	
 		
+		[Bindable]
+		public function get FitMode():String {
+		    return _fitMode;
+		}	
+
 		public function set ViewMode(s:String):void {
 			if(s!=_viewMode){
 				_viewMode = s;
-				if(_viewMode == "Tile"){_pscale = _scale; _scale = 0.23;_paperContainer.verticalScrollPosition = 0;}else{_scale = _pscale;}
+				if(_viewMode == ViewModeEnum.TILE){_pscale = _scale; _scale = 0.23;_paperContainer.verticalScrollPosition = 0;_fitMode = FitModeEnum.FITNONE;}else{_scale = _pscale;}
 				if(_initialized && _swfLoaded){createDisplayContainer();repaint();}
+			}
+		}
+		
+		public function set FitMode(s:String):void {
+			if(s!=_fitMode){
+				_fitMode = s;
+				
+				switch(s){					
+					case FitModeEnum.FITWIDTH:
+						fitWidth();
+					break;
+					
+					case FitModeEnum.FITHEIGHT:
+						fitHeight();
+					break;										
+				}
 			}
 		}
 		
@@ -142,7 +164,6 @@ package com.devaldi.controls.flexpaper
 			_numPages = n;
 		}
 		
-
 		[Bindable]
 		public function get currPage():Number {
 		    return _currPage;
@@ -178,8 +199,8 @@ package com.devaldi.controls.flexpaper
 		}
 		
 		public function switchMode():void{
-			if(ViewMode == "Portrait"){ViewMode = "Tile";}
-			else if(ViewMode == "Tile"){_scale = _pscale; ViewMode = "Portrait";}
+			if(ViewMode == ViewModeEnum.PORTRAIT){ViewMode = ViewModeEnum.TILE;}
+			else if(ViewMode == ViewModeEnum.TILE){_scale = _pscale; ViewMode = ViewModeEnum.PORTRAIT;}
 		}
 		
 		public function get SwfFile():String {
@@ -205,7 +226,7 @@ package com.devaldi.controls.flexpaper
 			if(factor<0.10 || factor>5)
 				return;
 			
-			if(_viewMode != "Portrait"){return;}
+			if(_viewMode != ViewModeEnum.PORTRAIT){return;}
 			
 			var _target:DisplayObject;
 			_paperContainer.CenteringEnabled = true;
@@ -217,6 +238,8 @@ package com.devaldi.controls.flexpaper
 				_target.filters = null;
 				Tweener.addTween(_target, {scaleX: factor, scaleY: factor, time: _zoomtime, transition: _zoomtransition, onComplete: tweenComplete});
 			}
+			
+			_fitMode = FitModeEnum.FITNONE;
 		}
 		
 		public function fitWidth():void{
@@ -234,6 +257,8 @@ package com.devaldi.controls.flexpaper
 			}
 			
 			dispatchEvent(new Event("onScaleChanged"));
+			
+			_fitMode = FitModeEnum.FITWIDTH;
 		}
 		
 		public function fitHeight():void{
@@ -250,7 +275,9 @@ package com.devaldi.controls.flexpaper
 				Tweener.addTween(_target, {scaleX:factor, scaleY:factor,time: 0, transition: 'easenone', onComplete: tweenComplete});
 			}			
 			
-			dispatchEvent(new Event("onScaleChanged"));		
+			dispatchEvent(new Event("onScaleChanged"));	
+			
+			_fitMode = FitModeEnum.FITHEIGHT;	
 		}
 		
 		private function tweenComplete():void{
@@ -354,14 +381,14 @@ package com.devaldi.controls.flexpaper
 						
 						if(checkIsVisible(i)){
 							if(_pageList[i].numChildren<3){
-								if(ViewMode == "Portrait"){ 		
+								if(ViewMode == ViewModeEnum.PORTRAIT){ 		
 									uloaderidx = (i==_pageList.length-1&&loaderidx+3<_loaderList.length)?loaderidx+3:loaderidx;									
 									
 									if(i<2||_pageList[i].numChildren==0||(_pageList[i]!=null&&_loaderList[uloaderidx].content.currentFrame!=_pageList[i].dupIndex)){
 										_loaderList[uloaderidx].content.gotoAndStop(_pageList[i].dupIndex);
 										_pageList[i].addChild(_loaderList[uloaderidx]);
 									}
-								}else if(ViewMode == "Tile" && _pageList[i].source == null){
+								}else if(ViewMode == ViewModeEnum.TILE && _pageList[i].source == null){
 							    	_libMC.gotoAndStop(_pageList[i].dupIndex);
 								    _thumbData = new BitmapData(_libMC.width*_scale, _libMC.height*_scale, false, 0xFFFFFF);
 								    _thumb = new Bitmap(_thumbData);
@@ -370,7 +397,7 @@ package com.devaldi.controls.flexpaper
 								}
 							}
 	
-							if(_viewMode != "Tile"){
+							if(_viewMode != ViewModeEnum.TILE){
 								if(_pageList[i].dupIndex == searchPageIndex && searchShape.parent != _pageList[i]){
 									_pageList[i].addChildAt(searchShape,_pageList[i].numChildren);
 								}else if(_pageList[i].dupIndex == searchPageIndex && searchShape.parent == _pageList[i]){
@@ -391,7 +418,7 @@ package com.devaldi.controls.flexpaper
 		
 		private function checkIsVisible(pageIndex:int):Boolean{
 			try{
-				if(ViewMode == "Tile"){
+				if(ViewMode == ViewModeEnum.TILE){
 					return  _pageList[pageIndex].parent.y + _pageList[pageIndex].height >= _paperContainer.verticalScrollPosition && 
 						 	(_pageList[pageIndex].parent.y - _pageList[pageIndex].height) < (_paperContainer.verticalScrollPosition + _paperContainer.height);
 				}else{
@@ -415,7 +442,7 @@ package com.devaldi.controls.flexpaper
 			if(_paperContainer.numChildren>0){_paperContainer.removeAllChildren();}
 			if(_displayContainer!=null){_displayContainer.removeAllChildren();}
 			
-			if(_viewMode == "Tile"){
+			if(_viewMode == ViewModeEnum.TILE){
 				_displayContainer = new FlowBox();
 				_displayContainer.setStyle("horizontalAlign", "left");
 				_scale = 0.243;
@@ -439,20 +466,20 @@ package com.devaldi.controls.flexpaper
 		}
 		
 		private function displayContainerrolloverHandler(event:Event):void{
-			if(_viewMode == "Portrait"){
+			if(_viewMode == ViewModeEnum.PORTRAIT){
 				grabCursorID = CursorManager.setCursor(grabCursor);
 			}
 		}
 
 		private function displayContainerMouseUpHandler(event:Event):void{
-			if(_viewMode == "Portrait"){
+			if(_viewMode == ViewModeEnum.PORTRAIT){
 				CursorManager.removeCursor(grabbingCursorID);
 				grabCursorID = CursorManager.setCursor(grabCursor);
 			}
 		}
 
 		private function displayContainerMouseDownHandler(event:Event):void{
-			if(_viewMode == "Portrait"){
+			if(_viewMode == ViewModeEnum.PORTRAIT){
 				CursorManager.removeCursor(grabCursorID);
 				grabbingCursorID = CursorManager.setCursor(grabbingCursor);
 			}
@@ -555,7 +582,7 @@ package com.devaldi.controls.flexpaper
 			_libMC.stop();
 			_libMC.gotoAndStop(1);
 			
-			if(_viewMode == "Portrait"){
+			if(_viewMode == ViewModeEnum.PORTRAIT){
 				_loaderList = new Array(Math.round(getCalculatedHeight(_paperContainer)/(_libMC.height*0.1))+1);
 				for(var li:int=0;li<_loaderList.length;li++){
 					_loaderList[li] = new DupLoader();
@@ -571,7 +598,7 @@ package com.devaldi.controls.flexpaper
 			addPages();
 			
 			// kick off the first page to load
-			if(_loaderList.length>0 && _viewMode == "Portrait"){_bbusyloading = true; _loaderList[0].loadBytes(_libMC.loaderInfo.bytes,getExecutionContext());}			
+			if(_loaderList.length>0 && _viewMode == ViewModeEnum.PORTRAIT){_bbusyloading = true; _loaderList[0].loadBytes(_libMC.loaderInfo.bytes,getExecutionContext());}			
 		}
 		
 		private function getCalculatedHeight(obj:DisplayObject):Number{
@@ -663,20 +690,20 @@ package com.devaldi.controls.flexpaper
 		}	
 				
 		private function dupImageClickHandler(event:MouseEvent):void{
-			if(_viewMode == "Tile" && event.target != null && event.target is DupImage){
+			if(_viewMode == ViewModeEnum.TILE && event.target != null && event.target is DupImage){
 				ViewMode = 'Portrait';
 				_scrollToPage = (event.target as DupImage).dupIndex;
 			}
 		}
 		
 		private function dupImageMoverHandler(event:MouseEvent):void{
-			if(_viewMode == "Tile" && event.target != null && event.target is DupImage){
+			if(_viewMode == ViewModeEnum.TILE && event.target != null && event.target is DupImage){
 				addGlowFilter(event.target as DupImage);
 			}
 		}
 		
 		private function dupImageMoutHandler(event:MouseEvent):void{
-			if(_viewMode == "Tile" && event.target != null && event.target is DupImage){
+			if(_viewMode == ViewModeEnum.TILE && event.target != null && event.target is DupImage){
 				(event.target as DupImage).filters = null;
 			}
 		}
@@ -755,16 +782,16 @@ package com.devaldi.controls.flexpaper
 			 img.filters = [ filter ];           
 		 }	
 		 
-		 	public function getExecutionContext():LoaderContext{
-				   	if(loaderCtx == null){
-				   		loaderCtx = new LoaderContext();
-				   	
-					   	if(loaderCtx.hasOwnProperty("allowLoadBytesCodeExecution")){
-		   					loaderCtx["allowLoadBytesCodeExecution"] = true;
-		   				}
-	   				
+	 	 public function getExecutionContext():LoaderContext{
+			   	if(loaderCtx == null){
+			   		loaderCtx = new LoaderContext();
+			   	
+				   	if(loaderCtx.hasOwnProperty("allowLoadBytesCodeExecution")){
+	   					loaderCtx["allowLoadBytesCodeExecution"] = true;
 	   				}
-	   				return loaderCtx; 
-			}       
+   				
+   				}
+   			return loaderCtx; 
+		  } 
 	}
 }

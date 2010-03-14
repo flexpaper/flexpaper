@@ -18,6 +18,7 @@
 		skin: ClassReference("mx.skins.ProgrammaticSkin");
 		overSkin:ClassReference("mx.skins.halo.ButtonBarButtonSkin");
 		downSkin:ClassReference("mx.skins.halo.ButtonBarButtonSkin");
+		selectedUpSkin:ClassReference("mx.skins.RectangularBorder");
 	}	
 
 	.sliderbttn{

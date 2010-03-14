@@ -19,11 +19,11 @@ along with FlexPaper.  If not, see <http://www.gnu.org/licenses/>.
 package com.devaldi.skinning
 {
 	import flash.events.Event;
-	import flash.events.MouseEvent;
 	import flash.filters.*;
-	
+	import flash.display.GradientType;
 	import mx.controls.Button;
 	import mx.events.*;
+	import flash.geom.Matrix;
 	
 	public class GradientImageButton extends Button
 	{
@@ -34,6 +34,20 @@ package com.devaldi.skinning
 			addEventListener("enabledChanged",enableHandler);
 		}
 		
+	     override protected function updateDisplayList(w:Number, h:Number):void {
+			if(selected){
+				var gradientBoxMatrix:Matrix = new Matrix();
+				gradientBoxMatrix.createGradientBox(w, h, 0, 0, 0);
+
+				graphics.beginGradientFill(GradientType.LINEAR,[0x009dff, 0x0079db, 0x0055b7],[0.20, 0.20, 0.20],[0, 128, 255],gradientBoxMatrix);
+				graphics.drawRect(0, 0, width, height);
+			}else{
+				graphics.clear();
+			}
+			
+			super.updateDisplayList(w,h);
+	     }
+				
 		private function enableHandler(event:Event):void
 		{
 			// define the color filter
@@ -45,6 +59,7 @@ package com.devaldi.skinning
 				matrix = matrix.concat([0.31, 0.61, 0.08, 0, 0]); 	// green
 				matrix = matrix.concat([0.31, 0.61, 0.08, 0, 0]); 	// blue
 				matrix = matrix.concat([0, 0, 0, 0.3, 0]); 			// alpha
+				selected = false;
 			}
 			else
 			{
