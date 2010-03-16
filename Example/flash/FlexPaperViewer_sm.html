@@ -6,11 +6,36 @@
         <meta http-equiv="Content-Type" content="text/html; charset=utf-8" /> 
         <style type="text/css" media="screen"> 
 			html, body	{ height:100%; }
-			body { margin:0; padding:0; overflow:auto; text-align:center; }   
+			body { margin:0; padding:0; overflow:auto; }   
 			#flashContent { display:none; }
         </style> 
 		
 		<script type="text/javascript" src="js/swfobject/swfobject.js"></script>
+		
+		<script type="text/javascript">
+			if(window.addEventListener)
+			window.addEventListener('DOMMouseScroll', handleWheel, false);
+			window.onmousewheel = document.onmousewheel = handleWheel;
+			
+			if (window.attachEvent) 
+			window.attachEvent("onmousewheel", handleWheel);
+			
+			function handleWheel(event){
+				if(!window.document.FlexPaperViewer.hasFocus()){return true;}
+				window.document.FlexPaperViewer.setViewerFocus(true);
+				window.document.FlexPaperViewer.focus();
+				
+				if(navigator.appName == "Netscape"){
+					if (event.detail)
+						delta = 0;
+					if (event.preventDefault){
+						event.preventDefault();
+						event.returnValue = false;
+						}
+				}
+				return false;			
+			}
+		</script>
 		
         <script type="text/javascript"> 
             <!-- For version detection, set to min. required Flash Player version, or 0 (or 0.0.0), for no version detection. --> 
@@ -18,15 +43,16 @@
             <!-- To use express install, set to playerProductInstall.swf, otherwise the empty string. -->
             var xiSwfUrlStr = "${expressInstallSwf}";
             var flashvars = { 
-                  SwfFile : "comm.swf?a",
-				  Scale : 0.5,
+                  SwfFile : escape("comm.swf?v1.2.2"),
+				  Scale : 0.6, 
 				  ZoomTransition : "easeOut",
 				  ZoomTime : 0.5,
   				  ZoomInterval : 0.1,
   				  FitPageOnLoad : false,
   				  FitWidthOnLoad : false,
   				  PrintEnabled : true,
-				  localeChain: "en_US"
+  				  FullScreenAsMaxWindow : true,
+  				  localeChain: "en_US"
 				  };
 			 var params = {
 				
@@ -39,7 +65,7 @@
             attributes.id = "FlexPaperViewer";
             attributes.name = "FlexPaperViewer";
             swfobject.embedSWF(
-                "FlexPaperViewer.swf?v1.2f", "flashContent", 
+                "FlexPaperViewer.swf", "flashContent", 
                 "540", "300", 
                 swfVersionStr, xiSwfUrlStr, 
                 flashvars, params, attributes);
@@ -59,7 +85,7 @@
 					document.write("<a href='http://www.adobe.com/go/getflashplayer'><img src='" 
 									+ pageHost + "www.adobe.com/images/shared/download_buttons/get_flash_player.gif' alt='Get Adobe Flash player' /></a>" ); 
 				</script> 
-	        </div> 
+	        </div>
         </div>
    </body> 
 </html> 
