@@ -21,6 +21,7 @@ package com.devaldi.streaming
         import flash.display.Loader;
         import flash.errors.EOFError;
         import flash.events.Event;
+        import flash.events.ProgressEvent;
         import flash.events.IOErrorEvent;
         import flash.events.SecurityErrorEvent;
         import flash.net.URLRequest;
@@ -51,6 +52,7 @@ package com.devaldi.streaming
                         _stream.addEventListener(SecurityErrorEvent.SECURITY_ERROR, securityErrorHandler);
                 }
                 
+                
                 private var _loader:Loader;
                 private var _stream:URLStream;
                 private var _inputBytes:ByteArray;
@@ -79,6 +81,7 @@ package com.devaldi.streaming
                 
                 private function streamProgressHandler(event:Event):void{
                 	//if there are no bytes do nothing
+                	// use http://flexpaper.googlecode.com/svn/trunk/Example/flash/testcase2/ar09_eng.swf as test for stream
                 	if( _stream.bytesAvailable == 0 ) return
                 	
                 	if(_stream.connected){ _stream.readBytes(_inputBytes,_inputBytes.length);}

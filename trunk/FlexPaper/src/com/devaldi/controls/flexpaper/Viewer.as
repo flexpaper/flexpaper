@@ -239,7 +239,7 @@ package com.devaldi.controls.flexpaper
 				Tweener.addTween(_target, {scaleX: factor, scaleY: factor, time: _zoomtime, transition: _zoomtransition, onComplete: tweenComplete});
 			}
 			
-			_fitMode = FitModeEnum.FITNONE;
+			FitMode = FitModeEnum.FITNONE;
 		}
 		
 		public function fitWidth():void{
@@ -359,9 +359,9 @@ package com.devaldi.controls.flexpaper
 				repositionPapers();
 				//_paperContainer.verticalScrollPosition = 0;
 				
-				if(_fitPageOnLoad){fitHeight();}
+				if(_fitPageOnLoad){FitMode = FitModeEnum.FITHEIGHT;}
 					
-				if(_fitWidthOnLoad){fitWidth();}
+				if(_fitWidthOnLoad){FitMode = FitModeEnum.FITWIDTH;}
 			}			
 		}
 		
