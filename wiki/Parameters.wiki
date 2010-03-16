@@ -18,7 +18,7 @@ The following parameters can be used in FlexPaper
 
  * *localeChain* (_String_) Sets the locale (language) to use. The following languages are currently supported: en_US (English), fr_FR (French), zh_CN (Chinese, Simple)
 
- * *FullScreenAsMaxWindow* (_Boolean_) Fullscreen will open a new browser window with FlexPaper maximized instead of using true fullscreen. This is a preferred setting when using FlexPaper as flash standalone as the security limitations of the Flash player disables (for security reasons) most of the input controls in true fullscreen.
+ * *FullScreenAsMaxWindow* (_Boolean_) With this set to true, clicking on fullscreen will open a new browser window with FlexPaper maximized instead of using true fullscreen. This is a preferred setting when using FlexPaper as flash standalone as the security limitations of the Flash player disables (for security reasons) most of the input controls in true fullscreen.
 
 The parameters are passed using flashvars or by setting properties on the flexpaper component inside flex, depending on your choice of usage. The code block below shows an example of how the parameters can be passed using the pre-compiled flash version
 
