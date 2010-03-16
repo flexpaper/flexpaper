@@ -21,19 +21,21 @@
 			window.attachEvent("onmousewheel", handleWheel);
 			
 			function handleWheel(event){
-				if(!window.document.FlexPaperViewer.hasFocus()){return true;}
-				window.document.FlexPaperViewer.setViewerFocus(true);
-				window.document.FlexPaperViewer.focus();
-				
-				if(navigator.appName == "Netscape"){
-					if (event.detail)
-						delta = 0;
-					if (event.preventDefault){
-						event.preventDefault();
-						event.returnValue = false;
-						}
-				}
-				return false;			
+				try{
+					if(!window.document.FlexPaperViewer.hasFocus()){return true;}
+					window.document.FlexPaperViewer.setViewerFocus(true);
+					window.document.FlexPaperViewer.focus();
+					
+					if(navigator.appName == "Netscape"){
+						if (event.detail)
+							delta = 0;
+						if (event.preventDefault){
+							event.preventDefault();
+							event.returnValue = false;
+							}
+					}
+					return false;	
+				}catch(err){return true;}
 			}
 		</script>
 		
