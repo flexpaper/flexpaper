@@ -16,6 +16,7 @@ You should have received a copy of the GNU General Public License
 along with FlexPaper.  If not, see <http://www.gnu.org/licenses/>.	
 */
 
+
 package com.devaldi.streaming
 {
         import flash.display.Loader;
@@ -101,13 +102,11 @@ package com.devaldi.streaming
                         }
                         
                         version = uint(inputBytes[3]);
+                        insertFileAttributesTag(inputBytes);
                         
                         if (version <= 9) {
                                 if (version == 8 || version == 9) {
                                         flagSWF9Bit(inputBytes);
-                                }
-                                else if (version <= 7) {
-                                        insertFileAttributesTag(inputBytes);
                                 }
                                 updateVersion(inputBytes, 9);
                         }
@@ -155,7 +154,7 @@ package com.devaldi.streaming
                         return result;
                 }
                 
-                private function findFileAttributesPosition(offset:uint, bytes:ByteArray):uint
+                private function findFileAttributesPosition(offset:uint, bytes:ByteArray):int
                 {
                         bytes.position = offset;
                         
@@ -176,15 +175,19 @@ package com.devaldi.streaming
                         catch (e:EOFError) {
                         }
                         
-                        return NaN;
+                        return -1;
                 }
                 
                 private function flagSWF9Bit(bytes:ByteArray):void
                 {
-                        var pos:uint = findFileAttributesPosition(getBodyPosition(bytes), bytes);
-                        if (!isNaN(pos)) {
-                                bytes[pos + 2] |= 0x08;
-                        }
+                        var pos:int = findFileAttributesPosition(getBodyPosition(bytes), bytes);
+						
+						if (pos != -1) {
+							bytes[pos + 2] |= 0x08;
+						}
+						else {
+							insertFileAttributesTag(bytes);
+						}
                 }
                 
                 private function insertFileAttributesTag(bytes:ByteArray):void
