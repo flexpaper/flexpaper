@@ -51,7 +51,6 @@ package com.devaldi.controls.flexpaper
 	import mx.core.UIComponent;
 	import mx.events.FlexEvent;
 	import mx.managers.CursorManager;
-	
  
 	[Event(name="onPapersLoaded", type="flash.events.Event")]
 	[Event(name="onPapersLoading", type="flash.events.Event")]
@@ -92,8 +91,8 @@ package com.devaldi.controls.flexpaper
 		public var grabCursor:Class;	  
 		
 		[Embed(source="/../assets/grabbing.gif")]
-		public var grabbingCursor:Class;	  	  
-		
+		public var grabbingCursor:Class;	  	 
+				
 		private var grabCursorID:Number = 0;
 		private var grabbingCursorID:Number = 0;
 		
@@ -325,7 +324,13 @@ package com.devaldi.controls.flexpaper
 		
 		private function onframeenter(event:Event):void{
 			if(event.target.content != null){
-				event.target.content.stop();
+				if(event.target.parent is DupImage && 
+					event.target.content.currentFrame!=(event.target.parent as DupImage).dupIndex &&
+					(event.target.parent as DupImage).dupIndex == currPage - 1){
+						var np:int = event.target.content.currentFrame;
+						event.target.content.gotoAndStop((event.target.parent as DupImage).dupIndex);
+						gotoPage(np);
+				}
 			}
 		}
 		
@@ -465,20 +470,20 @@ package com.devaldi.controls.flexpaper
 			_initialized=true;
 		}
 		
-		private function displayContainerrolloverHandler(event:Event):void{
+		private function displayContainerrolloverHandler(event:MouseEvent):void{
 			if(_viewMode == ViewModeEnum.PORTRAIT){
 				grabCursorID = CursorManager.setCursor(grabCursor);
 			}
 		}
 
-		private function displayContainerMouseUpHandler(event:Event):void{
+		private function displayContainerMouseUpHandler(event:MouseEvent):void{
 			if(_viewMode == ViewModeEnum.PORTRAIT){
 				CursorManager.removeCursor(grabbingCursorID);
 				grabCursorID = CursorManager.setCursor(grabCursor);
 			}
 		}
 
-		private function displayContainerMouseDownHandler(event:Event):void{
+		private function displayContainerMouseDownHandler(event:MouseEvent):void{
 			if(_viewMode == ViewModeEnum.PORTRAIT){
 				CursorManager.removeCursor(grabCursorID);
 				grabbingCursorID = CursorManager.setCursor(grabbingCursor);
@@ -567,11 +572,11 @@ package com.devaldi.controls.flexpaper
 		
 		private function swfComplete(event:Event):void{
 			_libMC = event.currentTarget.content as MovieClip;
-
+			
 			_swfLoaded = true
 			repaint();
 		}		
-		
+				
 		private function repaint():void{
 			if(!_swfLoaded){return;}
 			
@@ -587,7 +592,7 @@ package com.devaldi.controls.flexpaper
 				for(var li:int=0;li<_loaderList.length;li++){
 					_loaderList[li] = new DupLoader();
 		        	_loaderList[li].contentLoaderInfo.addEventListener(Event.COMPLETE, bytesLoaded);
-					//_loaderList[li].addEventListener(Event.ENTER_FRAME,onframeenter);
+					_loaderList[li].addEventListener(Event.ENTER_FRAME,onframeenter);
 				}
 			}
 			
@@ -688,7 +693,7 @@ package com.devaldi.controls.flexpaper
 		    di.addEventListener(MouseEvent.CLICK,dupImageClickHandler);
 		    _pageList[index-1] = di;
 		}	
-				
+		
 		private function dupImageClickHandler(event:MouseEvent):void{
 			if(_viewMode == ViewModeEnum.TILE && event.target != null && event.target is DupImage){
 				ViewMode = 'Portrait';
@@ -699,6 +704,12 @@ package com.devaldi.controls.flexpaper
 		private function dupImageMoverHandler(event:MouseEvent):void{
 			if(_viewMode == ViewModeEnum.TILE && event.target != null && event.target is DupImage){
 				addGlowFilter(event.target as DupImage);
+			}else{
+				if(event.target is flash.display.SimpleButton){
+					CursorManager.removeAllCursors();
+				}else{
+					grabCursorID = CursorManager.setCursor(grabCursor);	
+				}
 			}
 		}
 		
