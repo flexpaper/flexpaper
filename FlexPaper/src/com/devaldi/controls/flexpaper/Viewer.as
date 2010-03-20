@@ -84,7 +84,7 @@ package com.devaldi.controls.flexpaper
 		private var _zoomtime:Number = 0.6; 
 		private var _fitPageOnLoad:Boolean = false;
 		private var _fitWidthOnLoad:Boolean = false;
-		private var _dupImageClicked = false;
+		private var _dupImageClicked:Boolean = false;
 		
 		private var loaderCtx:LoaderContext;
 		
