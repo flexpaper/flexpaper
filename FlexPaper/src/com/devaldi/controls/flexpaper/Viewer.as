@@ -84,6 +84,7 @@ package com.devaldi.controls.flexpaper
 		private var _zoomtime:Number = 0.6; 
 		private var _fitPageOnLoad:Boolean = false;
 		private var _fitWidthOnLoad:Boolean = false;
+		private var _dupImageClicked = false;
 		
 		private var loaderCtx:LoaderContext;
 		
@@ -325,8 +326,8 @@ package com.devaldi.controls.flexpaper
 		private function onframeenter(event:Event):void{
 			if(event.target.content != null){
 				if(event.target.parent is DupImage && 
-					event.target.content.currentFrame!=(event.target.parent as DupImage).dupIndex &&
-					(event.target.parent as DupImage).dupIndex == currPage - 1){
+					event.target.content.currentFrame!=(event.target.parent as DupImage).dupIndex 
+					&& _dupImageClicked){
 						var np:int = event.target.content.currentFrame;
 						event.target.content.gotoAndStop((event.target.parent as DupImage).dupIndex);
 						gotoPage(np);
@@ -698,7 +699,16 @@ package com.devaldi.controls.flexpaper
 			if(_viewMode == ViewModeEnum.TILE && event.target != null && event.target is DupImage){
 				ViewMode = 'Portrait';
 				_scrollToPage = (event.target as DupImage).dupIndex;
+			}else{
+				_dupImageClicked = true;
+				var t:Timer = new Timer(100,1);
+				t.addEventListener("timer", resetClickHandler);
+				t.start();				
 			}
+		}
+		
+		private function resetClickHandler(e:Event):void {
+			_dupImageClicked = false;
 		}
 		
 		private function dupImageMoverHandler(event:MouseEvent):void{
