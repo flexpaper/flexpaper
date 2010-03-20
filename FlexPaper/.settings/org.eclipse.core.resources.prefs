@@ -1,8 +1,10 @@
-#Sat Feb 27 08:23:34 NZDT 2010
+#Sun Mar 21 09:07:13 NZST 2010
 eclipse.preferences.version=1
 encoding//locale/en_US/FlexPaper.properties=UTF-8
 encoding//locale/es_ES/FlexPaper.properties=UTF-8
 encoding//locale/fr_FR/FlexPaper.properties=UTF-8
+encoding//locale/hu_HU/FlexPaper.properties=UTF-8
 encoding//locale/ru_RU/FlexPaper.properties=UTF-8
+encoding//locale/tr_TR/FlexPaper.properties=UTF-8
 encoding//locale/zh_CN/FlexPaper.properties=UTF-8
 encoding/<project>=utf-8
