@@ -23,6 +23,19 @@ The following parameters can be used in FlexPaper
    * es_ES (Spanish)
    * pt_BR (Brazilian Portugese)
    * ru_RU (Russian)
+   * fi_FN (Finnish)
+   * de_DE (German)
+   * nl_NL (Netherlands)
+   * tr_TR (Turkish)
+   * se_SE (Swedish)
+   * pt_PT (Portugese)
+   * el_EL (Greek)
+   * da_DN (Danish)
+   * cz_CS (Czech)
+   * it_IT (Italian)
+   * pl_PL (Polish)
+   * pv_FN (Finnish)
+   * hu_HU (Hungarian)
 
  * *FullScreenAsMaxWindow* (_Boolean_) With this set to true, clicking on fullscreen will open a new browser window with FlexPaper maximized instead of using true fullscreen. This is a preferred setting when using FlexPaper as flash standalone as the security limitations of the Flash player disables (for security reasons) most of the input controls in true fullscreen.
 
