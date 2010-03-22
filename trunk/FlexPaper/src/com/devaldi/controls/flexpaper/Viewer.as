@@ -323,7 +323,10 @@ package com.devaldi.controls.flexpaper
 			createDisplayContainer();
 		}
 		
+		
 		private function onframeenter(event:Event):void{
+			if(!_dupImageClicked){return;}
+			
 			if(event.target.content != null){
 				if(event.target.parent is DupImage && 
 					event.target.content.currentFrame!=(event.target.parent as DupImage).dupIndex 
