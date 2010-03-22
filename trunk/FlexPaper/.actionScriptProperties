@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <actionScriptProperties mainApplicationPath="FlexPaper.as" version="3">
-<compiler additionalCompilerArguments="-locale=en_US,fr_FR,zh_CN,es_ES,ru_RU,pt_BR,hu_HU,tr_TR,se_SE,pt_PT,el_EL,dn_DN,cz_CS,it_IT,de_DE,pl_PL,fi_FI,pv_FN,nl_NL  -allow-source-path-overlap=true" copyDependentFiles="false" enableModuleDebug="true" generateAccessible="false" htmlExpressInstall="true" htmlGenerate="false" htmlHistoryManagement="false" htmlPlayerVersion="9.0.124" htmlPlayerVersionCheck="true" outputFolderPath="bin" sourceFolderPath="src" strict="true" useApolloConfig="false" verifyDigests="true" warn="true">
+<compiler additionalCompilerArguments="-locale=en_US,fr_FR,zh_CN,es_ES,ru_RU,pt_BR,hu_HU,tr_TR,se_SE,pt_PT,el_EL,dn_DN,cz_CS,it_IT,de_DE,pl_PL,fi_FN,pv_FN,nl_NL  -allow-source-path-overlap=true" copyDependentFiles="false" enableModuleDebug="true" generateAccessible="false" htmlExpressInstall="true" htmlGenerate="false" htmlHistoryManagement="false" htmlPlayerVersion="9.0.124" htmlPlayerVersionCheck="true" outputFolderPath="bin" sourceFolderPath="src" strict="true" useApolloConfig="false" verifyDigests="true" warn="true">
 <compilerSourcePath>
 <compilerSourcePathEntry kind="1" linkType="1" path="locale/{locale}"/>
 </compilerSourcePath>
