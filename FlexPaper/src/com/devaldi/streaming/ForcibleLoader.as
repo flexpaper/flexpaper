@@ -22,7 +22,6 @@ package com.devaldi.streaming
         import flash.display.Loader;
         import flash.errors.EOFError;
         import flash.events.Event;
-        import flash.events.ProgressEvent;
         import flash.events.IOErrorEvent;
         import flash.events.SecurityErrorEvent;
         import flash.net.URLRequest;
@@ -58,6 +57,11 @@ package com.devaldi.streaming
                 private var _stream:URLStream;
                 private var _inputBytes:ByteArray;
                 private var _loaderCtx:LoaderContext;
+                private var _resigned:Boolean = false;
+                
+                public function get Resigned():Boolean{
+                	return _resigned;
+                }
                 
                 public function get stream():URLStream
                 {
@@ -92,26 +96,27 @@ package com.devaldi.streaming
                 
                 private function completeHandler(event:Event):void
                 {
-                        var inputBytes:ByteArray = new ByteArray();
-                        _stream.readBytes(inputBytes);
+                        _inputBytes = new ByteArray();
+                        _stream.readBytes(_inputBytes);
                         _stream.close();
-                        inputBytes.endian = Endian.LITTLE_ENDIAN;
+                        _inputBytes.endian = Endian.LITTLE_ENDIAN;
                         
-                        if (isCompressed(inputBytes)) {
-                                uncompress(inputBytes);
+                        if (isCompressed(_inputBytes)) {
+                                uncompress(_inputBytes);
                         }
                         
-                        version = uint(inputBytes[3]);
-                        insertFileAttributesTag(inputBytes);
-                        
+                        version = uint(_inputBytes[3]);
+						
                         if (version <= 9) {
                                 if (version == 8 || version == 9) {
-                                        flagSWF9Bit(inputBytes);
+                                        flagSWF9Bit(_inputBytes);
+                                }else if (version <= 7) {
+                                        insertFileAttributesTag(_inputBytes);
                                 }
-                                updateVersion(inputBytes, 9);
+                                updateVersion(_inputBytes, 9);
                         }
                         
-                        loader.loadBytes(inputBytes,_loaderCtx);
+                        loader.loadBytes(_inputBytes,_loaderCtx);
                 }
                 
                 private function isCompressed(bytes:ByteArray):Boolean
@@ -188,6 +193,12 @@ package com.devaldi.streaming
 						else {
 							insertFileAttributesTag(bytes);
 						}
+                }
+                
+                public function resignFileAttributesTag():void{
+                	_resigned=true;
+	                insertFileAttributesTag(_inputBytes);
+	                loader.loadBytes(_inputBytes,_loaderCtx);
                 }
                 
                 private function insertFileAttributesTag(bytes:ByteArray):void
