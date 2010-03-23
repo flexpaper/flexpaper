@@ -64,7 +64,7 @@ package com.devaldi.controls.flexpaper
 		private var _swfFileChanged:Boolean = false;
 		private var _initialized:Boolean = false;
 		private var _loader:Loader = new Loader();
-		private var _libMC:MovieClip = new MovieClip();
+		private var _libMC:MovieClip;
 		private var _displayContainer:Container;
 		private var _paperContainer:ZoomCanvas;
 		private var _swfContainer:Canvas; 
@@ -85,6 +85,7 @@ package com.devaldi.controls.flexpaper
 		private var _fitPageOnLoad:Boolean = false;
 		private var _fitWidthOnLoad:Boolean = false;
 		private var _dupImageClicked:Boolean = false;
+		private var _fLoader:ForcibleLoader;
 		
 		private var loaderCtx:LoaderContext;
 		
@@ -549,9 +550,9 @@ package com.devaldi.controls.flexpaper
 			
 				dispatchEvent(new Event("onPapersLoading"));
 				
-				var fLoader:ForcibleLoader = new ForcibleLoader(_loader,getExecutionContext());
-				fLoader.stream.addEventListener(ProgressEvent.PROGRESS, onLoadProgress);
-				fLoader.load(new URLRequest(_swfFile),getExecutionContext());
+				_fLoader = new ForcibleLoader(_loader,getExecutionContext());
+				_fLoader.stream.addEventListener(ProgressEvent.PROGRESS, onLoadProgress);
+				_fLoader.load(new URLRequest(_swfFile),getExecutionContext());
 
 				_swfFileChanged = false;
 			}
@@ -575,7 +576,14 @@ package com.devaldi.controls.flexpaper
 		}
 		
 		private function swfComplete(event:Event):void{
-			_libMC = event.currentTarget.content as MovieClip;
+			try{
+				if(event.currentTarget.content != null && event.target.content is MovieClip)
+					_libMC = event.currentTarget.content as MovieClip;
+			}catch(e:Error){
+				if(!_fLoader.Resigned){_fLoader.resignFileAttributesTag();return;}
+			}
+			
+			if(_libMC == null && !_fLoader.Resigned){_fLoader.resignFileAttributesTag();return;}
 			
 			_swfLoaded = true
 			repaint();
