@@ -39,9 +39,8 @@ package com.devaldi.streaming
 		}
 		
 		public function removeAllChildren():void{
-			for(var i:int=0;i<this.numChildren;i++){
-				delete(this.removeChildAt(0));
-			}
+			while(numChildren > 0)
+				delete(removeChildAt(0));
 		}
 	}
 }
