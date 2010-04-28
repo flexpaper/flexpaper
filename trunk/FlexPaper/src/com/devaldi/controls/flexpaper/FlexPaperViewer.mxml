@@ -58,6 +58,9 @@
 		[Bindable]
 		public var FullScreenAsMaxWindow:Boolean = false;
 		
+		[Bindable]
+		public var ProgressiveLoading:Boolean = false;
+		
 		private var prd:PrintRangeDialog;
 		private var _fixedWidth:Number = -1;
 		private var _fixedHeight:Number = -1;
@@ -207,6 +210,7 @@
 			
 			contextMenu.customItems.push(cmi_about);
 			
+			
 			if(PrintEnabled){
 				var cmi_print:ContextMenuItem = new ContextMenuItem(resourceManager.getString("FlexPaper", "Print") + " ...");
 				cmi_print.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, printPaper);
@@ -261,6 +265,7 @@
 							ZoomTime="{ZoomTime}"
 							FitPageOnLoad="{FitPageOnLoad}"
 							FitWidthOnLoad="{FitWidthOnLoad}"
+							ProgressiveLoading="{ProgressiveLoading}"
 											
-							height="100%" width="100%" borderStyle="solid"  tabIndex="0"/>
+							height="100%" width="100%" borderStyle="solid"  tabIndex="0"/>							
 </mx:VBox>

@@ -23,6 +23,7 @@ package com.devaldi.streaming
         import flash.errors.EOFError;
         import flash.events.Event;
         import flash.events.IOErrorEvent;
+        import flash.events.ProgressEvent;
         import flash.events.SecurityErrorEvent;
         import flash.net.URLRequest;
         import flash.net.URLStream;
@@ -40,14 +41,20 @@ package com.devaldi.streaming
          */
         public class ForcibleLoader
         {
-                public function ForcibleLoader(loader:Loader, loaderCtx:LoaderContext)
+                public function ForcibleLoader(loader:Loader, loaderCtx:LoaderContext, progressive:Boolean)
                 {
                         this.loader = loader;
                         
                         _loaderCtx = loaderCtx;
                         _stream = new URLStream();
-                        _stream.addEventListener(Event.COMPLETE, completeHandler);
-                        //_stream.addEventListener(ProgressEvent.PROGRESS , streamProgressHandler);
+                        
+                        if(!progressive){
+                        	_stream.addEventListener(Event.COMPLETE, completeHandler);
+                        }else{
+                        	_stream.addEventListener(ProgressEvent.PROGRESS , streamProgressHandler);
+                        	_stream.addEventListener(Event.COMPLETE, streamCompleteHandler);
+                        }
+                        
                         _stream.addEventListener(IOErrorEvent.IO_ERROR, ioErrorHandler);
                         _stream.addEventListener(SecurityErrorEvent.SECURITY_ERROR, securityErrorHandler);
                 }
@@ -58,7 +65,8 @@ package com.devaldi.streaming
                 private var _inputBytes:ByteArray;
                 private var _loaderCtx:LoaderContext;
                 private var _resigned:Boolean = false;
-                
+                private var _bytesPending:uint = 0;
+                private var _prevLength:uint = 0;
                 public function get Resigned():Boolean{
                 	return _resigned;
                 }
@@ -84,14 +92,33 @@ package com.devaldi.streaming
                         _inputBytes = new ByteArray();
                 }
                 
-                private function streamProgressHandler(event:Event):void{
+                private function streamCompleteHandler(event:Event):void{
+                	flash.utils.setTimeout(confirmBytesLoaded,500);
+                }
+                
+                private function confirmBytesLoaded():void{
+                	_stream.readBytes(_inputBytes,_inputBytes.length);
+                	_loader.loadBytes(_inputBytes,_loaderCtx);
+                }
+                
+                
+                private function streamProgressHandler(event:ProgressEvent):void{
                 	//if there are no bytes do nothing
                 	// use http://flexpaper.googlecode.com/svn/trunk/Example/flash/testcase2/ar09_eng.swf as test for stream
-                	if( _stream.bytesAvailable == 0 ) return
-                	
-                	if(_stream.connected){ _stream.readBytes(_inputBytes,_inputBytes.length);}
-                	_loader.unload();
-                	_loader.loadBytes(_inputBytes,_loaderCtx);
+                	_stream.readBytes(_inputBytes,_inputBytes.length);_bytesPending = _inputBytes.length - _prevLength;
+
+					if(_bytesPending > (event.bytesTotal / 10)) {
+						try{
+			 			new flash.net.LocalConnection().connect('devaldiGCdummy');
+			   			new flash.net.LocalConnection().connect('devaldiGCdummy');
+			   			} catch (e:*) {}
+						
+						try{flash.system.System.gc();} catch (e:*) {}
+
+                		_bytesPending = 0;
+                		_prevLength = _inputBytes.length;
+                		_loader.loadBytes(_inputBytes,_loaderCtx);
+                	}
                 }
                 
                 private function completeHandler(event:Event):void
