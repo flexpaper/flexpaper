@@ -18,16 +18,18 @@ along with FlexPaper.  If not, see <http://www.gnu.org/licenses/>.
 
 package com.devaldi.streaming
 {
-	import mx.controls.Image;
 	import flash.display.MovieClip;
+	import mx.styles.CSSStyleDeclaration;
+	import mx.controls.Image;
 	
 	public class DupImage extends Image
 	{
 		public var dupIndex:int = 0;
-	
+		public var dupScale:Number = 0;
+		
 		public function DupImage()
 		{
-		
+			
 		}
 		
 		override public function set source(value:Object):void{

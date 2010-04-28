@@ -23,5 +23,6 @@ package com.devaldi.streaming
 	public class DupLoader extends flash.display.Loader
 	{
 		public var loaded:Boolean = false;
+		public var loadingFrames:int = 0;
 	}
 }
