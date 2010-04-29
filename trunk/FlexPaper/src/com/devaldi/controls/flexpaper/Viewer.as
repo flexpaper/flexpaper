@@ -35,6 +35,7 @@ package com.devaldi.controls.flexpaper
 	import flash.events.KeyboardEvent;
 	import flash.events.MouseEvent;
 	import flash.events.ProgressEvent;
+	import flash.filters.GlowFilter;
 	import flash.geom.Matrix;
 	import flash.net.URLRequest;
 	import flash.printing.PrintJob;
@@ -43,7 +44,6 @@ package com.devaldi.controls.flexpaper
 	import flash.text.TextSnapshot;
 	import flash.ui.Keyboard;
 	import flash.utils.Timer;
-	import flash.filters.GlowFilter;
 	
 	import mx.containers.Canvas;
 	import mx.controls.Image;
@@ -259,7 +259,7 @@ package com.devaldi.controls.flexpaper
 			
 			var _target:DisplayObject;
 			_paperContainer.CenteringEnabled = true;
-			var factor:Number = (_paperContainer.width / _loader.width) - 0.032; //- 0.03; 
+			var factor:Number = (_paperContainer.width / _libMC.width) - 0.032; //- 0.03; 
 			_scale = factor;
 			
 			for(var i:int=0;i<_displayContainer.numChildren;i++){
@@ -278,7 +278,7 @@ package com.devaldi.controls.flexpaper
 			
 			var _target:DisplayObject;
 			_paperContainer.CenteringEnabled = true;
-			var factor:Number = (_paperContainer.height / _loader.height); 
+			var factor:Number = (_paperContainer.height / _libMC.height); 
 			_scale = factor;
 			
 			for(var i:int=0;i<_displayContainer.numChildren;i++){
@@ -386,7 +386,7 @@ package com.devaldi.controls.flexpaper
 						
 						if(checkIsVisible(i)){
 							if(_pageList[i].numChildren<3){
-								if(_pageList[i].source == null || _pageList[i].isBlank || _pageList[i].dupScale != _scale){
+								/* if(_pageList[i].source == null || _pageList[i].source is MovieClip || _pageList[i].isBlank || _pageList[i].dupScale != _scale)*/{
 							    	_libMC.gotoAndStop(_pageList[i].dupIndex);
 								    _thumbData = new BitmapData(_pageList[i].scaleWidth, _pageList[i].scaleHeight, false, 0xFFFFFF);
 								    _thumb = new Bitmap(_thumbData);
@@ -574,6 +574,7 @@ package com.devaldi.controls.flexpaper
 				try{
 					if(event.currentTarget.content != null && event.target.content is MovieClip)
 						_libMC = event.currentTarget.content as MovieClip;
+						DupImage.paperSource = _libMC
 				}catch(e:Error){
 					if(!_fLoader.Resigned){_fLoader.resignFileAttributesTag();return;}
 				}
@@ -597,6 +598,7 @@ package com.devaldi.controls.flexpaper
 					
 					if(mobj is MovieClip){
 						_libMC = mobj as MovieClip;
+						DupImage.paperSource = _libMC
 						numPages = _libMC.totalFrames;
 						firstLoad = _pageList == null || (_pageList.length == 0 && numPages > 0);
 						
@@ -745,6 +747,10 @@ package com.devaldi.controls.flexpaper
 				ViewMode = 'Portrait';
 				_scrollToPage = (event.target as DupImage).dupIndex;
 			}else{
+				if(event.target is flash.display.SimpleButton){
+					_scrollToPage = _libMC.currentFrame;
+					_paperContainer.dispatchEvent(new FlexEvent(FlexEvent.UPDATE_COMPLETE));
+				}
 				_dupImageClicked = true;
 				var t:Timer = new Timer(100,1);
 				t.addEventListener("timer", resetClickHandler);
