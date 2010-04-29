@@ -18,27 +18,58 @@ along with FlexPaper.  If not, see <http://www.gnu.org/licenses/>.
 
 package com.devaldi.streaming
 {
-	import flash.display.MovieClip;
-	import mx.styles.CSSStyleDeclaration;
+	import flash.display.Bitmap;
+	import flash.display.BitmapData;
+	import flash.filters.DropShadowFilter;
+	
 	import mx.controls.Image;
 	
 	public class DupImage extends Image
 	{
 		public var dupIndex:int = 0;
 		public var dupScale:Number = 0;
+		public var isBlank:Boolean = false;
+		public var scaleWidth:int;
+		public var scaleHeight:int;
 		
-		public function DupImage()
-		{
-			
-		}
+		private static var bmData:BitmapData;
+		
+		public function DupImage(){}
 		
 		override public function set source(value:Object):void{
-			super.source = value;
+			if(value!=null){super.source = value;}
 			
-			if(value!=null && (value is MovieClip) && value.content != null){
-				value.content.stop();
+			if(value!=null){
+				if(this.filters.length==0){addDropShadow(this);}
+				isBlank = false;
 			}
 		}
+		
+		public function setBlank():void{
+			if(bmData==null||(bmData!=null&&bmData.width!=scaleWidth)||(bmData!=null&&bmData.height!=scaleHeight)){
+				bmData = new BitmapData(scaleWidth, scaleHeight, false, 0xFFFFFF);
+			}
+			
+			var b:Bitmap = new Bitmap(bmData);
+			
+			super.source = b; 
+			if(this.filters.length==0){addDropShadow(this);}
+			isBlank = true;			
+		}
+		
+		private function addDropShadow(img:Image):void
+		{
+			 var filter : DropShadowFilter = new DropShadowFilter();
+			 filter.blurX = 4;
+			 filter.blurY = 4;
+			 filter.quality = 2;
+			 filter.alpha = 0.5;
+			 filter.angle = 45;
+			 filter.color = 0x202020;
+			 filter.distance = 4;
+			 filter.inner = false;
+			 img.filters = [ filter ];           
+		 }			
 		
 		public function removeAllChildren():void{
 			while(numChildren > 0)
