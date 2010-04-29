@@ -35,7 +35,6 @@ package com.devaldi.controls.flexpaper
 	import flash.events.KeyboardEvent;
 	import flash.events.MouseEvent;
 	import flash.events.ProgressEvent;
-	import flash.filters.DropShadowFilter;
 	import flash.geom.Matrix;
 	import flash.net.URLRequest;
 	import flash.printing.PrintJob;
@@ -44,6 +43,7 @@ package com.devaldi.controls.flexpaper
 	import flash.text.TextSnapshot;
 	import flash.ui.Keyboard;
 	import flash.utils.Timer;
+	import flash.filters.GlowFilter;
 	
 	import mx.containers.Canvas;
 	import mx.controls.Image;
@@ -333,7 +333,7 @@ package com.devaldi.controls.flexpaper
 			this.addChild(_paperContainer);
 			
 			// Create a timer to use for repainting
-			_repaintTimer = new Timer(10,0);
+			_repaintTimer = new Timer(5,0);
 			_repaintTimer.addEventListener("timer", repaintHandler);
 			createDisplayContainer();
 		}
@@ -372,8 +372,13 @@ package com.devaldi.controls.flexpaper
 				var _thumb:Bitmap;
 				var _thumbData:BitmapData;
 				var uloaderidx:int=0;
+				var sw:int=(_libMC.width*_scale>2880)?2880:_libMC.width*_scale;
+				var sh:int=(_libMC.height*_scale>2880)?2880:_libMC.height*_scale;
 				
 					for(var i:int=0;i<_libMC.framesLoaded;i++){
+						_pageList[i].scaleWidth = sw;
+						_pageList[i].scaleHeight = sh;
+						
 						if(!bFoundFirst && ((i) * (_pageList[i].height + 6)) >= _paperContainer.verticalScrollPosition){
 							bFoundFirst = true;
 							currPage = i + 1;
@@ -381,9 +386,9 @@ package com.devaldi.controls.flexpaper
 						
 						if(checkIsVisible(i)){
 							if(_pageList[i].numChildren<3){
-								if(_pageList[i].source == null || _pageList[i].dupScale != _scale){
+								if(_pageList[i].source == null || _pageList[i].isBlank || _pageList[i].dupScale != _scale){
 							    	_libMC.gotoAndStop(_pageList[i].dupIndex);
-								    _thumbData = new BitmapData((_libMC.width*_scale>2880)?2880:_libMC.width*_scale, (_libMC.height*_scale>2880)?2880:_libMC.height*_scale, false, 0xFFFFFF);
+								    _thumbData = new BitmapData(_pageList[i].scaleWidth, _pageList[i].scaleHeight, false, 0xFFFFFF);
 								    _thumb = new Bitmap(_thumbData);
 									_pageList[i].source = _thumb;
 									_pageList[i].dupScale = _scale;
@@ -401,8 +406,8 @@ package com.devaldi.controls.flexpaper
 							
 							loaderidx++;
 						}else{
-							if(_pageList[i].numChildren>0 || _pageList[i].source != null){
-								_pageList[i].source = null;
+							if(!_pageList[i].isBlank){
+								_pageList[i].setBlank();
 								_pageList[i].removeAllChildren();
 							}					
 						}
@@ -582,17 +587,18 @@ package com.devaldi.controls.flexpaper
 				dispatchEvent(new Event("onPapersLoaded"));
 				_bbusyloading = false;
 				repositionPapers();
-				//_paperContainer.verticalScrollPosition = 0;
 				
-				if(_fitPageOnLoad){FitMode = FitModeEnum.FITHEIGHT;}
-					
-				if(_fitWidthOnLoad){FitMode = FitModeEnum.FITWIDTH;}				
+				if(_fitPageOnLoad){FitMode = FitModeEnum.FITHEIGHT;_scrollToPage = 1;}
+				if(_fitWidthOnLoad){FitMode = FitModeEnum.FITWIDTH;_scrollToPage = 1;}				
 			}else{
 				if(event.currentTarget.content != null){
 					var mobj:Object = event.currentTarget.content;
+					var firstLoad:Boolean = false;
+					
 					if(mobj is MovieClip){
 						_libMC = mobj as MovieClip;
 						numPages = _libMC.totalFrames;
+						firstLoad = _pageList == null || (_pageList.length == 0 && numPages > 0);
 						
 						if(_libMC.framesLoaded > 0)
 							addInLoadedPages();
@@ -601,11 +607,12 @@ package com.devaldi.controls.flexpaper
 							dispatchEvent(new Event("onPapersLoaded"));
 						}
 						
+						if(firstLoad){
+						}
+						
 						_bbusyloading = false;
 						_swfLoaded = true
 						repositionPapers();
-						//_paperContainer.verticalScrollPosition = 0;
-						
 					}
 				}
 			}
@@ -721,12 +728,15 @@ package com.devaldi.controls.flexpaper
 		private function createPaper(mc:MovieClip,index:int):void {
 			var di:DupImage = new DupImage(); 
 			di.scaleX = di.scaleY = _scale;
+			di.scaleWidth=(_libMC.width*_scale>2880)?2880:_libMC.width*_scale;
+			di.scaleHeight=(_libMC.height*_scale>2880)?2880:_libMC.height*_scale;
 			di.dupIndex = index;
 		    di.width = mc.width;
 		    di.height = mc.height;
 		    di.addEventListener(MouseEvent.MOUSE_OVER,dupImageMoverHandler);
 		    di.addEventListener(MouseEvent.MOUSE_OUT,dupImageMoutHandler);
 		    di.addEventListener(MouseEvent.CLICK,dupImageClickHandler);
+		    di.setBlank();
 		    _pageList[index-1] = di;
 		}	
 		
@@ -822,23 +832,9 @@ package com.devaldi.controls.flexpaper
 		
 		private function addGlowFilter(img:Image):void{
 			var filter : flash.filters.GlowFilter = new flash.filters.GlowFilter(0x111111, 1, 5, 5, 2, 1, false, false);
-			 img.filters = [ filter ];   
+			img.filters = [ filter ];   
 		}
 				
-		private function addDropShadow(img:Image):void
-		{
-			 var filter : DropShadowFilter = new DropShadowFilter();
-			 filter.blurX = 4;
-			 filter.blurY = 4;
-			 filter.quality = 2;
-			 filter.alpha = 0.5;
-			 filter.angle = 45;
-			 filter.color = 0x202020;
-			 filter.distance = 6;
-			 filter.inner = false;
-			 img.filters = [ filter ];           
-		 }	
-		 
 	 	 public function getExecutionContext():LoaderContext{
 			   	if(loaderCtx == null){
 			   		loaderCtx = new LoaderContext();
