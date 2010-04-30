@@ -385,16 +385,15 @@ package com.devaldi.controls.flexpaper
 						}
 						
 						if(checkIsVisible(i)){
-							/*if(_pageList[i].numChildren<3)*/ {
-								/* if(_pageList[i].source == null || _pageList[i].source is MovieClip || _pageList[i].isBlank || _pageList[i].dupScale != _scale)*/{
-							    	_libMC.gotoAndStop(_pageList[i].dupIndex);
-								    _thumbData = new BitmapData(_pageList[i].scaleWidth, _pageList[i].scaleHeight, false, 0xFFFFFF);
-								    _thumb = new Bitmap(_thumbData);
-									_pageList[i].source = _thumb;
-									_pageList[i].dupScale = _scale;
-									_thumbData.draw(_libMC,new Matrix(_scale, 0, 0, _scale),null,null,null,true);
-								}
+							if(_pageList[i].source == null || _pageList[i].numChildren < 2 || _pageList[i].dupScale != _scale){
+						    	_libMC.gotoAndStop(_pageList[i].dupIndex);
+							    _thumbData = new BitmapData(_pageList[i].scaleWidth, _pageList[i].scaleHeight, false, 0xFFFFFF);
+							    _thumb = new Bitmap(_thumbData);
+								_pageList[i].source = _thumb;
+								_pageList[i].dupScale = _scale;
+								_thumbData.draw(_libMC,new Matrix(_scale, 0, 0, _scale),null,null,null,true);
 							}
+						
 	
 							if(_viewMode != ViewModeEnum.TILE){
 								if(_pageList[i].dupIndex == searchPageIndex && searchShape.parent != _pageList[i]){
@@ -407,7 +406,7 @@ package com.devaldi.controls.flexpaper
 							loaderidx++;
 						}else{
 							if(_pageList[i].source != null){
-								_pageList[i].source = null
+								_pageList[i].source = null;
 								_pageList[i].removeAllChildren();
 							}					
 						}
