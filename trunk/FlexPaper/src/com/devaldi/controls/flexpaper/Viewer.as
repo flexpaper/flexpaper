@@ -385,7 +385,7 @@ package com.devaldi.controls.flexpaper
 						}
 						
 						if(checkIsVisible(i)){
-							if(_pageList[i].numChildren<3){
+							/*if(_pageList[i].numChildren<3)*/ {
 								/* if(_pageList[i].source == null || _pageList[i].source is MovieClip || _pageList[i].isBlank || _pageList[i].dupScale != _scale)*/{
 							    	_libMC.gotoAndStop(_pageList[i].dupIndex);
 								    _thumbData = new BitmapData(_pageList[i].scaleWidth, _pageList[i].scaleHeight, false, 0xFFFFFF);
@@ -406,8 +406,8 @@ package com.devaldi.controls.flexpaper
 							
 							loaderidx++;
 						}else{
-							if(!_pageList[i].isBlank){
-								_pageList[i].setBlank();
+							if(_pageList[i].source != null){
+								_pageList[i].source = null
 								_pageList[i].removeAllChildren();
 							}					
 						}
@@ -738,7 +738,7 @@ package com.devaldi.controls.flexpaper
 		    di.addEventListener(MouseEvent.MOUSE_OVER,dupImageMoverHandler);
 		    di.addEventListener(MouseEvent.MOUSE_OUT,dupImageMoutHandler);
 		    di.addEventListener(MouseEvent.CLICK,dupImageClickHandler);
-		    di.setBlank();
+		    //di.setBlank();
 		    _pageList[index-1] = di;
 		}	
 		

@@ -29,11 +29,9 @@ package com.devaldi.streaming
 	{
 		public var dupIndex:int = 0;
 		public var dupScale:Number = 0;
-		public var isBlank:Boolean = false;
 		public var scaleWidth:int;
 		public var scaleHeight:int;
 		
-		private static var bmData:BitmapData;
 		public static var paperSource:MovieClip; 
 		
 		public function DupImage(){}
@@ -43,7 +41,6 @@ package com.devaldi.streaming
 			
 			if(value!=null){
 				if(this.filters.length==0){addDropShadow(this);}
-				isBlank = false;
 			}
 		}
 		
@@ -60,19 +57,7 @@ package com.devaldi.streaming
 				addChild(paperSource);
 			}
 		}
-		
-		public function setBlank():void{
-			if(bmData==null||(bmData!=null&&bmData.width!=scaleWidth)||(bmData!=null&&bmData.height!=scaleHeight)){
-				bmData = new BitmapData(scaleWidth, scaleHeight, false, 0xFFFFFF);
-			}
-			
-			var b:Bitmap = new Bitmap(bmData);
-			
-			super.source = b; 
-			if(this.filters.length==0){addDropShadow(this);}
-			isBlank = true;			
-		}
-		
+				
 		private function addDropShadow(img:Image):void
 		{
 			 var filter : DropShadowFilter = new DropShadowFilter();
@@ -91,5 +76,11 @@ package com.devaldi.streaming
 			while(numChildren > 0)
 				delete(removeChildAt(0));
 		}
+		
+		override protected function updateDisplayList(w:Number, h:Number):void {
+			graphics.beginFill(0xffffff,1);
+			graphics.drawRect(0,0,w,h);
+			super.updateDisplayList(w,h);
+		}		
 	}
 }
