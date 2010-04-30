@@ -22,7 +22,11 @@ package com.devaldi.skinning
 	
 	public class GradientLabel extends Label
 	{
-
+		protected override function updateDisplayList(unscaledWidth:Number,
+													  unscaledHeight:Number):void
+		{
+			super.updateDisplayList(unscaledWidth, unscaledHeight);
+		}
 		
 	}
 }
