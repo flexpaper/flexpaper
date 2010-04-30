@@ -294,6 +294,7 @@ package com.devaldi.controls.flexpaper
 		
 		private function tweenComplete():void{
 			_tweencount--;
+			_repaintTimer.delay = 300;
 			if(_tweencount==0){
 				_paperContainer.dispatchEvent(new FlexEvent(FlexEvent.UPDATE_COMPLETE));
 			}
@@ -360,8 +361,7 @@ package com.devaldi.controls.flexpaper
 				_paperContainer.horizontalScrollPosition = 0;
 				_scrollToPage = 0;
 			}
-
-			// reset a timer on 1 sec and reposition papers only if triggered 
+ 
 			_repaintTimer.reset();_repaintTimer.start();
 		}
 		
@@ -501,6 +501,7 @@ package com.devaldi.controls.flexpaper
 		private function repaintHandler(e:Event):void {
 			repositionPapers();
 			_repaintTimer.stop();
+			_repaintTimer.delay = 5;
 		}
 		
 		private function addMouseScrollListener(e:Event):void {
