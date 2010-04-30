@@ -23,5 +23,6 @@ package com.devaldi.skinning
 	public class GradientLabel extends Label
 	{
 
+		
 	}
 }
