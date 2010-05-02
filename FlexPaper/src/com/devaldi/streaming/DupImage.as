@@ -40,7 +40,7 @@ package com.devaldi.streaming
 			if(value!=null){super.source = value;}
 			
 			if(value!=null){
-				if(this.filters.length==0){addDropShadow(this);}
+				if(this.filters.length==0){addDropShadow();}
 			}
 		}
 		
@@ -58,8 +58,9 @@ package com.devaldi.streaming
 			}
 		}
 				
-		private function addDropShadow(img:Image):void
+		public function addDropShadow():void
 		{
+			this.filters = null;
 			 var filter : DropShadowFilter = new DropShadowFilter();
 			 filter.blurX = 4;
 			 filter.blurY = 4;
@@ -69,8 +70,14 @@ package com.devaldi.streaming
 			 filter.color = 0x202020;
 			 filter.distance = 4;
 			 filter.inner = false;
-			 img.filters = [ filter ];           
-		 }			
+			 this.filters = [ filter ];           
+		}			
+		
+		public function addGlowFilter():void{
+			var filter : flash.filters.GlowFilter = new flash.filters.GlowFilter(0x111111, 1, 5, 5, 2, 1, false, false);
+			filters = [ filter ];   
+		}
+		
 		
 		public function removeAllChildren():void{
 			while(numChildren > 0)
@@ -81,6 +88,11 @@ package com.devaldi.streaming
 			graphics.beginFill(0xffffff,1);
 			graphics.drawRect(0,0,w,h);
 			super.updateDisplayList(w,h);
-		}		
+		}	
+		
+		public function addGlowShadow():void
+		{
+			
+		}
 	}
 }

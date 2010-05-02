@@ -294,7 +294,7 @@ package com.devaldi.controls.flexpaper
 		
 		private function tweenComplete():void{
 			_tweencount--;
-			_repaintTimer.delay = 300;
+			_repaintTimer.delay = 400;
 			if(_tweencount==0){
 				_paperContainer.dispatchEvent(new FlexEvent(FlexEvent.UPDATE_COMPLETE));
 			}
@@ -764,7 +764,7 @@ package com.devaldi.controls.flexpaper
 		
 		private function dupImageMoverHandler(event:MouseEvent):void{
 			if(_viewMode == ViewModeEnum.TILE && event.target != null && event.target is DupImage){
-				addGlowFilter(event.target as DupImage);
+				(event.target as DupImage).addGlowFilter();
 			}else{
 				if(event.target is flash.display.SimpleButton){
 					CursorManager.removeAllCursors();
@@ -776,7 +776,7 @@ package com.devaldi.controls.flexpaper
 		
 		private function dupImageMoutHandler(event:MouseEvent):void{
 			if(_viewMode == ViewModeEnum.TILE && event.target != null && event.target is DupImage){
-				(event.target as DupImage).filters = null;
+				(event.target as DupImage).addDropShadow();
 			}
 		}
 				
@@ -789,6 +789,8 @@ package com.devaldi.controls.flexpaper
 		
 		public function printPaper():void{
 			var pj:PrintJob = new PrintJob();
+			_libMC.alpha = 1;
+			
 			if(pj.start()){
 				_libMC.stop();
 				
@@ -834,11 +836,6 @@ package com.devaldi.controls.flexpaper
 				
 				pj.send();
 			}			
-		}
-		
-		private function addGlowFilter(img:Image):void{
-			var filter : flash.filters.GlowFilter = new flash.filters.GlowFilter(0x111111, 1, 5, 5, 2, 1, false, false);
-			img.filters = [ filter ];   
 		}
 				
 	 	 public function getExecutionContext():LoaderContext{

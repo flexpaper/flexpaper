@@ -202,6 +202,7 @@
         }		
         
         private function bindStageEvents(e:Event):void{
+			stage.removeEventListener(FullScreenEvent.FULL_SCREEN, fullScreenRedraw);
 			stage.addEventListener(FullScreenEvent.FULL_SCREEN, fullScreenRedraw);
 			contextMenu = new ContextMenu();
 			
