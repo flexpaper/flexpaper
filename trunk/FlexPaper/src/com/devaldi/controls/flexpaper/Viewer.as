@@ -31,6 +31,7 @@ package com.devaldi.controls.flexpaper
 	import flash.display.DisplayObject;
 	import flash.display.Loader;
 	import flash.display.MovieClip;
+	import flash.display.Sprite;
 	import flash.events.Event;
 	import flash.events.KeyboardEvent;
 	import flash.events.MouseEvent;
@@ -574,7 +575,7 @@ package com.devaldi.controls.flexpaper
 				try{
 					if(event.currentTarget.content != null && event.target.content is MovieClip)
 						_libMC = event.currentTarget.content as MovieClip;
-						DupImage.paperSource = _libMC
+						DupImage.paperSource = _libMC;
 				}catch(e:Error){
 					if(!_fLoader.Resigned){_fLoader.resignFileAttributesTag();return;}
 				}
@@ -598,7 +599,7 @@ package com.devaldi.controls.flexpaper
 					
 					if(mobj is MovieClip){
 						_libMC = mobj as MovieClip;
-						DupImage.paperSource = _libMC
+						DupImage.paperSource = _libMC;
 						numPages = _libMC.totalFrames;
 						firstLoad = _pageList == null || (_pageList.length == 0 && numPages > 0);
 						
@@ -788,19 +789,24 @@ package com.devaldi.controls.flexpaper
 		}
 		
 		public function printPaper():void{
-			var pj:PrintJob = new PrintJob();
+			_libMC.parent.setChildIndex(_libMC,0);
 			_libMC.alpha = 1;
+			
+			var pj:PrintJob = new PrintJob();
 			
 			if(pj.start()){
 				_libMC.stop();
 				
 				for(var i:int=0;i<numPages;i++){
 					_libMC.gotoAndStop(i+1);
-					pj.addPage(_swfContainer);
+					pj.addPage(_libMC as Sprite);
 				}			
 				
 				pj.send();
 			}
+
+			_libMC.parent.setChildIndex(_libMC,_libMC.parent.numChildren - 1);
+			_libMC.alpha = 0;
 		}
 		
 		public function printPaperRange(range:String):void{
@@ -823,6 +829,9 @@ package com.devaldi.controls.flexpaper
 				}
 			}
 
+			_libMC.parent.setChildIndex(_libMC,0);
+			_libMC.alpha = 1;
+			
 			var pj:PrintJob = new PrintJob();
 			if(pj.start()){
 				_libMC.stop();
@@ -830,12 +839,15 @@ package com.devaldi.controls.flexpaper
 				for(var ip:int=0;ip<numPages;ip++){
 					if(pageNumList[ip+1] != null){
 						_libMC.gotoAndStop(ip+1);
-						pj.addPage(_swfContainer);
+						pj.addPage(_libMC as Sprite);
 					}
 				}			
 				
 				pj.send();
 			}			
+			
+			_libMC.parent.setChildIndex(_libMC,_libMC.parent.numChildren - 1);
+			_libMC.alpha = 0;
 		}
 				
 	 	 public function getExecutionContext():LoaderContext{
