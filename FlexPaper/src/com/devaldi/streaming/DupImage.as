@@ -51,7 +51,7 @@ package com.devaldi.streaming
 		}
 		
 		private function dupImageMoverHandler(event:MouseEvent):void{
-			if(!contains(paperSource)){
+		    if(!contains(paperSource)){
 				paperSource.gotoAndStop(dupIndex);
 				paperSource.alpha = 0;
 				addChild(paperSource);
@@ -88,7 +88,7 @@ package com.devaldi.streaming
 			graphics.beginFill(0xffffff,1);
 			graphics.drawRect(0,0,w,h);
 			super.updateDisplayList(w,h);
-		}	
+		}	 
 		
 		public function addGlowShadow():void
 		{
