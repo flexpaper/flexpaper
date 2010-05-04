@@ -375,6 +375,8 @@ package com.devaldi.controls.flexpaper
 				var uloaderidx:int=0;
 				var sw:int=(_libMC.width*_scale>2880)?2880:_libMC.width*_scale;
 				var sh:int=(_libMC.height*_scale>2880)?2880:_libMC.height*_scale;
+				var hn:int=-1;
+				var ln:int=-1;
 				
 					for(var i:int=0;i<_libMC.framesLoaded;i++){
 						_pageList[i].scaleWidth = sw;
@@ -385,11 +387,16 @@ package com.devaldi.controls.flexpaper
 							currPage = i + 1;
 						}
 						
-						if(checkIsVisible(i)){
-							if(_pageList[i].source == null || _pageList[i].numChildren < 2 || _pageList[i].dupScale != _scale){
+						if(checkIsVisible(i) || (hn!=-1 && i == hn+1)){
+						if(hn==-1){hn=i;}
+						if(ln==-1&&hn!=-1){ln=i;}
+						
+							if(_pageList[i].source == null || (_pageList[i].numChildren == 0 || (searchShape!=null && searchShape.parent == _pageList[i] && _pageList[i].numChildren < 3)) || _pageList[i].dupScale != _scale){
 						    	_libMC.gotoAndStop(_pageList[i].dupIndex);
-							    _thumbData = new BitmapData(_pageList[i].scaleWidth, _pageList[i].scaleHeight, false, 0xFFFFFF);
+							    
+								_thumbData = new BitmapData(_pageList[i].scaleWidth, _pageList[i].scaleHeight, false, 0xFFFFFF);
 							    _thumb = new Bitmap(_thumbData);
+								
 								_pageList[i].source = _thumb;
 								_pageList[i].dupScale = _scale;
 								_thumbData.draw(_libMC,new Matrix(_scale, 0, 0, _scale),null,null,null,true);
@@ -406,9 +413,10 @@ package com.devaldi.controls.flexpaper
 							
 							loaderidx++;
 						}else{
-							if(_pageList[i].source != null){
+							if(_pageList[i].source != null && ((hn!=-1&&i<=hn-2)||(ln!=-1&&i>ln+2))){
 								_pageList[i].source = null;
 								_pageList[i].removeAllChildren();
+								delete(_pageList[i].source);
 							}					
 						}
 				}
@@ -797,6 +805,11 @@ package com.devaldi.controls.flexpaper
 			if(pj.start()){
 				_libMC.stop();
 				
+				if((pj.pageHeight/_libMC.height) < 1 && (pj.pageHeight/_libMC.height) < (pj.pageWidth/_libMC.width))
+					_libMC.scaleX = _libMC.scaleY = (pj.pageHeight/_libMC.height);
+				else if((pj.pageWidth/_libMC.width) < 1)
+					_libMC.scaleX = _libMC.scaleY = (pj.pageWidth/_libMC.width);
+				
 				for(var i:int=0;i<numPages;i++){
 					_libMC.gotoAndStop(i+1);
 					pj.addPage(_libMC as Sprite);
@@ -836,6 +849,11 @@ package com.devaldi.controls.flexpaper
 			if(pj.start()){
 				_libMC.stop();
 				
+				if((pj.pageHeight/_libMC.height) < 1 && (pj.pageHeight/_libMC.height) < (pj.pageWidth/_libMC.width))
+					_libMC.scaleX = _libMC.scaleY = (pj.pageHeight/_libMC.height);
+				else if((pj.pageWidth/_libMC.width) < 1)
+					_libMC.scaleX = _libMC.scaleY = (pj.pageWidth/_libMC.width);
+				
 				for(var ip:int=0;ip<numPages;ip++){
 					if(pageNumList[ip+1] != null){
 						_libMC.gotoAndStop(ip+1);
@@ -846,6 +864,7 @@ package com.devaldi.controls.flexpaper
 				pj.send();
 			}			
 			
+			_libMC.scaleX = _libMC.scaleY = 1;
 			_libMC.parent.setChildIndex(_libMC,_libMC.parent.numChildren - 1);
 			_libMC.alpha = 0;
 		}
