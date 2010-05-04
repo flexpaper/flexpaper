@@ -37,6 +37,10 @@ package com.devaldi.streaming
 		public function DupImage(){}
 		
 		override public function set source(value:Object):void{
+			if(value==null && this.source != null && this.source.bitmapData != null){
+				this.source.bitmapData.dispose();
+			}
+			
 			if(value!=null){super.source = value;}
 			
 			if(value!=null){
