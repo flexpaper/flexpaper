@@ -322,9 +322,12 @@ package com.devaldi.controls.flexpaper
 			this.addChild(_swfContainer);
 			
 			// Add the swf to the invisible container.
+			var uici:Image = new Image();
+			uici.addChild(_loader);
+			
 			var uic:UIComponent = new UIComponent();
 			_swfContainer.addChild(uic);
-			uic.addChild(_loader);
+			uic.addChild(uici);
 			
 			_paperContainer = new ZoomCanvas();
 			_paperContainer.percentHeight = 100;
@@ -394,10 +397,18 @@ package com.devaldi.controls.flexpaper
 							if(_pageList[i].source == null || (_pageList[i].numChildren == 0 || (searchShape!=null && searchShape.parent == _pageList[i] && _pageList[i].numChildren < 3)) || _pageList[i].dupScale != _scale){
 						    	_libMC.gotoAndStop(_pageList[i].dupIndex);
 							    
-								_thumbData = new BitmapData(_pageList[i].scaleWidth, _pageList[i].scaleHeight, false, 0xFFFFFF);
-							    _thumb = new Bitmap(_thumbData);
+								// this bitmapdata and its bitap should be in a cache and re-rendered only for visible pages
+								// literaly using same approach as before.... just setting the sources and then have a blank one as well
 								
-								_pageList[i].source = _thumb;
+								_thumbData = new BitmapData(_pageList[i].scaleWidth, _pageList[i].scaleHeight, false, 0xFFFFFF);
+							    //if(_pageList[i].source == null){
+									_thumb = new Bitmap(_thumbData);
+									_pageList[i].source = _thumb;
+								/* }else{
+									_pageList[i].source.bitmapData = _thumbData;
+									_pageList[i].source.width = _pageList[i].scaleWidth;
+									_pageList[i].source.height = _pageList[i].scaleHeight;
+								}*/
 								_pageList[i].dupScale = _scale;
 								_thumbData.draw(_libMC,new Matrix(_scale, 0, 0, _scale),null,null,null,true);
 							}
@@ -797,7 +808,7 @@ package com.devaldi.controls.flexpaper
 		}
 		
 		public function printPaper():void{
-			_libMC.parent.setChildIndex(_libMC,0);
+			if(_libMC.parent is DupImage){(_swfContainer.getChildAt(0) as UIComponent).addChild(_libMC);}
 			_libMC.alpha = 1;
 			
 			var pj:PrintJob = new PrintJob();
@@ -812,13 +823,13 @@ package com.devaldi.controls.flexpaper
 				
 				for(var i:int=0;i<numPages;i++){
 					_libMC.gotoAndStop(i+1);
-					pj.addPage(_libMC as Sprite);
+					pj.addPage(_swfContainer);
 				}			
 				
 				pj.send();
 			}
 
-			_libMC.parent.setChildIndex(_libMC,_libMC.parent.numChildren - 1);
+			_libMC.scaleX = _libMC.scaleY = 1;
 			_libMC.alpha = 0;
 		}
 		
@@ -841,8 +852,8 @@ package com.devaldi.controls.flexpaper
 					}
 				}
 			}
-
-			_libMC.parent.setChildIndex(_libMC,0);
+			
+			if(_libMC.parent is DupImage){(_swfContainer.getChildAt(0) as UIComponent).addChild(_libMC);}
 			_libMC.alpha = 1;
 			
 			var pj:PrintJob = new PrintJob();
@@ -857,7 +868,7 @@ package com.devaldi.controls.flexpaper
 				for(var ip:int=0;ip<numPages;ip++){
 					if(pageNumList[ip+1] != null){
 						_libMC.gotoAndStop(ip+1);
-						pj.addPage(_libMC as Sprite);
+						pj.addPage(_swfContainer);
 					}
 				}			
 				
@@ -865,7 +876,6 @@ package com.devaldi.controls.flexpaper
 			}			
 			
 			_libMC.scaleX = _libMC.scaleY = 1;
-			_libMC.parent.setChildIndex(_libMC,_libMC.parent.numChildren - 1);
 			_libMC.alpha = 0;
 		}
 				
