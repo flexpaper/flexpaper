@@ -390,7 +390,7 @@ package com.devaldi.controls.flexpaper
 		private function repositionPapers():void{
 			if(_loaderList==null||_libMC.framesLoaded==0){return;}
 			
-			if(!_bbusyloading||true){
+			{
 				var loaderidx:int=0;
 				var bFoundFirst:Boolean = false;
 				var _thumb:Bitmap;
@@ -408,8 +408,9 @@ package com.devaldi.controls.flexpaper
 							if(ViewMode == ViewModeEnum.PORTRAIT){ 		
 								uloaderidx = (i==_pageList.length-1&&loaderidx+3<_loaderList.length)?loaderidx+3:loaderidx;									
 								
-								if(_loaderList!=null && _loaderList.length>0 && _viewMode == ViewModeEnum.PORTRAIT){
+								if(!_bbusyloading && _loaderList!=null && _loaderList.length>0 && _viewMode == ViewModeEnum.PORTRAIT){
 									if(_libMC!=null&&_libMC.framesLoaded>=_pageList[i].dupIndex &&_loaderList[uloaderidx].content==null||(_loaderList[uloaderidx].content!=null&&_loaderList[uloaderidx].content.framesLoaded<_pageList[i].dupIndex)){
+										_bbusyloading = true;
 										_loaderList[uloaderidx].loadBytes(_fLoader.InputBytes,getExecutionContext());
 										flash.utils.setTimeout(repositionPapers,200);
 									}
