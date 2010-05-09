@@ -408,9 +408,8 @@ package com.devaldi.controls.flexpaper
 							if(ViewMode == ViewModeEnum.PORTRAIT){ 		
 								uloaderidx = (i==_pageList.length-1&&loaderidx+3<_loaderList.length)?loaderidx+3:loaderidx;									
 								
-								// laadda om loadersen on demand istallet...
 								if(_loaderList!=null && _loaderList.length>0 && _viewMode == ViewModeEnum.PORTRAIT){
-									if(_libMC!=null&&_loaderList[uloaderidx].content==null||(_loaderList[uloaderidx].content!=null&&_loaderList[uloaderidx].content.framesLoaded<_pageList[i].dupIndex)){
+									if(_libMC!=null&&_libMC.framesLoaded>=_pageList[i].dupIndex &&_loaderList[uloaderidx].content==null||(_loaderList[uloaderidx].content!=null&&_loaderList[uloaderidx].content.framesLoaded<_pageList[i].dupIndex)){
 										_loaderList[uloaderidx].loadBytes(_fLoader.InputBytes,getExecutionContext());
 										flash.utils.setTimeout(repositionPapers,200);
 									}
