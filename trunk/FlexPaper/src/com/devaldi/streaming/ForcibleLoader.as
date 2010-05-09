@@ -67,9 +67,23 @@ package com.devaldi.streaming
                 private var _resigned:Boolean = false;
                 private var _bytesPending:uint = 0;
                 private var _prevLength:uint = 0;
+				private var _loaderList:Array;
+				
                 public function get Resigned():Boolean{
                 	return _resigned;
                 }
+				
+				public function get InputBytes():ByteArray {
+					return _inputBytes;
+				}					
+				
+				public function get LoaderList():Array {
+					return _loaderList;
+				}	
+				
+				public function set LoaderList(a:Array):void {
+					_loaderList = a;
+				}				
                 
                 public function get stream():URLStream
                 {
