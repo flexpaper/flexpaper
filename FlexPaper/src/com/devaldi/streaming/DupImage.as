@@ -21,8 +21,9 @@ package com.devaldi.streaming
 	import flash.display.Bitmap;
 	import flash.display.BitmapData;
 	import flash.display.MovieClip;
-	import flash.filters.DropShadowFilter;
 	import flash.events.MouseEvent;
+	import flash.filters.DropShadowFilter;
+	
 	import mx.controls.Image;
 	
 	public class DupImage extends Image
@@ -31,17 +32,18 @@ package com.devaldi.streaming
 		public var dupScale:Number = 0;
 		public var scaleWidth:int;
 		public var scaleHeight:int;
+		public var loadedIndex:int = -1;
 		
 		public static var paperSource:MovieClip; 
 		
 		public function DupImage(){}
 		
 		override public function set source(value:Object):void{
-			if(value==null && this.source != null && this.source.bitmapData != null){
+			if(this.source != null && this.source.bitmapData != null){
 				this.source.bitmapData.dispose();
 			}
 			
-			if(value!=null){super.source = value;}
+			super.source = value;
 			
 			if(value!=null){
 				if(this.filters.length==0){addDropShadow();}
@@ -51,7 +53,7 @@ package com.devaldi.streaming
 		override protected function createChildren():void {
 			super.createChildren();
 			
-			addEventListener(MouseEvent.ROLL_OVER,dupImageMoverHandler);
+			addEventListener(MouseEvent.ROLL_OVER,dupImageMoverHandler,false,0,true);
 		}
 		
 		private function dupImageMoverHandler(event:MouseEvent):void{
