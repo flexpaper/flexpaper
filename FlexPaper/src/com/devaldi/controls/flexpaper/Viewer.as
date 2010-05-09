@@ -835,6 +835,11 @@ package com.devaldi.controls.flexpaper
 			if(pj.start()){
 				_libMC.stop();
 				
+				if((pj.pageHeight/_libMC.height) < 1 && (pj.pageHeight/_libMC.height) < (pj.pageWidth/_libMC.width))
+					_libMC.scaleX = _libMC.scaleY = (pj.pageHeight/_libMC.height);
+				else if((pj.pageWidth/_libMC.width) < 1)
+					_libMC.scaleX = _libMC.scaleY = (pj.pageWidth/_libMC.width);
+				
 				for(var i:int=0;i<_libMC.framesLoaded;i++){
 					_libMC.gotoAndStop(i+1);
 					pj.addPage(_swfContainer);
@@ -867,6 +872,11 @@ package com.devaldi.controls.flexpaper
 			var pj:PrintJob = new PrintJob();
 			if(pj.start()){
 				_libMC.stop();
+				
+				if((pj.pageHeight/_libMC.height) < 1 && (pj.pageHeight/_libMC.height) < (pj.pageWidth/_libMC.width))
+					_libMC.scaleX = _libMC.scaleY = (pj.pageHeight/_libMC.height);
+				else if((pj.pageWidth/_libMC.width) < 1)
+					_libMC.scaleX = _libMC.scaleY = (pj.pageWidth/_libMC.width);
 				
 				for(var ip:int=0;ip<_libMC.framesLoaded;ip++){
 					if(pageNumList[ip+1] != null){
