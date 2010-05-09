@@ -885,6 +885,7 @@ package com.devaldi.controls.flexpaper
 			img.filters = [ filter ];   
 		}
 		
+		
 		private function addDropShadow(img:Image):void
 		{
 			var filter : DropShadowFilter = new DropShadowFilter();
