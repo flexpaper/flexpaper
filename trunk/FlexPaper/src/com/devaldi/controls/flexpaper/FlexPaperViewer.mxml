@@ -174,7 +174,7 @@
 	                        break;
 	                }
              	}else{
-             		var ur:URLRequest = new URLRequest("FlexPaperViewer.swf");
+             		var ur:URLRequest = new URLRequest(this.stage.loaderInfo.url);
              		var uv:URLVariables = new URLVariables();
              		uv.Scale = Scale;
              		uv.SwfFile = SwfFile;
@@ -267,6 +267,6 @@
 							FitPageOnLoad="{FitPageOnLoad}"
 							FitWidthOnLoad="{FitWidthOnLoad}"
 							ProgressiveLoading="{ProgressiveLoading}"
-											
+							
 							height="100%" width="100%" borderStyle="solid"  tabIndex="0"/>							
 </mx:VBox>

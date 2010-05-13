@@ -266,12 +266,12 @@ package com.devaldi.streaming
                 
                 private function ioErrorHandler(event:IOErrorEvent):void
                 {
-                        loader.contentLoaderInfo.dispatchEvent(new IOErrorEvent(IOErrorEvent.IO_ERROR));
+                        //loader.contentLoaderInfo.dispatchEvent(new IOErrorEvent(IOErrorEvent.IO_ERROR));
                 }
                 
                 private function securityErrorHandler(event:SecurityErrorEvent):void
                 {
-                        loader.contentLoaderInfo.dispatchEvent(new SecurityErrorEvent(SecurityErrorEvent.SECURITY_ERROR));
+                        //loader.contentLoaderInfo.dispatchEvent(new SecurityErrorEvent(SecurityErrorEvent.SECURITY_ERROR));
                 }
                 
         }
