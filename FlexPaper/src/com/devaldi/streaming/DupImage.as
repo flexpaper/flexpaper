@@ -20,10 +20,11 @@ package com.devaldi.streaming
 {
 	import flash.display.Bitmap;
 	import flash.display.BitmapData;
+	import flash.display.DisplayObject;
 	import flash.display.MovieClip;
 	import flash.events.MouseEvent;
 	import flash.filters.DropShadowFilter;
-	
+	import flash.utils.setTimeout;
 	import mx.controls.Image;
 	
 	public class DupImage extends Image
@@ -66,6 +67,7 @@ package com.devaldi.streaming
 				
 		public function addDropShadow():void
 		{
+			if(this.filters.length==0){
 			this.filters = null;
 			 var filter : DropShadowFilter = new DropShadowFilter();
 			 filter.blurX = 4;
@@ -76,24 +78,34 @@ package com.devaldi.streaming
 			 filter.color = 0x202020;
 			 filter.distance = 4;
 			 filter.inner = false;
-			 this.filters = [ filter ];           
+			 this.filters = [ filter ];
+			}
 		}			
 		
 		public function addGlowFilter():void{
 			var filter : flash.filters.GlowFilter = new flash.filters.GlowFilter(0x111111, 1, 5, 5, 2, 1, false, false);
-			filters = [ filter ];   
+			filters = [ filter ];
 		}
 		
 		
 		public function removeAllChildren():void{
 			while(numChildren > 0)
 				delete(removeChildAt(0));
+			
+			this.filters = null;
+		}
+		
+		override public function addChild(child:DisplayObject):DisplayObject{
+			//flash.utils.setTimeout(addDropShadow,200);
+			return super.addChild(child);
 		}
 		
 		override protected function updateDisplayList(w:Number, h:Number):void {
+			if(w>0&&h>0){
+			try{
 			graphics.beginFill(0xffffff,1);
 			graphics.drawRect(0,0,w,h);
-			super.updateDisplayList(w,h);
+			super.updateDisplayList(w,h);}catch (e:*) {}}
 		}	 
 		
 		public function addGlowShadow():void
