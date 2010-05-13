@@ -89,8 +89,6 @@ package com.devaldi.controls.flexpaper
 		private var _dupImageClicked:Boolean = false;
 		private var _fLoader:ForcibleLoader;
 		private var _progressiveLoading:Boolean = false;
-		private var _displNavPanel:Boolean = true;
-		private var _navigationThumbPanel:VBox;
 		private var _repaintTimer:Timer;
 		private var _frameLoadCount:int = 0;
 		private var loaderCtx:LoaderContext;
