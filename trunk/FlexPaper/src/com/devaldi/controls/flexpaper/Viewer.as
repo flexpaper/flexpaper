@@ -298,6 +298,7 @@ package com.devaldi.controls.flexpaper
 		
 		private function tweenComplete():void{
 			_tweencount--;
+						
 			if(_tweencount==0){
 				_paperContainer.dispatchEvent(new FlexEvent(FlexEvent.UPDATE_COMPLETE));
 			}
@@ -351,7 +352,6 @@ package com.devaldi.controls.flexpaper
 		
 		private function updComplete(event:Event):void	{
 			if(_scrollToPage>0){
-				var vg:Number = new Number(_paperContainer.getStyle("verticalGap"));
 				_paperContainer.verticalScrollPosition = _pageList[_scrollToPage-1].y;
 				_paperContainer.horizontalScrollPosition = 0;
 				_scrollToPage = 0;
@@ -386,7 +386,7 @@ package com.devaldi.controls.flexpaper
 				
 				if(_fitPageOnLoad){FitMode = FitModeEnum.FITHEIGHT;}
 				
-				if(_fitWidthOnLoad){FitMode = FitModeEnum.FITWIDTH;}
+				if(_fitWidthOnLoad){FitMode = FitModeEnum.FITWIDTH;} 
 			}			
 		}
 		
@@ -639,8 +639,6 @@ package com.devaldi.controls.flexpaper
 				_bbusyloading = false;
 				repositionPapers();
 				
-				if(_fitPageOnLoad){FitMode = FitModeEnum.FITHEIGHT;_scrollToPage = 1;}
-				if(_fitWidthOnLoad){FitMode = FitModeEnum.FITWIDTH;_scrollToPage = 1;}				
 			}else{
 				if(event.currentTarget.content != null){
 					var mobj:Object = event.currentTarget.content;
@@ -659,10 +657,7 @@ package com.devaldi.controls.flexpaper
 						if(_libMC.framesLoaded == _libMC.totalFrames){	
 							dispatchEvent(new Event("onPapersLoaded"));
 						}
-						
-						if(firstLoad){
-						}
-						
+												
 						if(_libMC.framesLoaded>_frameLoadCount){
 							flash.utils.setTimeout(repositionPapers,500);
 							_frameLoadCount = _libMC.framesLoaded;
