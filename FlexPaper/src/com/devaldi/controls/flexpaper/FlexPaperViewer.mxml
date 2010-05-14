@@ -22,14 +22,15 @@
 </mx:Metadata>
 <mx:Script>
 	<![CDATA[
-		import mx.events.SliderEvent;
-        import mx.controls.sliderClasses.Slider;
-		import mx.controls.Alert;
-		import mx.managers.PopUpManager;
 		import flash.display.StageDisplayState;
 		import flash.net.navigateToURL;
+		
+		import mx.controls.Alert;
+		import mx.controls.sliderClasses.Slider;
+		import mx.events.SliderEvent;
+		import mx.managers.BrowserManager;
 		import mx.managers.IBrowserManager;
-        import mx.managers.BrowserManager;
+		import mx.managers.PopUpManager;
         
 		[Bindable]
 		public var Scale:Number = 1;
@@ -65,7 +66,8 @@
 		private var _fixedWidth:Number = -1;
 		private var _fixedHeight:Number = -1;
 		private var _browserManager:IBrowserManager;
-
+		private var _paperScaleHasPriority:Boolean = false;
+			
 		private function Init():void{
 			_browserManager = BrowserManager.getInstance();
 		}	
@@ -106,8 +108,12 @@
 		}
 		
 		private function sliderChange(event:SliderEvent):void {
-                var currentSlider:Slider=Slider(event.currentTarget);
-                paper1.Zoom(currentSlider.value);
+            if(!_paperScaleHasPriority)
+			{
+            paper1.Zoom(Slider(event.currentTarget).value);
+			}
+			
+			_paperScaleHasPriority = false;
         }		
         
  		private function formatPct(item:Object):String {
@@ -139,7 +145,8 @@
    		}
    		
    		private function onScaleChanged(event:Event):void{
-   			txtPct.text = formatPct(paper1.Scale);
+			_paperScaleHasPriority = true;
+			txtPct.text = formatPct(paper1.Scale);
    			slidPctScale.value = Number(paper1.Scale);
    		}
    		
@@ -184,6 +191,7 @@
              		uv.FitPageOnLoad = paper1.FitMode == FitModeEnum.FITHEIGHT;
              		uv.FitWidthOnLoad = paper1.FitMode == FitModeEnum.FITWIDTH;
              		uv.PrintEnabled = PrintEnabled;
+					uv.ProgressiveLoading = ProgressiveLoading;
              		uv.FullScreenAsMaxWindow = FullScreenAsMaxWindow;
              		ur.data = uv;
              		navigateToURL(ur,"FlexPaperFullScreen");
