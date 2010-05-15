@@ -266,6 +266,7 @@ package com.devaldi.controls.flexpaper
 			}
 			
 			FitMode = FitModeEnum.FITNONE;
+			_scale = factor;
 		}
 		
 		public function fitWidth():void{
@@ -394,9 +395,9 @@ package com.devaldi.controls.flexpaper
 			if(!bFound){
 				_bbusyloading = false;
 				
-				if(_fitPageOnLoad){FitMode = FitModeEnum.FITHEIGHT;}
+				if(_fitPageOnLoad){FitMode = FitModeEnum.FITHEIGHT;_fitPageOnLoad=false;}
 				
-				if(_fitWidthOnLoad){FitMode = FitModeEnum.FITWIDTH;} 
+				if(_fitWidthOnLoad){FitMode = FitModeEnum.FITWIDTH;_fitWidthOnLoad=false;} 
 			}			
 		}
 		
@@ -452,9 +453,9 @@ package com.devaldi.controls.flexpaper
 						}
 						
 						if(_viewMode != ViewModeEnum.TILE){
-							if(_pageList[i].dupIndex == searchPageIndex && searchShape.parent != _pageList[i]){
+							if(i+1 == searchPageIndex && searchShape.parent != _pageList[i]){
 								_pageList[i].addChildAt(searchShape,_pageList[i].numChildren);
-							}else if(_pageList[i].dupIndex == searchPageIndex && searchShape.parent == _pageList[i]){
+							}else if(i+1 == searchPageIndex && searchShape.parent == _pageList[i]){
 								_pageList[i].setChildIndex(searchShape,_pageList[i].numChildren -1);
 							}
 						}
@@ -761,9 +762,12 @@ package com.devaldi.controls.flexpaper
 		private var searchPageIndex:int = -1;
 		private var searchShape:ShapeMarker;
 		private var prevSearchText:String = "";
+		private var prevYsave=-1;
 		
 		public function searchText(text:String):void{
 			var tri:Array;
+			
+			if(text.length==0){return;}
 			
 			if(prevSearchText != text){
 				searchIndex = -1;
@@ -793,7 +797,9 @@ package com.devaldi.controls.flexpaper
 						tri = snap.getTextRunInfo(searchIndex+ti,searchIndex+ti+1);
 						
 						// only draw the "selected" rect if fonts are embedded otherwise draw a line thingy
-						if(tri.length>0){
+						if(tri.length>1){
+							prevYsave = tri[0].corner1y;
+							
 							if((tri[0].corner1x-tri[0].corner3x)>0 && (tri[0].corner3y-tri[0].corner1y)>0){
 								searchShape.graphics.drawRect(tri[0].corner3x,tri[0].corner1y,((tri[1].corner1y==tri[0].corner1y&&tri[1].corner3x>tri[0].corner1x)?tri[1].corner3x:tri[0].corner1x)-tri[0].corner3x,tri[0].corner3y-tri[0].corner1y);
 							}else{
@@ -802,9 +808,9 @@ package com.devaldi.controls.flexpaper
 						}
 					}
 					
-					if(tri.length>0){
+					if(prevYsave>-1){
 						searchShape.graphics.endFill();
-						_adjGotoPage = tri[0].corner1y;
+						_adjGotoPage = (prevYsave) * _scale - 50;
 						gotoPage(searchPageIndex);
 						break;
 					}
