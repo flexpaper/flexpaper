@@ -25,6 +25,7 @@ package com.devaldi.controls.flexpaper
 	import com.devaldi.streaming.DupImage;
 	import com.devaldi.streaming.DupLoader;
 	import com.devaldi.streaming.ForcibleLoader;
+	import com.devaldi.controls.FlowVBox;
 	
 	import flash.display.Bitmap;
 	import flash.display.BitmapData;
@@ -121,7 +122,7 @@ package com.devaldi.controls.flexpaper
 			if(s!=_viewMode){
 				_viewMode = s;
 				if(_viewMode == ViewModeEnum.TILE){_pscale = _scale; _scale = 0.23;_paperContainer.verticalScrollPosition = 0;_fitMode = FitModeEnum.FITNONE;}else{_scale = _pscale;}
-				if(_initialized && _swfLoaded){createDisplayContainer();if(this._progressiveLoading){_displayContainer.removeAllChildren(); _pageList = null; this.addInLoadedPages();}else{reCreateAllPages();}}
+				if(_initialized && _swfLoaded){createDisplayContainer();if(this._progressiveLoading){this.addInLoadedPages(true);}else{reCreateAllPages();}}
 			}
 		}
 		
@@ -501,7 +502,7 @@ package com.devaldi.controls.flexpaper
 				_scale = 0.243;
 				_paperContainer.addChild(_displayContainer);
 			}else{
-				_displayContainer = new mx.containers.VBox();
+				_displayContainer = new FlowVBox();
 				_displayContainer.setStyle("horizontalAlign", "center");
 				_paperContainer.addChild(_displayContainer);
 			}
@@ -671,7 +672,11 @@ package com.devaldi.controls.flexpaper
 			}
 		}	
 		
-		private function addInLoadedPages():void{
+		private function addInLoadedPages(recreate:Boolean = false):void{
+			if(recreate){
+				_displayContainer.removeAllChildren(); _pageList = null;
+			}
+			
 			if(_pageList==null || (_pageList != null && _pageList.length != numPages)){
 				_pageList = new Array(numPages);
 				

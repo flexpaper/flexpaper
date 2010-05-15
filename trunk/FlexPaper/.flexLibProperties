@@ -29,6 +29,7 @@
     <classEntry path="com.devaldi.controls.ZoomCanvas"/>
     <classEntry path="com.devaldi.skinning.GradientTextInput"/>
     <classEntry path="com.devaldi.skinning.GradientImageButton"/>
+    <classEntry path="com.devaldi.controls.FlowVBox"/>
   </includeClasses>
   <includeResources/>
   <namespaceManifests/>
