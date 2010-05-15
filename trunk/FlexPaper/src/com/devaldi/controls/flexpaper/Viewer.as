@@ -431,14 +431,12 @@ package com.devaldi.controls.flexpaper
 								}
 								
 								
-								if((i<2||_pageList[i].numChildren==0||(_loaderList[uloaderidx].content!=null && _pageList[i] != null)) 
-									&& _loaderList[uloaderidx] != null && _loaderList[uloaderidx].content != null
-									&& !(_pageList[i].numChildren>0&&_pageList[i].loadedIndex==_pageList[i].dupIndex)
-									||(_loaderList[uloaderidx].content!=null && _pageList[i] != null &&_loaderList[uloaderidx].parent==null)){
-									
+								if((i<2||_pageList[i].numChildren==0||(_pageList[i]!=null&&_loaderList[uloaderidx].content.currentFrame!=_pageList[i].dupIndex))
+									&& _loaderList[uloaderidx] != null && _loaderList[uloaderidx].content != null){
 									if(_libMC.framesLoaded >= _pageList[i].dupIndex){
 										_loaderList[uloaderidx].content.gotoAndStop(_pageList[i].dupIndex);
 										_pageList[i].addChild(_loaderList[uloaderidx]);
+										
 										_pageList[i].loadedIndex = _pageList[i].dupIndex;
 									}
 									
