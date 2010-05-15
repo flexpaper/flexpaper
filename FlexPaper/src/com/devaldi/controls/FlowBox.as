@@ -18,13 +18,18 @@ along with FlexPaper.  If not, see <http://www.gnu.org/licenses/>.
 
 package com.devaldi.controls
 {
+ import com.devaldi.streaming.DupImage;
+ 
+ import flash.display.Bitmap;
  import flash.display.DisplayObject;
  import flash.events.Event;
  
  import mx.collections.ArrayCollection;
  import mx.containers.Box;
  import mx.containers.BoxDirection;
+ import mx.controls.Image;
  import mx.events.ResizeEvent;
+ 
 
     [DefaultProperty("children")]
     public class FlowBox extends Box
@@ -254,6 +259,18 @@ package com.devaldi.controls
         }        
         override public function removeAllChildren():void
         {
+			var du:Object;
+			
+			for(var c:int=0;c<_children.length;c++){
+				for(var i:int=0;i<_children[c].numChildren;i++){
+					du = _children[c].getChildAt(i);
+					
+					if( du is Bitmap && (du as Bitmap).bitmapData != null)
+						du.bitmapData.dispose();
+				}				
+			}
+			
+			
             _children.removeAll();
             relayoutChildren();
         }        
