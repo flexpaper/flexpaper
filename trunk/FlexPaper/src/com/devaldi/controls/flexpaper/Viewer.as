@@ -436,9 +436,11 @@ package com.devaldi.controls.flexpaper
 									&& !(_pageList[i].numChildren>0&&_pageList[i].loadedIndex==_pageList[i].dupIndex)
 									||(_loaderList[uloaderidx].content!=null && _pageList[i] != null &&_loaderList[uloaderidx].parent==null)){
 									
+									if(_libMC.framesLoaded >= _pageList[i].dupIndex){
 										_loaderList[uloaderidx].content.gotoAndStop(_pageList[i].dupIndex);
 										_pageList[i].addChild(_loaderList[uloaderidx]);
 										_pageList[i].loadedIndex = _pageList[i].dupIndex;
+									}
 									
 								}
 							} else if(ViewMode == ViewModeEnum.TILE && _pageList[i].source == null && _libMC.framesLoaded >= _pageList[i].dupIndex){
@@ -464,7 +466,7 @@ package com.devaldi.controls.flexpaper
 					}else{
 						if(_pageList[i].numChildren>0 || _pageList[i].source != null){
 							_pageList[i].source = null;
-							_pageList[i].removeAllChildren();
+							//_pageList[i].removeAllChildren();
 							_pageList[i].loadedIndex = -1;
 						}					
 					}
@@ -791,6 +793,7 @@ package com.devaldi.controls.flexpaper
 				
 				if(searchIndex > 0){ // found a new match
 					searchShape = new ShapeMarker();
+					
 					searchShape.graphics.beginFill(0x0095f7,0.3);
 					
 					for(var ti:int=0;ti<text.length;ti++){
@@ -798,7 +801,7 @@ package com.devaldi.controls.flexpaper
 						
 						// only draw the "selected" rect if fonts are embedded otherwise draw a line thingy
 						if(tri.length>1){
-							prevYsave = tri[0].corner1y;
+							prevYsave = tri[0].matrix_ty;
 							
 							if((tri[0].corner1x-tri[0].corner3x)>0 && (tri[0].corner3y-tri[0].corner1y)>0){
 								searchShape.graphics.drawRect(tri[0].corner3x,tri[0].corner1y,((tri[1].corner1y==tri[0].corner1y&&tri[1].corner3x>tri[0].corner1x)?tri[1].corner3x:tri[0].corner1x)-tri[0].corner3x,tri[0].corner3y-tri[0].corner1y);
@@ -808,7 +811,7 @@ package com.devaldi.controls.flexpaper
 						}
 					}
 					
-					if(prevYsave>-1){
+					if(prevYsave>0){
 						searchShape.graphics.endFill();
 						_adjGotoPage = (prevYsave) * _scale - 50;
 						gotoPage(searchPageIndex);
