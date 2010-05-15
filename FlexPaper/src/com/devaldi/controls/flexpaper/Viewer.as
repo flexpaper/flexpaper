@@ -21,11 +21,11 @@ package com.devaldi.controls.flexpaper
 	import caurina.transitions.Tweener;
 	
 	import com.devaldi.controls.FlowBox;
+	import com.devaldi.controls.FlowVBox;
 	import com.devaldi.controls.ZoomCanvas;
 	import com.devaldi.streaming.DupImage;
 	import com.devaldi.streaming.DupLoader;
 	import com.devaldi.streaming.ForcibleLoader;
-	import com.devaldi.controls.FlowVBox;
 	
 	import flash.display.Bitmap;
 	import flash.display.BitmapData;
@@ -94,6 +94,7 @@ package com.devaldi.controls.flexpaper
 		private var _frameLoadCount:int = 0;
 		private var loaderCtx:LoaderContext;
 		private var _adjGotoPage:int = 0;
+		private var _zoomInterval:Number = 0;
 		
 		[Embed(source="/../assets/grab.gif")]
 		public var grabCursor:Class;	  
@@ -170,6 +171,14 @@ package com.devaldi.controls.flexpaper
 		public function set ZoomTime(n:Number):void {
 			_zoomtime = n;
 		}		
+		
+		public function get ZoomInterval():Number {
+			return _zoomInterval;
+		}	
+		
+		public function set ZoomInterval(n:Number):void {
+			_zoomInterval = n;
+		}				
 		
 		[Bindable]
 		public function get numPages():Number {
@@ -357,7 +366,7 @@ package com.devaldi.controls.flexpaper
 				_paperContainer.horizontalScrollPosition = 0;
 				_scrollToPage = 0;
 			}
-			
+						
 			_repaintTimer.reset();_repaintTimer.start();
 		}
 		
@@ -515,6 +524,8 @@ package com.devaldi.controls.flexpaper
 			_displayContainer.addEventListener(MouseEvent.ROLL_OUT,displayContainerrolloutHandler);
 			_displayContainer.addEventListener(MouseEvent.MOUSE_DOWN,displayContainerMouseDownHandler);
 			_displayContainer.addEventListener(MouseEvent.MOUSE_UP,displayContainerMouseUpHandler);
+			_displayContainer.addEventListener(MouseEvent.DOUBLE_CLICK,displayContainerDoubleClickHandler);
+			_displayContainer.doubleClickEnabled = true;
 			
 			_initialized=true;
 			
@@ -531,6 +542,10 @@ package com.devaldi.controls.flexpaper
 				CursorManager.removeCursor(grabbingCursorID);
 				grabCursorID = CursorManager.setCursor(grabCursor);
 			}
+		}
+		
+		private function displayContainerDoubleClickHandler(event:MouseEvent):void{
+			FitMode = (FitMode == FitModeEnum.FITWIDTH)?FitModeEnum.FITHEIGHT:FitModeEnum.FITWIDTH; 
 		}
 		
 		private function displayContainerMouseDownHandler(event:MouseEvent):void{
