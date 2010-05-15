@@ -431,7 +431,7 @@ package com.devaldi.controls.flexpaper
 								}
 								
 								
-								if((i<2||_pageList[i].numChildren==0||(_pageList[i]!=null&&_loaderList[uloaderidx].content.currentFrame!=_pageList[i].dupIndex))
+								if((i<2||_pageList[i].numChildren==0||(_pageList[i]!=null&&_loaderList[uloaderidx]!=null&&_loaderList[uloaderidx].content!=null&&_loaderList[uloaderidx].content.currentFrame!=_pageList[i].dupIndex))
 									&& _loaderList[uloaderidx] != null && _loaderList[uloaderidx].content != null){
 									if(_libMC.framesLoaded >= _pageList[i].dupIndex){
 										_loaderList[uloaderidx].content.gotoAndStop(_pageList[i].dupIndex);
@@ -452,7 +452,7 @@ package com.devaldi.controls.flexpaper
 							
 						}
 						
-						if(_viewMode != ViewModeEnum.TILE){
+						if(_viewMode != ViewModeEnum.TILE && searchShape != null){
 							if(i+1 == searchPageIndex && searchShape.parent != _pageList[i]){
 								_pageList[i].addChildAt(searchShape,_pageList[i].numChildren);
 							}else if(i+1 == searchPageIndex && searchShape.parent == _pageList[i]){
