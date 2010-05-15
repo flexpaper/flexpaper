@@ -121,7 +121,7 @@ package com.devaldi.controls.flexpaper
 			if(s!=_viewMode){
 				_viewMode = s;
 				if(_viewMode == ViewModeEnum.TILE){_pscale = _scale; _scale = 0.23;_paperContainer.verticalScrollPosition = 0;_fitMode = FitModeEnum.FITNONE;}else{_scale = _pscale;}
-				if(_initialized && _swfLoaded){createDisplayContainer();this.reCreateAllPages();}
+				if(_initialized && _swfLoaded){createDisplayContainer();if(this._progressiveLoading){_displayContainer.removeAllChildren(); _pageList = null; this.addInLoadedPages();}else{reCreateAllPages();}}
 			}
 		}
 		
@@ -430,7 +430,7 @@ package com.devaldi.controls.flexpaper
 										_pageList[i].loadedIndex = _pageList[i].dupIndex;
 									
 								}
-							} else if(ViewMode == ViewModeEnum.TILE && _pageList[i].source == null){
+							} else if(ViewMode == ViewModeEnum.TILE && _pageList[i].source == null && _libMC.framesLoaded >= _pageList[i].dupIndex){
 								_libMC.gotoAndStop(_pageList[i].dupIndex);
 								_thumbData = new BitmapData(_libMC.width*_scale, _libMC.height*_scale, false, 0xFFFFFF);
 								_thumb = new Bitmap(_thumbData);
