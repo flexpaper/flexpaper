@@ -30,6 +30,7 @@
     <classEntry path="com.devaldi.skinning.GradientTextInput"/>
     <classEntry path="com.devaldi.skinning.GradientImageButton"/>
     <classEntry path="com.devaldi.controls.FlowVBox"/>
+    <classEntry path="com.devaldi.streaming.IGenericMovieClip"/>
   </includeClasses>
   <includeResources/>
   <namespaceManifests/>

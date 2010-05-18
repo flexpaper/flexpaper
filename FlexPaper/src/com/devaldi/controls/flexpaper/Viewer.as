@@ -23,10 +23,11 @@ package com.devaldi.controls.flexpaper
 	import com.devaldi.controls.FlowBox;
 	import com.devaldi.controls.FlowVBox;
 	import com.devaldi.controls.ZoomCanvas;
+	import com.devaldi.streaming.AVM2Loader;
 	import com.devaldi.streaming.DupImage;
 	import com.devaldi.streaming.DupLoader;
-	import com.devaldi.streaming.ForcibleLoader;
 	
+	import flash.display.AVM1Movie;
 	import flash.display.Bitmap;
 	import flash.display.BitmapData;
 	import flash.display.DisplayObject;
@@ -79,7 +80,7 @@ package com.devaldi.controls.flexpaper
 		private var _fitMode:String = FitModeEnum.FITNONE; 
 		private var _scrollToPage:Number = 0;
 		private var _numPages:Number = 0;
-		private var _currPage:Number = 1;
+		private var _currPage:Number = 0;
 		private var _tweencount:Number = 0;
 		private var _bbusyloading:Boolean = true;
 		private var _loaderList:Array;
@@ -88,7 +89,7 @@ package com.devaldi.controls.flexpaper
 		private var _fitPageOnLoad:Boolean = false;
 		private var _fitWidthOnLoad:Boolean = false;
 		private var _dupImageClicked:Boolean = false;
-		private var _fLoader:ForcibleLoader;
+		private var _fLoader:AVM2Loader;
 		private var _progressiveLoading:Boolean = false;
 		private var _repaintTimer:Timer;
 		private var _frameLoadCount:int = 0;
@@ -108,6 +109,11 @@ package com.devaldi.controls.flexpaper
 		public function Viewer(){
 			super();
 		}
+		
+		[Bindable]
+		public function get BusyLoading():Boolean {
+			return _bbusyloading;
+		}	
 		
 		[Bindable]
 		public function get ViewMode():String {
@@ -255,7 +261,7 @@ package com.devaldi.controls.flexpaper
 			if(_viewMode != ViewModeEnum.PORTRAIT){return;}
 			
 			var _target:DisplayObject;
-			_paperContainer.CenteringEnabled = true;
+			_paperContainer.CenteringEnabled = (_paperContainer.width>0);
 			
 			_tweencount = _displayContainer.numChildren;
 			
@@ -269,12 +275,20 @@ package com.devaldi.controls.flexpaper
 			_scale = factor;
 		}
 		
+		private function getFitWidthFactor():Number{
+			return (_paperContainer.width / _libMC.width) - 0.032; //- 0.03;
+		}
+		
+		private function getFitHeightFactor():Number{
+			return  (_paperContainer.height / _libMC.height);
+		}
+		
 		public function fitWidth():void{
 			if(_displayContainer.numChildren == 0){return;}
 			
 			var _target:DisplayObject;
-			_paperContainer.CenteringEnabled = true;
-			var factor:Number = (_paperContainer.width / _libMC.width) - 0.032; //- 0.03; 
+			_paperContainer.CenteringEnabled = (_paperContainer.width>0);
+			var factor:Number = getFitWidthFactor();
 			_scale = factor;
 			
 			for(var i:int=0;i<_displayContainer.numChildren;i++){
@@ -292,8 +306,8 @@ package com.devaldi.controls.flexpaper
 			if(_displayContainer.numChildren == 0){return;}
 			
 			var _target:DisplayObject;
-			_paperContainer.CenteringEnabled = true;
-			var factor:Number = (_paperContainer.height / _libMC.height); 
+			_paperContainer.CenteringEnabled = (_paperContainer.height>0);
+			var factor:Number = getFitHeightFactor(); 
 			_scale = factor;
 			
 			for(var i:int=0;i<_displayContainer.numChildren;i++){
@@ -311,7 +325,7 @@ package com.devaldi.controls.flexpaper
 			_tweencount--;
 						
 			if(_tweencount==0){
-				_paperContainer.dispatchEvent(new FlexEvent(FlexEvent.UPDATE_COMPLETE));
+				repositionPapers();
 			}
 		}
 		
@@ -369,6 +383,7 @@ package com.devaldi.controls.flexpaper
 			}
 						
 			_repaintTimer.reset();_repaintTimer.start();
+			//repositionPapers();
 		}
 		
 		private function repaintHandler(e:Event):void {
@@ -394,10 +409,9 @@ package com.devaldi.controls.flexpaper
 			
 			if(!bFound){
 				_bbusyloading = false;
-				
-				if(_fitPageOnLoad){FitMode = FitModeEnum.FITHEIGHT;_fitPageOnLoad=false;}
-				
-				if(_fitWidthOnLoad){FitMode = FitModeEnum.FITWIDTH;_fitWidthOnLoad=false;} 
+				if(_fitPageOnLoad){FitMode = FitModeEnum.FITHEIGHT;_fitPageOnLoad=false;_scrollToPage=1;}
+				if(_fitWidthOnLoad){FitMode = FitModeEnum.FITWIDTH;_fitWidthOnLoad=false;_scrollToPage=1;} 
+				_displayContainer.visible = true;
 			}			
 		}
 		
@@ -411,6 +425,7 @@ package com.devaldi.controls.flexpaper
 				var _thumbData:BitmapData;
 				var uloaderidx:int=0;
 				
+				
 				for(var i:int=0;i<_pageList.length;i++){
 					if(!bFoundFirst && ((i) * (_pageList[i].height + 6)) >= _paperContainer.verticalScrollPosition){
 						bFoundFirst = true;
@@ -423,7 +438,7 @@ package com.devaldi.controls.flexpaper
 								uloaderidx = (i==_pageList.length-1&&loaderidx+3<_loaderList.length)?loaderidx+3:(loaderidx<_loaderList.length)?loaderidx:0;									
 								
 								if(!_bbusyloading && _loaderList!=null && _loaderList.length>0 && _viewMode == ViewModeEnum.PORTRAIT){
-									if(_libMC!=null&&_libMC.framesLoaded>=_pageList[i].dupIndex &&_loaderList[uloaderidx].content==null||(_loaderList[uloaderidx].content!=null&&_loaderList[uloaderidx].content.framesLoaded<_pageList[i].dupIndex)){
+									if(_libMC!=null&&_libMC.framesLoaded>=_pageList[i].dupIndex && _loaderList[uloaderidx] != null && _loaderList[uloaderidx].content==null||(_loaderList[uloaderidx].content!=null&&_loaderList[uloaderidx].content.framesLoaded<_pageList[i].dupIndex)){
 										_bbusyloading = true;
 										_loaderList[uloaderidx].loadBytes(_fLoader.InputBytes,getExecutionContext());
 										flash.utils.setTimeout(repositionPapers,200);
@@ -494,6 +509,7 @@ package com.devaldi.controls.flexpaper
 			_paperContainer.addEventListener(FlexEvent.UPDATE_COMPLETE,updComplete);
 			_paperContainer.x = 2.5;
 			_paperContainer.addEventListener(MouseEvent.MOUSE_WHEEL, wheelHandler);
+			
 			this.addChild(_paperContainer);				
 			
 			try{
@@ -516,7 +532,6 @@ package com.devaldi.controls.flexpaper
 				_displayContainer.setStyle("horizontalAlign", "center");
 				_paperContainer.addChild(_displayContainer);
 			}
-			
 			_displayContainer.setStyle("verticalAlign", "center");
 			_displayContainer.percentHeight = 100;
 			_displayContainer.percentWidth = 96;
@@ -610,7 +625,7 @@ package com.devaldi.controls.flexpaper
 				
 				dispatchEvent(new Event("onPapersLoading"));
 				
-				_fLoader = new ForcibleLoader(_loader,getExecutionContext(),ProgressiveLoading);
+				_fLoader = new AVM2Loader(_loader,getExecutionContext(),ProgressiveLoading);
 				_fLoader.stream.addEventListener(ProgressEvent.PROGRESS, onLoadProgress);
 				_fLoader.load(new URLRequest(_swfFile),getExecutionContext());
 				
@@ -696,6 +711,10 @@ package com.devaldi.controls.flexpaper
 			if(_pageList==null || (_pageList != null && _pageList.length != numPages)){
 				_pageList = new Array(numPages);
 				
+				_displayContainer.visible = false;
+				if(_fitWidthOnLoad){_scale = getFitWidthFactor();}
+				if(_fitPageOnLoad){_scale = getFitHeightFactor();}
+				
 				_libMC.stop();
 				_libMC.gotoAndStop(1);
 				
@@ -712,6 +731,7 @@ package com.devaldi.controls.flexpaper
 		private function reCreateAllPages():void{
 			if(!_swfLoaded){return;}
 			
+			_displayContainer.visible = false;
 			_displayContainer.removeAllChildren();
 			_pageList = new Array(numPages);			
 			
