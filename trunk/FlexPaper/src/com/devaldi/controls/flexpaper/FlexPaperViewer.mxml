@@ -62,6 +62,9 @@
 		[Bindable]
 		public var ProgressiveLoading:Boolean = false;
 		
+		[Bindable]
+		private var TrueFullScreenActive = false;
+		
 		private var prd:PrintRangeDialog;
 		private var _fixedWidth:Number = -1;
 		private var _fixedHeight:Number = -1;
@@ -108,9 +111,9 @@
 		}
 		
 		private function sliderChange(event:SliderEvent):void {
-            if(!_paperScaleHasPriority)
+            if(!_paperScaleHasPriority && !paper1.BusyLoading)
 			{
-            paper1.Zoom(Slider(event.currentTarget).value);
+            	paper1.Zoom(Slider(event.currentTarget).value);
 			}
 			
 			_paperScaleHasPriority = false;
@@ -233,7 +236,15 @@
         private function fullScreenRedraw(event:FullScreenEvent):void{
         	if(!event.fullScreen && _fixedWidth>0){
         		paper1.setActualSize(_fixedWidth,_fixedHeight);
-        	}
+        	}else{
+				if(paper1.FitMode == FitModeEnum.FITWIDTH)
+					flash.utils.setTimeout(paper1.fitWidth,200);
+				if(paper1.FitMode == FitModeEnum.FITHEIGHT)
+					flash.utils.setTimeout(paper1.fitHeight,200);
+			}
+			
+			TrueFullScreenActive = event.fullScreen && !FullScreenAsMaxWindow;
+			txtSearch.enabled = !TrueFullScreenActive; 
         }
 	]]>
 </mx:Script>
@@ -249,7 +260,7 @@
 		<st:GradientTextInput x="315" y="1" fontSize="9" height="21" width="40" id="txtPage" text="{paper1.currPage}" keyDown="txtPageNumKeyDown(event)" enabled="{paper1.ViewMode == ViewModeEnum.PORTRAIT}" toolTip="@Resource(key='Current Page', bundle='FlexPaper')" tabIndex="8"/>
 		<st:GradientLabel x="359" y="3" fontSize="9" height="17" width="10" text="/"/>
 		<st:GradientLabel x="368" y="3" fontSize="9" height="19" width="28" text="{paper1.numPages}"/>
-		<st:GradientImageButton top="3" x="489" icon="@Embed('/../assets/find.gif')" styleName="toolbttn" width="20" click="paper1.searchText(txtSearch.text);" toolTip="@Resource(key='Search', bundle='FlexPaper')"   tabIndex="11"/>
+		<st:GradientImageButton top="3" x="489" icon="@Embed('/../assets/find.gif')" styleName="toolbttn" width="20" click="paper1.searchText(txtSearch.text);" toolTip="@Resource(key='Search', bundle='FlexPaper')"   tabIndex="11" enabled="{!TrueFullScreenActive}"/>
 		<st:GradientLabel id="lblProgress" x="{paper1.width-31}" textAlign="center" y="5" fontSize="8" height="19" width="32" text="" tabIndex="0"/>
 		<mx:Image source="@Embed('/../assets/bar.gif')" width="3" height="21" x="95" y="1" />
 		<mx:Image source="@Embed('/../assets/bar.gif')" width="3" height="21" x="288" y="1" />
