@@ -50,6 +50,7 @@ package com.devaldi.streaming
                         
                         if(!progressive){
                         	_stream.addEventListener(Event.COMPLETE, completeHandler);
+							_stream.addEventListener(ProgressEvent.PROGRESS , nonProgressiveProgress);
                         }else{
                         	_stream.addEventListener(ProgressEvent.PROGRESS , streamProgressHandler);
                         	_stream.addEventListener(Event.COMPLETE, streamCompleteHandler);
@@ -68,6 +69,9 @@ package com.devaldi.streaming
                 private var _bytesPending:uint = 0;
                 private var _prevLength:uint = 0;
 				private var _loaderList:Array;
+				private var _attempts:Number = 0;
+				private var _doretry:Boolean = true;
+				private var _request:URLRequest;
 				
                 public function get Resigned():Boolean{
                 	return _resigned;
@@ -102,9 +106,20 @@ package com.devaldi.streaming
                 
                 public function load(request:URLRequest, loaderCtx:LoaderContext):void
                 {
-                        _stream.load(request);
-                        _inputBytes = new ByteArray();
+					_attempts++;					
+					_request = request;
+                    _stream.load(request);
+                    _inputBytes = new ByteArray();
+					flash.utils.setTimeout(retry,7000);
                 }
+				
+				private function retry():void{
+					if(_attempts<4 && _doretry){
+						_attempts++;
+						_stream.load(_request);
+						flash.utils.setTimeout(retry,7000);
+					}
+				}
                 
                 private function streamCompleteHandler(event:Event):void{
                 	flash.utils.setTimeout(confirmBytesLoaded,500);
@@ -115,12 +130,14 @@ package com.devaldi.streaming
                 	_loader.loadBytes(_inputBytes,_loaderCtx);
                 }
                 
-                
+				private function nonProgressiveProgress(event:ProgressEvent):void{
+					_doretry = !(_loader.loaderInfo.bytesLoaded>2000);		
+				}
+				
                 private function streamProgressHandler(event:ProgressEvent):void{
                 	//if there are no bytes do nothing
-                	// use http://flexpaper.googlecode.com/svn/trunk/Example/flash/testcase2/ar09_eng.swf as test for stream
-                	_stream.readBytes(_inputBytes,_inputBytes.length);_bytesPending = _inputBytes.length - _prevLength;
-
+					_stream.readBytes(_inputBytes,_inputBytes.length);_bytesPending = _inputBytes.length - _prevLength;
+					
 					if(_inputBytes.length>4){
 						version = uint(_inputBytes[3]);
 						if (version <= 9) {
@@ -140,6 +157,8 @@ package com.devaldi.streaming
                 		_prevLength = _inputBytes.length;
                 		_loader.loadBytes(_inputBytes,_loaderCtx);
                 	}
+
+					_doretry = !(_loader.loaderInfo.bytesLoaded>2000);					
                 }
                 
                 private function completeHandler(event:Event):void
