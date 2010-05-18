@@ -255,7 +255,7 @@ package com.devaldi.controls.flexpaper
 		}				
 		
 		public function Zoom(factor:Number):void{
-			if(factor<0.10 || factor>5)
+			if(factor<0.10 || factor>5 || factor == _scale)
 				return;
 			
 			if(_viewMode != ViewModeEnum.PORTRAIT){return;}
@@ -297,8 +297,6 @@ package com.devaldi.controls.flexpaper
 				Tweener.addTween(_target, {scaleX:factor, scaleY:factor,time: 0, transition: 'easenone', onComplete: tweenComplete});
 			}
 			
-			dispatchEvent(new Event("onScaleChanged"));
-			
 			_fitMode = FitModeEnum.FITWIDTH;
 		}
 		
@@ -316,8 +314,6 @@ package com.devaldi.controls.flexpaper
 				Tweener.addTween(_target, {scaleX:factor, scaleY:factor,time: 0, transition: 'easenone', onComplete: tweenComplete});
 			}			
 			
-			dispatchEvent(new Event("onScaleChanged"));	
-			
 			_fitMode = FitModeEnum.FITHEIGHT;	
 		}
 		
@@ -327,6 +323,8 @@ package com.devaldi.controls.flexpaper
 			if(_tweencount==0){
 				repositionPapers();
 			}
+			
+			dispatchEvent(new Event("onScaleChanged"));	
 		}
 		
 		public function set Scale(s:String):void {
@@ -494,8 +492,8 @@ package com.devaldi.controls.flexpaper
 					return  _pageList[pageIndex].parent.y + _pageList[pageIndex].height >= _paperContainer.verticalScrollPosition && 
 						(_pageList[pageIndex].parent.y - _pageList[pageIndex].height) < (_paperContainer.verticalScrollPosition + _paperContainer.height);
 				}else{
-					return  ((pageIndex + 1) * (_pageList[pageIndex].height + 6)) >= _paperContainer.verticalScrollPosition && 
-						((pageIndex) * (_pageList[pageIndex].height + 6)) < (_paperContainer.verticalScrollPosition + _paperContainer.height);
+					return  ((pageIndex + 1) * (_pageList[pageIndex].getScaledHeight() + 6)) >= _paperContainer.verticalScrollPosition && 
+						((pageIndex) * (_pageList[pageIndex].getScaledHeight() + 6)) < (_paperContainer.verticalScrollPosition + _paperContainer.height);
 				}
 			}catch(e:Error){
 				return false;	

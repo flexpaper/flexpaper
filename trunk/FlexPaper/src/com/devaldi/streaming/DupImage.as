@@ -112,5 +112,10 @@ package com.devaldi.streaming
 		{
 			
 		}
+		
+		public function getScaledHeight():Number
+		{
+			return scaleX>0? super.unscaledHeight * this.scaleX:height;
+		}		
 	}
 }
