@@ -39,6 +39,9 @@ The following parameters can be used in FlexPaper
 
  * *FullScreenAsMaxWindow* (_Boolean_) With this set to true, clicking on fullscreen will open a new browser window with FlexPaper maximized instead of using true fullscreen. This is a preferred setting when using FlexPaper as flash standalone as the security limitations of the Flash player disables (for security reasons) most of the input controls in true fullscreen.
 
+ * *ProgressiveLoading* (_Boolean_) Will load and display the document progressively when set to true as opposed to downloading the complete document before displaying the pages. Documents need to be converted to at least Flash version 9 for this to work (-T 9 flag using PDF2SWF)
+
+
 The parameters are passed using flashvars or by setting properties on the flexpaper component inside flex, depending on your choice of usage. The code block below shows an example of how the parameters can be passed using the pre-compiled flash version
 
 {{{
