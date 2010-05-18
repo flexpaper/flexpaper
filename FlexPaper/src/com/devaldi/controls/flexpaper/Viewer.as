@@ -129,7 +129,7 @@ package com.devaldi.controls.flexpaper
 			if(s!=_viewMode){
 				_viewMode = s;
 				if(_viewMode == ViewModeEnum.TILE){_pscale = _scale; _scale = 0.23;_paperContainer.verticalScrollPosition = 0;_fitMode = FitModeEnum.FITNONE;}else{_scale = _pscale;}
-				if(_initialized && _swfLoaded){createDisplayContainer();if(this._progressiveLoading){this.addInLoadedPages(true);}else{reCreateAllPages();}}
+				if(_initialized && _swfLoaded){createDisplayContainer();if(this._progressiveLoading){this.addInLoadedPages(true);}else{reCreateAllPages();}_displayContainer.visible = true;}
 			}
 		}
 		
@@ -414,6 +414,7 @@ package com.devaldi.controls.flexpaper
 				_displayContainer.visible = true;
 			}			
 		}
+		
 		
 		private function repositionPapers():void{
 			if(_loaderList==null||_libMC.framesLoaded==0){return;}
@@ -716,9 +717,9 @@ package com.devaldi.controls.flexpaper
 				if(_fitPageOnLoad){_scale = getFitHeightFactor();}
 				
 				_libMC.stop();
-				_libMC.gotoAndStop(1);
 				
 				for(var i:int=0;i<numPages;i++){
+					_libMC.gotoAndStop(i+1);
 					createPaper(_libMC,i+1);
 				}		
 				
@@ -736,9 +737,9 @@ package com.devaldi.controls.flexpaper
 			_pageList = new Array(numPages);			
 			
 			_libMC.stop();
-			_libMC.gotoAndStop(1);
 			
 			for(var i:int=0;i<numPages;i++){
+				_libMC.gotoAndStop(i+1);
 				createPaper(_libMC,i+1);
 			}
 			
