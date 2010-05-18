@@ -39,9 +39,9 @@ package com.devaldi.streaming
          * fLoader.load(new URLRequest('swf7.swf'));
          * </pre>
          */
-        public class ForcibleLoader
+        public class AVM2Loader
         {
-                public function ForcibleLoader(loader:Loader, loaderCtx:LoaderContext, progressive:Boolean)
+                public function AVM2Loader(loader:Loader, loaderCtx:LoaderContext, progressive:Boolean)
                 {
                         this.loader = loader;
                         
@@ -121,6 +121,13 @@ package com.devaldi.streaming
                 	// use http://flexpaper.googlecode.com/svn/trunk/Example/flash/testcase2/ar09_eng.swf as test for stream
                 	_stream.readBytes(_inputBytes,_inputBytes.length);_bytesPending = _inputBytes.length - _prevLength;
 
+					if(_inputBytes.length>4){
+						version = uint(_inputBytes[3]);
+						if (version <= 9) {
+							updateVersion(9);
+						}					
+					}
+					
 					if(_bytesPending > (event.bytesTotal / 10)) {
 						try{
 			 			new flash.net.LocalConnection().connect('devaldiGCdummy');
@@ -154,7 +161,7 @@ package com.devaldi.streaming
                                 }else if (version <= 7) {
                                         insertFileAttributesTag(_inputBytes);
                                 }
-                                updateVersion(_inputBytes, 9);
+                                updateVersion(9);
                         }
                         
                         loader.loadBytes(_inputBytes,_loaderCtx);
@@ -239,7 +246,7 @@ package com.devaldi.streaming
                 public function resignFileAttributesTag():void{
                 	_resigned=true;
 	                insertFileAttributesTag(_inputBytes);
-	                loader.loadBytes(_inputBytes,_loaderCtx);
+					_loader.loadBytes(_inputBytes,_loaderCtx);
                 }
                 
                 private function insertFileAttributesTag(bytes:ByteArray):void
@@ -259,9 +266,9 @@ package com.devaldi.streaming
                         afterBytes.length = 0;
                 }
                 
-                private function updateVersion(bytes:ByteArray, version:uint):void
+                public function updateVersion(version:uint):void
                 {
-                        bytes[3] = version;
+                        _inputBytes[3] = version;
                 }
                 
                 private function ioErrorHandler(event:IOErrorEvent):void
