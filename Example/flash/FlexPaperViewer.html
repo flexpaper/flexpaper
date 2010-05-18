@@ -45,7 +45,7 @@
             <!-- To use express install, set to playerProductInstall.swf, otherwise the empty string. -->
             var xiSwfUrlStr = "${expressInstallSwf}";
             var flashvars = { 
-                  SwfFile : escape("Paper.swf?v1.3b"),
+                  SwfFile : escape("Paper.swf?v1.3b1"),
 				  Scale : 0.6, 
 				  ZoomTransition : "easeOut",
 				  ZoomTime : 0.5,
@@ -54,6 +54,7 @@
   				  FitWidthOnLoad : false,
   				  PrintEnabled : true,
   				  FullScreenAsMaxWindow : true,
+				  ProgressiveLoading : true,
   				  localeChain: "en_US"
 				  };
 			 var params = {
