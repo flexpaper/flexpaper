@@ -148,7 +148,7 @@
    		}
    		
    		private function onScaleChanged(event:Event):void{
-			_paperScaleHasPriority = true;
+			//_paperScaleHasPriority = true;
 			txtPct.text = formatPct(paper1.Scale);
    			slidPctScale.value = Number(paper1.Scale);
    		}
@@ -254,7 +254,7 @@
 		<mx:Image source="@Embed('/../assets/bar.gif')" width="3" height="21" x="22" y="1" />
 		<st:GradientImageButton id="bttnFitWidth" top="2" left="28" icon="@Embed('/../assets/fit.gif')" styleName="toolbttn" width="20" selected="{paper1.FitMode == FitModeEnum.FITWIDTH}" toggle="true" click="paper1.fitWidth();bttnFitHeight.selected=false;" enabled="{paper1.ViewMode == ViewModeEnum.PORTRAIT}" toolTip="@Resource(key='FitWidth', bundle='FlexPaper')"  tabIndex="1"/>
 		<st:GradientImageButton id="bttnFitHeight" top="2" left="51" icon="@Embed('/../assets/pagefit.gif')" styleName="toolbttn" width="20"  click="paper1.fitHeight();bttnFitWidth.selected=false;" selected="{paper1.FitMode == FitModeEnum.FITHEIGHT}" toggle="true" enabled="{paper1.ViewMode == ViewModeEnum.PORTRAIT}" toolTip="@Resource(key='FitPage', bundle='FlexPaper')"  tabIndex="2"/>
-		<st:GradientHSlider id="slidPctScale" x="99" y="1" maximum="5" change="sliderChange(event)" styleName="sliderbttn" dataTipFormatFunction="formatPct" liveDragging="true" snapInterval="{ZoomInterval}" minimum="0.1" value="{Scale}" width="120" enabled="{paper1.ViewMode == ViewModeEnum.PORTRAIT}" toolTip="@Resource(key='Scale', bundle='FlexPaper')"  tabIndex="4"/>
+		<st:GradientHSlider id="slidPctScale" x="99" y="1" maximum="5" change="sliderChange(event)"  styleName="sliderbttn" dataTipFormatFunction="formatPct" liveDragging="true" snapInterval="{ZoomInterval}" minimum="0.1" value="{Scale}" width="120" enabled="{paper1.ViewMode == ViewModeEnum.PORTRAIT}" toolTip="@Resource(key='Scale', bundle='FlexPaper')"  tabIndex="4"/>
 		<st:GradientTextInput x="220" y="1" fontSize="9" height="21" width="40" id="txtPct" text="{formatPct(Scale)}" keyDown="txtPctKeyDown(event)" enabled="{paper1.ViewMode == ViewModeEnum.PORTRAIT}" toolTip="@Resource(key='Scale', bundle='FlexPaper')" tabIndex="5"/>		
 		<st:GradientImageButton top="2" x="73" icon="@Embed('/../assets/thumbs.gif')" styleName="toolbttn" width="20" click="paper1.switchMode();" toolTip="@Resource(key='ThumbView', bundle='FlexPaper')" selected="{paper1.ViewMode == ViewModeEnum.TILE}" toggle="true"  tabIndex="3"/>
 		<st:GradientTextInput x="315" y="1" fontSize="9" height="21" width="40" id="txtPage" text="{paper1.currPage}" keyDown="txtPageNumKeyDown(event)" enabled="{paper1.ViewMode == ViewModeEnum.PORTRAIT}" toolTip="@Resource(key='Current Page', bundle='FlexPaper')" tabIndex="8"/>
