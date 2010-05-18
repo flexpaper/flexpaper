@@ -45,8 +45,8 @@
             <!-- To use express install, set to playerProductInstall.swf, otherwise the empty string. -->
             var xiSwfUrlStr = "${expressInstallSwf}";
             var flashvars = { 
-                  SwfFile : escape("Paper.swf?v1.3b1x"),
-				  Scale : 0.6, 
+                  SwfFile : escape("Paper.swf?v1.3b1xy"),
+				  Scale : 0.8, 
 				  ZoomTransition : "easeOut",
 				  ZoomTime : 0.5,
   				  ZoomInterval : 0.1,
@@ -69,7 +69,7 @@
             attributes.name = "FlexPaperViewer";
             swfobject.embedSWF(
                 "FlexPaperViewer.swf", "flashContent", 
-                "540", "550", 
+                "800", "700", 
                 swfVersionStr, xiSwfUrlStr, 
                 flashvars, params, attributes);
 			swfobject.createCSS("#flashContent", "display:block;text-align:left;");
