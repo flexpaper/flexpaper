@@ -273,6 +273,8 @@ package com.devaldi.controls.flexpaper
 			
 			FitMode = FitModeEnum.FITNONE;
 			_scale = factor;
+			
+			dispatchEvent(new Event("onScaleChanged"));
 		}
 		
 		private function getFitWidthFactor():Number{
@@ -298,6 +300,8 @@ package com.devaldi.controls.flexpaper
 			}
 			
 			_fitMode = FitModeEnum.FITWIDTH;
+			
+			dispatchEvent(new Event("onScaleChanged"));
 		}
 		
 		public function fitHeight():void{
@@ -314,7 +318,9 @@ package com.devaldi.controls.flexpaper
 				Tweener.addTween(_target, {scaleX:factor, scaleY:factor,time: 0, transition: 'easenone', onComplete: tweenComplete});
 			}			
 			
-			_fitMode = FitModeEnum.FITHEIGHT;	
+			_fitMode = FitModeEnum.FITHEIGHT;
+			
+			dispatchEvent(new Event("onScaleChanged"));
 		}
 		
 		private function tweenComplete():void{
@@ -322,9 +328,7 @@ package com.devaldi.controls.flexpaper
 						
 			if(_tweencount==0){
 				repositionPapers();
-			}
-			
-			dispatchEvent(new Event("onScaleChanged"));	
+			}	
 		}
 		
 		public function set Scale(s:String):void {
@@ -439,7 +443,7 @@ package com.devaldi.controls.flexpaper
 								if(!_bbusyloading && _loaderList!=null && _loaderList.length>0 && _viewMode == ViewModeEnum.PORTRAIT){
 									if(_libMC!=null&&_libMC.framesLoaded>=_pageList[i].dupIndex && _loaderList[uloaderidx] != null && _loaderList[uloaderidx].content==null||(_loaderList[uloaderidx].content!=null&&_loaderList[uloaderidx].content.framesLoaded<_pageList[i].dupIndex)){
 										_bbusyloading = true;
-										_loaderList[uloaderidx].loadBytes(_fLoader.InputBytes,getExecutionContext());
+										_loaderList[uloaderidx].loadBytes(_loader.contentLoaderInfo.bytes,getExecutionContext());
 										flash.utils.setTimeout(repositionPapers,200);
 									}
 								}
@@ -716,9 +720,13 @@ package com.devaldi.controls.flexpaper
 				
 				_libMC.stop();
 				
+				var w:Number=0; var h:Number=0;
+				_libMC.gotoAndStop(1);
+				w = _libMC.width; h=_libMC.height;
+				
 				for(var i:int=0;i<numPages;i++){
 					_libMC.gotoAndStop(i+1);
-					createPaper(_libMC,i+1);
+					createPaper(i+1,(_libMC.width>0)?_libMC.width:w,(_libMC.height>0)?_libMC.height:h);
 				}		
 				
 				addPages();
@@ -736,10 +744,14 @@ package com.devaldi.controls.flexpaper
 			
 			_libMC.stop();
 			
+			var w:Number=0; var h:Number=0;
+			_libMC.gotoAndStop(1);
+			w = _libMC.width; h=_libMC.height;
+			
 			for(var i:int=0;i<numPages;i++){
 				_libMC.gotoAndStop(i+1);
-				createPaper(_libMC,i+1);
-			}
+				createPaper(i+1,(_libMC.width>0)?_libMC.width:w,(_libMC.height>0)?_libMC.height:h);
+			}		
 			
 			addPages();
 			
@@ -848,12 +860,12 @@ package com.devaldi.controls.flexpaper
 			}
 		}
 		
-		private function createPaper(mc:MovieClip,index:int):void {
+		private function createPaper(index:int, w:Number, h:Number):void {
 			var di:DupImage = new DupImage(); 
 			di.scaleX = di.scaleY = _scale;
 			di.dupIndex = index;
-			di.width = mc.width;
-			di.height = mc.height;
+			di.width = w;
+			di.height = h;
 			di.addEventListener(MouseEvent.MOUSE_OVER,dupImageMoverHandler);
 			di.addEventListener(MouseEvent.MOUSE_OUT,dupImageMoutHandler);
 			di.addEventListener(MouseEvent.CLICK,dupImageClickHandler);
