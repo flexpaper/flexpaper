@@ -63,14 +63,14 @@
 		public var ProgressiveLoading:Boolean = false;
 		
 		[Bindable]
-		private var TrueFullScreenActive = false;
+		private var TrueFullScreenActive:Boolean = false;
 		
 		private var prd:PrintRangeDialog;
 		private var _fixedWidth:Number = -1;
 		private var _fixedHeight:Number = -1;
 		private var _browserManager:IBrowserManager;
-		private var _paperScaleHasPriority:Boolean = false;
-			
+		private var _sliderUserChange:Boolean = true;
+		
 		private function Init():void{
 			_browserManager = BrowserManager.getInstance();
 		}	
@@ -110,13 +110,14 @@
 			spin1.visible = true;
 		}
 		
-		private function sliderChange(event:SliderEvent):void {
-            if(!_paperScaleHasPriority && !paper1.BusyLoading)
+		private function sliderChange(event:SliderEvent):void 
+		{
+			if(!paper1.BusyLoading && _sliderUserChange)
 			{
             	paper1.Zoom(Slider(event.currentTarget).value);
 			}
 			
-			_paperScaleHasPriority = false;
+			_sliderUserChange = true;
         }		
         
  		private function formatPct(item:Object):String {
@@ -148,9 +149,9 @@
    		}
    		
    		private function onScaleChanged(event:Event):void{
-			//_paperScaleHasPriority = true;
 			txtPct.text = formatPct(paper1.Scale);
-   			slidPctScale.value = Number(paper1.Scale);
+			_sliderUserChange = false;
+			slidPctScale.value = Number(paper1.Scale);
    		}
    		
 		private function showInfo(e:Event):void {

@@ -110,7 +110,9 @@ package com.devaldi.streaming
 					_request = request;
                     _stream.load(request);
                     _inputBytes = new ByteArray();
-					flash.utils.setTimeout(retry,7000);
+					
+					// wait with this one.. seems a bit dodgy
+					//flash.utils.setTimeout(retry,7000);
                 }
 				
 				private function retry():void{
@@ -131,7 +133,7 @@ package com.devaldi.streaming
                 }
                 
 				private function nonProgressiveProgress(event:ProgressEvent):void{
-					_doretry = !(_loader.loaderInfo.bytesLoaded>2000);		
+					_doretry = (_loader.contentLoaderInfo==null || _loader.contentLoaderInfo.bytesLoaded<2000);
 				}
 				
                 private function streamProgressHandler(event:ProgressEvent):void{
@@ -158,7 +160,7 @@ package com.devaldi.streaming
                 		_loader.loadBytes(_inputBytes,_loaderCtx);
                 	}
 
-					_doretry = !(_loader.loaderInfo.bytesLoaded>2000);					
+					_doretry = (_loader.contentLoaderInfo==null || _loader.contentLoaderInfo.bytesLoaded<2000);					
                 }
                 
                 private function completeHandler(event:Event):void
@@ -292,12 +294,12 @@ package com.devaldi.streaming
                 
                 private function ioErrorHandler(event:IOErrorEvent):void
                 {
-                        //loader.contentLoaderInfo.dispatchEvent(new IOErrorEvent(IOErrorEvent.IO_ERROR));
+                       // loader.contentLoaderInfo.dispatchEvent(new IOErrorEvent(IOErrorEvent.IO_ERROR));
                 }
                 
                 private function securityErrorHandler(event:SecurityErrorEvent):void
                 {
-                        //loader.contentLoaderInfo.dispatchEvent(new SecurityErrorEvent(SecurityErrorEvent.SECURITY_ERROR));
+                  //      loader.contentLoaderInfo.dispatchEvent(new SecurityErrorEvent(SecurityErrorEvent.SECURITY_ERROR));
                 }
                 
         }
