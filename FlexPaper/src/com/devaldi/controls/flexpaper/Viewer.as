@@ -55,6 +55,7 @@ package com.devaldi.controls.flexpaper
 	import mx.core.UIComponent;
 	import mx.events.FlexEvent;
 	import mx.managers.CursorManager;
+	import flash.utils.ByteArray;
 	
 	[Event(name="onPapersLoaded", type="flash.events.Event")]
 	[Event(name="onPapersLoading", type="flash.events.Event")]
@@ -68,6 +69,7 @@ package com.devaldi.controls.flexpaper
 		private var _swfFileChanged:Boolean = false;
 		private var _initialized:Boolean = false;
 		private var _loader:Loader = new Loader();
+		private var _loaderptr:Loader;
 		private var _libMC:MovieClip;
 		private var _displayContainer:Container;
 		private var _paperContainer:ZoomCanvas;
@@ -96,6 +98,7 @@ package com.devaldi.controls.flexpaper
 		private var loaderCtx:LoaderContext;
 		private var _adjGotoPage:int = 0;
 		private var _zoomInterval:Number = 0;
+		private var _inputBytes:ByteArray;
 		
 		[Embed(source="/../assets/grab.gif")]
 		public var grabCursor:Class;	  
@@ -242,6 +245,7 @@ package com.devaldi.controls.flexpaper
 		public function set SwfFile(s:String):void {
 			_swfFile = s;
 			_swfFileChanged = true;
+			_loaderptr = null;
 			
 			// Changing the SWF file causes the component to invalidate.
 			invalidateProperties();
@@ -402,7 +406,7 @@ package com.devaldi.controls.flexpaper
 			if(!ProgressiveLoading){
 				for(var i:int=0;i<_loaderList.length;i++){
 					if(!_loaderList[i].loaded){
-						_loaderList[i].loadBytes(_fLoader.InputBytes,getExecutionContext());
+						_loaderList[i].loadBytes(_inputBytes,getExecutionContext());
 						bFound = true;
 						break;
 					}
@@ -443,7 +447,7 @@ package com.devaldi.controls.flexpaper
 								if(!_bbusyloading && _loaderList!=null && _loaderList.length>0 && _viewMode == ViewModeEnum.PORTRAIT){
 									if(_libMC!=null&&_libMC.framesLoaded>=_pageList[i].dupIndex && _loaderList[uloaderidx] != null && _loaderList[uloaderidx].content==null||(_loaderList[uloaderidx].content!=null&&_loaderList[uloaderidx].content.framesLoaded<_pageList[i].dupIndex)){
 										_bbusyloading = true;
-										_loaderList[uloaderidx].loadBytes(_loader.contentLoaderInfo.bytes,getExecutionContext());
+										_loaderList[uloaderidx].loadBytes(_inputBytes,getExecutionContext());
 										flash.utils.setTimeout(repositionPapers,200);
 									}
 								}
@@ -660,11 +664,13 @@ package com.devaldi.controls.flexpaper
 						_libMC = event.currentTarget.content as MovieClip;
 					DupImage.paperSource = _libMC;
 				}catch(e:Error){
-					if(!_fLoader.Resigned){_fLoader.resignFileAttributesTag();return;}
+					if(!_fLoader.Resigned){_fLoader.resignFileAttributesTag(_fLoader.InputBytes,_loader);return;}
 				}
 				
-				if(_libMC == null && !_fLoader.Resigned){_fLoader.resignFileAttributesTag();return;}
-				
+				if(_libMC == null && !_fLoader.Resigned){_fLoader.resignFileAttributesTag(_fLoader.InputBytes,_loader);return;}
+
+				_inputBytes = _fLoader.InputBytes;
+					
 				if(_libMC.height>0&&_loaderList==null){createLoaderList();}
 				numPages = _libMC.totalFrames;
 				_swfLoaded = true
@@ -679,12 +685,27 @@ package com.devaldi.controls.flexpaper
 					var mobj:Object = event.currentTarget.content;
 					var firstLoad:Boolean = false;
 					
+					if(mobj is AVM1Movie && _loaderptr==null){
+						_inputBytes = _loader.contentLoaderInfo.bytes;
+						
+						if(_loaderptr==null){
+							_fLoader.flagSWF9Bit(_inputBytes);
+						}
+						
+						_loaderptr = new Loader();
+						_loaderptr.contentLoaderInfo.addEventListener(Event.COMPLETE, swfComplete);
+						if(!_fLoader.Resigned){_fLoader.resignFileAttributesTag(_inputBytes,_loaderptr);}
+						_loaderptr.loadBytes(_inputBytes);
+					}
+					
 					if(mobj is MovieClip){
 						_libMC = mobj as MovieClip;
 						if(_libMC.height>0&&_loaderList==null){createLoaderList();}
 						DupImage.paperSource = _libMC;
 						numPages = _libMC.totalFrames;
 						firstLoad = _pageList == null || (_pageList.length == 0 && numPages > 0);
+						
+						if(_loaderptr==null){_inputBytes = _fLoader.InputBytes;}else{_inputBytes = _loaderptr.contentLoaderInfo.bytes;}
 						
 						if(_libMC.framesLoaded > 0)
 							addInLoadedPages();
@@ -793,7 +814,7 @@ package com.devaldi.controls.flexpaper
 		private var searchPageIndex:int = -1;
 		private var searchShape:ShapeMarker;
 		private var prevSearchText:String = "";
-		private var prevYsave=-1;
+		private var prevYsave:Number=-1;
 		
 		public function searchText(text:String):void{
 			var tri:Array;

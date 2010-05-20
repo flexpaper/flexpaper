@@ -143,7 +143,7 @@ package com.devaldi.streaming
 					if(_inputBytes.length>4){
 						version = uint(_inputBytes[3]);
 						if (version <= 9) {
-							updateVersion(9);
+							updateVersion(9,_inputBytes);
 						}					
 					}
 					
@@ -182,13 +182,13 @@ package com.devaldi.streaming
                                 }else if (version <= 7) {
                                         insertFileAttributesTag(_inputBytes);
                                 }
-                                updateVersion(9);
+                                updateVersion(9,_inputBytes);
                         }
                         
                         loader.loadBytes(_inputBytes,_loaderCtx);
                 }
                 
-                private function isCompressed(bytes:ByteArray):Boolean
+                public function isCompressed(bytes:ByteArray):Boolean
                 {
                         return bytes[0] == 0x43;
                 }
@@ -252,7 +252,7 @@ package com.devaldi.streaming
                         return -1;
                 }
                 
-                private function flagSWF9Bit(bytes:ByteArray):void
+                public function flagSWF9Bit(bytes:ByteArray):void
                 {
                         var pos:int = findFileAttributesPosition(getBodyPosition(bytes), bytes);
 						
@@ -264,10 +264,10 @@ package com.devaldi.streaming
 						}
                 }
                 
-                public function resignFileAttributesTag():void{
+                public function resignFileAttributesTag(bytes:ByteArray, ldr:Loader):void{
                 	_resigned=true;
-	                insertFileAttributesTag(_inputBytes);
-					_loader.loadBytes(_inputBytes,_loaderCtx);
+	                insertFileAttributesTag(bytes);
+					ldr.loadBytes(bytes,_loaderCtx);
                 }
                 
                 private function insertFileAttributesTag(bytes:ByteArray):void
@@ -287,9 +287,9 @@ package com.devaldi.streaming
                         afterBytes.length = 0;
                 }
                 
-                public function updateVersion(version:uint):void
+                public function updateVersion(version:uint, b:ByteArray):void
                 {
-                        _inputBytes[3] = version;
+                        b[3] = version;
                 }
                 
                 private function ioErrorHandler(event:IOErrorEvent):void
