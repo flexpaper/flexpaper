@@ -685,16 +685,16 @@ package com.devaldi.controls.flexpaper
 					var mobj:Object = event.currentTarget.content;
 					var firstLoad:Boolean = false;
 					
-					if(mobj is AVM1Movie && _loaderptr==null){
+					if(mobj is AVM1Movie){
 						_inputBytes = _loader.contentLoaderInfo.bytes;
 						
 						if(_loaderptr==null){
 							_fLoader.flagSWF9Bit(_inputBytes);
+							_loaderptr = new Loader();
+							_loaderptr.contentLoaderInfo.addEventListener(Event.COMPLETE, swfComplete);
 						}
 						
-						_loaderptr = new Loader();
-						_loaderptr.contentLoaderInfo.addEventListener(Event.COMPLETE, swfComplete);
-						if(!_fLoader.Resigned){_fLoader.resignFileAttributesTag(_inputBytes,_loaderptr);}
+						_fLoader.resignFileAttributesTag(_inputBytes,_loaderptr);
 						_loaderptr.loadBytes(_inputBytes);
 					}
 					
