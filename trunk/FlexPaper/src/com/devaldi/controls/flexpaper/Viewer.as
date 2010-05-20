@@ -685,7 +685,7 @@ package com.devaldi.controls.flexpaper
 					var mobj:Object = event.currentTarget.content;
 					var firstLoad:Boolean = false;
 					
-					if(mobj is AVM1Movie){
+					if(mobj is AVM1Movie || _loaderptr != null){
 						_inputBytes = _loader.contentLoaderInfo.bytes;
 						
 						if(_loaderptr==null){
