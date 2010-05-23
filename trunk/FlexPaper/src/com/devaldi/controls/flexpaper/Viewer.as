@@ -282,10 +282,12 @@ package com.devaldi.controls.flexpaper
 		}
 		
 		private function getFitWidthFactor():Number{
+			_libMC.gotoAndStop(1);
 			return (_paperContainer.width / _libMC.width) - 0.032; //- 0.03;
 		}
 		
 		private function getFitHeightFactor():Number{
+			_libMC.gotoAndStop(1);
 			return  (_paperContainer.height / _libMC.height);
 		}
 		
