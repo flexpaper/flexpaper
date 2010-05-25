@@ -383,6 +383,8 @@ package com.devaldi.controls.flexpaper
 			}
 		}
 		
+		
+		
 		private function updComplete(event:Event):void	{
 			if(_scrollToPage>0){
 				_paperContainer.verticalScrollPosition = _pageList[_scrollToPage-1].y;
@@ -738,9 +740,6 @@ package com.devaldi.controls.flexpaper
 				_pageList = new Array(numPages);
 				
 				_displayContainer.visible = false;
-				if(_fitWidthOnLoad){_scale = getFitWidthFactor();}
-				if(_fitPageOnLoad){_scale = getFitHeightFactor();}
-				
 				_libMC.stop();
 				
 				var w:Number=0; var h:Number=0;
@@ -753,6 +752,9 @@ package com.devaldi.controls.flexpaper
 				}		
 				
 				addPages();
+				
+				if(_fitWidthOnLoad){_scale = getFitWidthFactor();}
+				if(_fitPageOnLoad){_scale = getFitHeightFactor();}
 			}	
 			
 			flash.utils.setTimeout(repositionPapers,500);
