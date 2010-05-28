@@ -1,6 +1,6 @@
 There is a range of available converters, both commercial and free. The following example shows the recommended settings using the open source converter "PDF2SWF" which can be found here: http://www.swftools.org/
 
-Converting your documents using PDF2SWF if fairly straight forward. Documents are preferrably converted using the command line executable. The following example shows the currently recommended setting for converting your document:
+Converting your documents using PDF2SWF is fairly straight forward. Documents are preferrably converted using the command line executable. The following example shows the currently recommended setting for converting your document:
 
 *C:\SWFTools\pdf2swf.exe Paper.pdf -o Paper.swf -f -T 9 -t -G*
 
