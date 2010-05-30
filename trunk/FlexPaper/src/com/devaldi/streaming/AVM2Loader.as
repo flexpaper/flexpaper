@@ -128,8 +128,13 @@ package com.devaldi.streaming
                 }
                 
                 private function confirmBytesLoaded():void{
-                	_stream.readBytes(_inputBytes,_inputBytes.length);
-                	_loader.loadBytes(_inputBytes,_loaderCtx);
+                	try{
+						_stream.readBytes(_inputBytes,_inputBytes.length);
+	                	_loader.loadBytes(_inputBytes,_loaderCtx);
+					}
+					catch(e:Error){ // on error try again, version 9 of flash player sometimes fails.
+						_loader.loadBytes(_inputBytes,_loaderCtx);
+					}
                 }
                 
 				private function nonProgressiveProgress(event:ProgressEvent):void{
@@ -147,17 +152,15 @@ package com.devaldi.streaming
 						}					
 					}
 					
-					if(_bytesPending > (event.bytesTotal / 10)) {
-						try{
-			 			new flash.net.LocalConnection().connect('devaldiGCdummy');
-			   			new flash.net.LocalConnection().connect('devaldiGCdummy');
-			   			} catch (e:*) {}
-						
-						try{flash.system.System.gc();} catch (e:*) {}
-
-                		_bytesPending = 0;
+					if(_bytesPending > (event.bytesTotal / 10) || (_loader.contentLoaderInfo != null && event.bytesTotal == _bytesPending + _loader.contentLoaderInfo.bytesLoaded)) {
+						_bytesPending = 0;
                 		_prevLength = _inputBytes.length;
-                		_loader.loadBytes(_inputBytes,_loaderCtx);
+                		try{
+							_loader.unload();
+							_loader.loadBytes(_inputBytes,_loaderCtx);}
+						catch(e:Error){ // on error try again, version 9 of flash player sometimes fails.
+							_loader.loadBytes(_inputBytes,_loaderCtx);
+						}
                 	}
 
 					_doretry = (_loader.contentLoaderInfo==null || _loader.contentLoaderInfo.bytesLoaded<2000);					
