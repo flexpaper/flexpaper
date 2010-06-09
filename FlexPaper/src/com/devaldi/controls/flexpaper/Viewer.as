@@ -41,10 +41,12 @@ package com.devaldi.controls.flexpaper
 	import flash.geom.Matrix;
 	import flash.net.URLRequest;
 	import flash.printing.PrintJob;
+	import flash.printing.PrintJobOptions;
 	import flash.system.LoaderContext;
 	import flash.system.System;
 	import flash.text.TextSnapshot;
 	import flash.ui.Keyboard;
+	import flash.utils.ByteArray;
 	import flash.utils.Timer;
 	
 	import mx.containers.Canvas;
@@ -55,7 +57,6 @@ package com.devaldi.controls.flexpaper
 	import mx.core.UIComponent;
 	import mx.events.FlexEvent;
 	import mx.managers.CursorManager;
-	import flash.utils.ByteArray;
 	
 	[Event(name="onPapersLoaded", type="flash.events.Event")]
 	[Event(name="onPapersLoading", type="flash.events.Event")]
@@ -113,7 +114,6 @@ package com.devaldi.controls.flexpaper
 			super();
 		}
 		
-		[Bindable]
 		public function get BusyLoading():Boolean {
 			return _bbusyloading;
 		}	
@@ -363,7 +363,7 @@ package com.devaldi.controls.flexpaper
 			uic.addChild(_loader);
 			
 			// Create a timer to use for repainting
-			_repaintTimer = new Timer(20,0);
+			_repaintTimer = new Timer(5,0);
 			_repaintTimer.addEventListener("timer", repaintHandler);
 			createDisplayContainer();
 		}
@@ -444,7 +444,7 @@ package com.devaldi.controls.flexpaper
 					}
 										
 					if(checkIsVisible(i)){
-						if(_pageList[i].numChildren<3){
+						if(_pageList[i].numChildren<4){
 							if(ViewMode == ViewModeEnum.PORTRAIT){ 		
 								uloaderidx = (i==_pageList.length-1&&loaderidx+3<_loaderList.length)?loaderidx+3:(loaderidx<_loaderList.length)?loaderidx:0;									
 								
@@ -478,11 +478,11 @@ package com.devaldi.controls.flexpaper
 							
 						}
 						
-						if(_viewMode != ViewModeEnum.TILE && searchShape != null){
-							if(i+1 == searchPageIndex && searchShape.parent != _pageList[i]){
-								_pageList[i].addChildAt(searchShape,_pageList[i].numChildren);
-							}else if(i+1 == searchPageIndex && searchShape.parent == _pageList[i]){
-								_pageList[i].setChildIndex(searchShape,_pageList[i].numChildren -1);
+						if(_viewMode != ViewModeEnum.TILE && _selectionMarker != null){
+							if(i+1 == searchPageIndex && _selectionMarker.parent != _pageList[i]){
+								_pageList[i].addChildAt(_selectionMarker,_pageList[i].numChildren);
+							}else if(i+1 == searchPageIndex && _selectionMarker.parent == _pageList[i]){
+								_pageList[i].setChildIndex(_selectionMarker,_pageList[i].numChildren -1);
 							}
 						}
 						
@@ -816,7 +816,7 @@ package com.devaldi.controls.flexpaper
 		private var snap:TextSnapshot;
 		private var searchIndex:int = -1;		
 		private var searchPageIndex:int = -1;
-		private var searchShape:ShapeMarker;
+		private var _selectionMarker:ShapeMarker;
 		private var prevSearchText:String = "";
 		private var prevYsave:Number=-1;
 		
@@ -827,10 +827,10 @@ package com.devaldi.controls.flexpaper
 			
 			if(prevSearchText != text){
 				searchIndex = -1;
-				searchPageIndex = -1;
+				//searchPageIndex = -1;
 				prevSearchText = text;
 			}
-			if(searchShape!=null && searchShape.parent != null){searchShape.parent.removeChild(searchShape);}
+			if(_selectionMarker!=null && _selectionMarker.parent != null){_selectionMarker.parent.removeChild(_selectionMarker);}
 			
 			// start searching from the current page
 			if(searchPageIndex == -1){
@@ -846,9 +846,9 @@ package com.devaldi.controls.flexpaper
 				searchIndex = snap.findText((searchIndex==-1?0:searchIndex),text,false);
 				
 				if(searchIndex > 0){ // found a new match
-					searchShape = new ShapeMarker();
+					_selectionMarker = new ShapeMarker();
 					
-					searchShape.graphics.beginFill(0x0095f7,0.3);
+					_selectionMarker.graphics.beginFill(0x0095f7,0.3);
 					
 					for(var ti:int=0;ti<text.length;ti++){
 						tri = snap.getTextRunInfo(searchIndex+ti,searchIndex+ti+1);
@@ -858,15 +858,15 @@ package com.devaldi.controls.flexpaper
 							prevYsave = tri[0].matrix_ty;
 							
 							if((tri[0].corner1x-tri[0].corner3x)>0 && (tri[0].corner3y-tri[0].corner1y)>0){
-								searchShape.graphics.drawRect(tri[0].corner3x,tri[0].corner1y,((tri[1].corner1y==tri[0].corner1y&&tri[1].corner3x>tri[0].corner1x)?tri[1].corner3x:tri[0].corner1x)-tri[0].corner3x,tri[0].corner3y-tri[0].corner1y);
+								_selectionMarker.graphics.drawRect(tri[0].corner3x,tri[0].corner1y,((tri[1].corner1y==tri[0].corner1y)?tri[1].corner3x:tri[0].corner1x)-tri[0].corner3x,tri[0].corner3y-tri[0].corner1y);
 							}else{
-								searchShape.graphics.drawRect(tri[0].matrix_tx,tri[0].matrix_ty+1,tri[1].matrix_tx-tri[0].matrix_tx,4);
+								_selectionMarker.graphics.drawRect(tri[0].matrix_tx,tri[0].matrix_ty+1,tri[1].matrix_tx-tri[0].matrix_tx,4);
 							}
 						}
 					}
 					
 					if(prevYsave>0){
-						searchShape.graphics.endFill();
+						_selectionMarker.graphics.endFill();
 						_adjGotoPage = (prevYsave) * _scale - 50;
 						gotoPage(searchPageIndex);
 						break;
@@ -894,8 +894,90 @@ package com.devaldi.controls.flexpaper
 			di.addEventListener(MouseEvent.MOUSE_OVER,dupImageMoverHandler);
 			di.addEventListener(MouseEvent.MOUSE_OUT,dupImageMoutHandler);
 			di.addEventListener(MouseEvent.CLICK,dupImageClickHandler);
+			//di.addEventListener(MouseEvent.MOUSE_DOWN,textSelectorMouseDownHandler);
 			_pageList[index-1] = di;
 		}	
+		
+		private function textSelectorMouseDownHandler(event:MouseEvent):void{
+			_currentlySelectedText = "";
+			_firstHitIndex = -1;
+			_lastHitIndex = -1;
+			
+			if(_selectionMarker!=null&&_selectionMarker.parent!=null){_selectionMarker.parent.removeChild(_selectionMarker);}
+			
+			systemManager.addEventListener(
+				MouseEvent.MOUSE_MOVE, textSelectorMoveHandler, true);
+			
+			systemManager.addEventListener(
+				MouseEvent.MOUSE_UP, textSelectorMouseUpHandler, true);
+			
+			systemManager.stage.removeEventListener(
+				Event.MOUSE_LEAVE, textSelectorMouseLeaveHandler);
+		}
+		
+		private var _firstHitIndex:int = -1;
+		private var _lastHitIndex:int = -1;
+		private var _currentlySelectedText:String = "";
+		private var _tri:Array;
+		
+		private function textSelectorMoveHandler(event:MouseEvent):void{
+			event.stopImmediatePropagation();
+
+			if(!event.target is DupLoader){return;}
+			
+			var mc:MovieClip = (event.target.content as MovieClip);
+			var ts:TextSnapshot = mc.textSnapshot;
+			var hitIndex:int = ts.hitTestTextNearPos(event.target.parent.mouseX,event.target.parent.mouseY,10);
+			
+			if(hitIndex>0){
+				if(_firstHitIndex==-1){_firstHitIndex=hitIndex;}
+				_lastHitIndex = hitIndex; 
+			}
+			
+			snap = _libMC.textSnapshot;			
+			_tri = snap.getTextRunInfo(_firstHitIndex,_lastHitIndex);
+			
+			if(_selectionMarker!=null&&_selectionMarker.parent!=null){_selectionMarker.parent.removeChild(_selectionMarker);}
+			
+			_selectionMarker = new ShapeMarker();
+			
+			for(var i:int=0;i<_tri.length-1;i++){
+				_selectionMarker.graphics.beginFill(0x0095f7,0.3);
+				_selectionMarker.graphics.drawRect(_tri[i].corner3x,_tri[i].corner1y,((_tri[i+1].corner1y==_tri[i].corner1y)?_tri[i+1].corner3x:_tri[i].corner1x)-_tri[i].corner3x,_tri[i].corner3y-_tri[i].corner1y);
+				_selectionMarker.graphics.endFill();
+			}
+
+			_pageList[mc.currentFrame-1].addChildAt(_selectionMarker,_pageList[mc.currentFrame-1].numChildren);
+			searchPageIndex = mc.currentFrame;
+		}
+		
+		private function textSelectorMouseUpHandler(event:MouseEvent):void{
+			stopSelecting();	
+		}
+		
+		private function textSelectorMouseLeaveHandler(event:MouseEvent):void{
+			stopSelecting();	
+		}
+			
+		
+		private function stopSelecting():void{
+			systemManager.removeEventListener(
+				MouseEvent.MOUSE_MOVE, textSelectorMoveHandler, true);
+			
+			systemManager.removeEventListener(
+				MouseEvent.MOUSE_UP, textSelectorMouseUpHandler, true);
+			
+			systemManager.stage.removeEventListener(
+				Event.MOUSE_LEAVE, textSelectorMouseLeaveHandler);
+		
+			var rev:int;
+			if(_firstHitIndex>_lastHitIndex){rev=_firstHitIndex;_firstHitIndex=_lastHitIndex;_lastHitIndex=rev;}
+			
+			snap = _libMC.textSnapshot;
+			_currentlySelectedText = snap.getText(_firstHitIndex,_lastHitIndex);
+			_tri = snap.getTextRunInfo(_firstHitIndex,_lastHitIndex);
+		
+		}
 		
 		private function dupImageClickHandler(event:MouseEvent):void{
 			if((_viewMode == ViewModeEnum.TILE) && event.target != null && event.target is DupImage){
@@ -950,9 +1032,12 @@ package com.devaldi.controls.flexpaper
 				else if((pj.pageWidth/_libMC.width) < 1)
 					_libMC.scaleX = _libMC.scaleY = (pj.pageWidth/_libMC.width);
 				
+				var options:PrintJobOptions = new PrintJobOptions();
+				options.printAsBitmap = true;
+				
 				for(var i:int=0;i<_libMC.framesLoaded;i++){
 					_libMC.gotoAndStop(i+1);
-					pj.addPage(_swfContainer);
+					pj.addPage(_swfContainer,null,options);
 				}			
 				
 				pj.send();
@@ -986,6 +1071,9 @@ package com.devaldi.controls.flexpaper
 			}
 			
 			var pj:PrintJob = new PrintJob();
+			var options:PrintJobOptions = new PrintJobOptions();
+			options.printAsBitmap = true;
+			
 			if(pj.start()){
 				_libMC.stop();
 				
@@ -997,7 +1085,7 @@ package com.devaldi.controls.flexpaper
 				for(var ip:int=0;ip<_libMC.framesLoaded;ip++){
 					if(pageNumList[ip+1] != null){
 						_libMC.gotoAndStop(ip+1);
-						pj.addPage(_swfContainer);
+						pj.addPage(_swfContainer,null,options);
 					}
 				}			
 				
