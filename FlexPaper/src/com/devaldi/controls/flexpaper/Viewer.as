@@ -1033,7 +1033,7 @@ package com.devaldi.controls.flexpaper
 					_libMC.scaleX = _libMC.scaleY = (pj.pageWidth/_libMC.width);
 				
 				var options:PrintJobOptions = new PrintJobOptions();
-				options.printAsBitmap = true;
+				//options.printAsBitmap = true;
 				
 				for(var i:int=0;i<_libMC.framesLoaded;i++){
 					_libMC.gotoAndStop(i+1);
@@ -1072,7 +1072,7 @@ package com.devaldi.controls.flexpaper
 			
 			var pj:PrintJob = new PrintJob();
 			var options:PrintJobOptions = new PrintJobOptions();
-			options.printAsBitmap = true;
+			//options.printAsBitmap = true;
 			
 			if(pj.start()){
 				_libMC.stop();
