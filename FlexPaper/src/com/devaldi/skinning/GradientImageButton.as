@@ -36,10 +36,14 @@ package com.devaldi.skinning
 		
 	     override protected function updateDisplayList(w:Number, h:Number):void {
 			if(selected){
+				graphics.clear();
+				
 				var gradientBoxMatrix:Matrix = new Matrix();
 				gradientBoxMatrix.createGradientBox(w, h, 0, 0, 0);
 
-				graphics.beginGradientFill(GradientType.LINEAR,[0x009dff, 0x0079db, 0x0055b7],[0.20, 0.20, 0.20],[0, 128, 255],gradientBoxMatrix);
+				graphics.beginGradientFill(GradientType.LINEAR,[0x009dff, 0x0079db, 0x0055b7],[0.22, 0.22, 0.22],[0, 128, 255],gradientBoxMatrix);
+				//graphics.beginGradientFill(GradientType.LINEAR,[0xdddddd, 0xcccccc, 0xdedede],[1, 1, 1],[100, 200, 255],gradientBoxMatrix);
+				
 				graphics.drawRect(0, 0, width, height);
 			}else{
 				graphics.clear();
