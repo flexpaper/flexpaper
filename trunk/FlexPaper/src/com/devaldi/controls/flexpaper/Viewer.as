@@ -100,12 +100,16 @@ package com.devaldi.controls.flexpaper
 		private var _adjGotoPage:int = 0;
 		private var _zoomInterval:Number = 0;
 		private var _inputBytes:ByteArray;
+		private var _textSelectEnabled:Boolean = false;
 		
 		[Embed(source="/../assets/grab.gif")]
 		public var grabCursor:Class;	  
 		
 		[Embed(source="/../assets/grabbing.gif")]
 		public var grabbingCursor:Class;	  	 
+		
+		[Embed(source="/../assets/textselectcursor.gif")]
+		public var textSelectCursor:Class;	  	 
 		
 		private var grabCursorID:Number = 0;
 		private var grabbingCursorID:Number = 0;
@@ -160,6 +164,17 @@ package com.devaldi.controls.flexpaper
 		public function get ProgressiveLoading():Boolean {
 			return _progressiveLoading;
 		}	
+		
+		
+		public function set TextSelectEnabled(b1:Boolean):void {
+			_textSelectEnabled = b1;
+		}
+		
+		[Bindable]
+		public function get TextSelectEnabled():Boolean {
+			return _textSelectEnabled;
+		}	
+				
 		
 		public function setPaperFocus():void{
 			_paperContainer.setFocus();
@@ -246,6 +261,12 @@ package com.devaldi.controls.flexpaper
 			_swfFile = s;
 			_swfFileChanged = true;
 			_loaderptr = null;
+			_libMC = null;
+			_loaderList = null;
+			if(_displayContainer!=null){_displayContainer.removeAllChildren();} 
+			_pageList = null;
+			_paperContainer.verticalScrollPosition = 0;
+			createDisplayContainer();
 			
 			// Changing the SWF file causes the component to invalidate.
 			invalidateProperties();
@@ -560,25 +581,39 @@ package com.devaldi.controls.flexpaper
 		
 		private function displayContainerrolloverHandler(event:MouseEvent):void{
 			if(_viewMode == ViewModeEnum.PORTRAIT){
-				grabCursorID = CursorManager.setCursor(grabCursor);
+				if(TextSelectEnabled){
+					grabCursorID = CursorManager.setCursor(textSelectCursor);
+				}else{
+					grabCursorID = CursorManager.setCursor(grabCursor);
+				}
 			}
 		}
 		
 		private function displayContainerMouseUpHandler(event:MouseEvent):void{
 			if(_viewMode == ViewModeEnum.PORTRAIT){
 				CursorManager.removeCursor(grabbingCursorID);
-				grabCursorID = CursorManager.setCursor(grabCursor);
+				if(TextSelectEnabled){
+					grabCursorID = CursorManager.setCursor(textSelectCursor);
+				}else{
+					grabCursorID = CursorManager.setCursor(grabCursor);
+				}
 			}
 		}
 		
 		private function displayContainerDoubleClickHandler(event:MouseEvent):void{
+			if(TextSelectEnabled){return;}
+			
 			FitMode = (FitMode == FitModeEnum.FITWIDTH)?FitModeEnum.FITHEIGHT:FitModeEnum.FITWIDTH; 
 		}
 		
 		private function displayContainerMouseDownHandler(event:MouseEvent):void{
 			if(_viewMode == ViewModeEnum.PORTRAIT){
 				CursorManager.removeCursor(grabCursorID);
-				grabbingCursorID = CursorManager.setCursor(grabbingCursor);
+				if(TextSelectEnabled){
+					grabbingCursorID = CursorManager.setCursor(textSelectCursor);
+				}else{
+					grabbingCursorID = CursorManager.setCursor(grabbingCursor);
+				}
 			}
 		}
 		
@@ -894,11 +929,13 @@ package com.devaldi.controls.flexpaper
 			di.addEventListener(MouseEvent.MOUSE_OVER,dupImageMoverHandler);
 			di.addEventListener(MouseEvent.MOUSE_OUT,dupImageMoutHandler);
 			di.addEventListener(MouseEvent.CLICK,dupImageClickHandler);
-			//di.addEventListener(MouseEvent.MOUSE_DOWN,textSelectorMouseDownHandler);
+			di.addEventListener(MouseEvent.MOUSE_DOWN,textSelectorMouseDownHandler);
 			_pageList[index-1] = di;
 		}	
 		
 		private function textSelectorMouseDownHandler(event:MouseEvent):void{
+			if(!TextSelectEnabled){return;}
+			
 			_currentlySelectedText = "";
 			_firstHitIndex = -1;
 			_lastHitIndex = -1;
@@ -923,7 +960,7 @@ package com.devaldi.controls.flexpaper
 		private function textSelectorMoveHandler(event:MouseEvent):void{
 			event.stopImmediatePropagation();
 
-			if(!event.target is DupLoader){return;}
+			if(!(event.target is DupLoader)){return;}
 			
 			var mc:MovieClip = (event.target.content as MovieClip);
 			var ts:TextSnapshot = mc.textSnapshot;
@@ -934,17 +971,29 @@ package com.devaldi.controls.flexpaper
 				_lastHitIndex = hitIndex; 
 			}
 			
-			snap = _libMC.textSnapshot;			
-			_tri = snap.getTextRunInfo(_firstHitIndex,_lastHitIndex);
+			snap = _libMC.textSnapshot;
+			if(_firstHitIndex<=_lastHitIndex){
+				_tri = snap.getTextRunInfo(_firstHitIndex,_lastHitIndex);
+			}else{
+				_tri = snap.getTextRunInfo(_lastHitIndex,_firstHitIndex);
+			}
 			
 			if(_selectionMarker!=null&&_selectionMarker.parent!=null){_selectionMarker.parent.removeChild(_selectionMarker);}
 			
 			_selectionMarker = new ShapeMarker();
+			var ly:Number=-1;
+			var li:int;
 			
 			for(var i:int=0;i<_tri.length-1;i++){
-				_selectionMarker.graphics.beginFill(0x0095f7,0.3);
-				_selectionMarker.graphics.drawRect(_tri[i].corner3x,_tri[i].corner1y,((_tri[i+1].corner1y==_tri[i].corner1y)?_tri[i+1].corner3x:_tri[i].corner1x)-_tri[i].corner3x,_tri[i].corner3y-_tri[i].corner1y);
-				_selectionMarker.graphics.endFill();
+				if(ly==-1){ly=_tri[i].corner1y;li=0;}
+				
+				if(ly!=_tri[i+1].corner1y||i==_tri.length-2){
+					_selectionMarker.graphics.beginFill(0x0095f7,0.3);
+					_selectionMarker.graphics.drawRect(_tri[li].corner3x,_tri[i].corner1y,((i==_tri.length-2)?_tri[i+1].corner1x:_tri[i].corner1x)-_tri[li].corner3x,_tri[i].corner3y-_tri[i].corner1y);
+					_selectionMarker.graphics.endFill();
+					
+					ly=_tri[i+1].corner1y;li=i+1;
+				}
 			}
 
 			_pageList[mc.currentFrame-1].addChildAt(_selectionMarker,_pageList[mc.currentFrame-1].numChildren);
@@ -976,7 +1025,6 @@ package com.devaldi.controls.flexpaper
 			snap = _libMC.textSnapshot;
 			_currentlySelectedText = snap.getText(_firstHitIndex,_lastHitIndex);
 			_tri = snap.getTextRunInfo(_firstHitIndex,_lastHitIndex);
-		
 		}
 		
 		private function dupImageClickHandler(event:MouseEvent):void{
@@ -1002,7 +1050,11 @@ package com.devaldi.controls.flexpaper
 				if(event.target is flash.display.SimpleButton){
 					CursorManager.removeAllCursors();
 				}else{
-					grabCursorID = CursorManager.setCursor(grabCursor);	
+					if(TextSelectEnabled){
+						grabCursorID = CursorManager.setCursor(textSelectCursor);	
+					}else{
+						grabCursorID = CursorManager.setCursor(grabCursor);
+					}
 				}
 			}
 		}
