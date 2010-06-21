@@ -465,9 +465,31 @@ package com.devaldi.controls.flexpaper
 				
 				
 				for(var i:int=0;i<_pageList.length;i++){
-					if(!bFoundFirst && ((i) * (_pageList[i].height + 6)) >= _paperContainer.verticalScrollPosition){
-						bFoundFirst = true;
-						currPage = i + 1;
+					if(!bFoundFirst)
+					{
+						var perH:int=0;
+						if(_pageList.length>1)
+						{
+							perH=_pageList[1].y-_pageList[0].y;
+							var nowP:Number=_paperContainer.verticalScrollPosition/(perH);
+							if(0<nowP<0.5)
+								currPage = 1;
+							else if(nowP>=(_pageList.length-0.5)&&nowP<=_pageList.length)
+								currPage=_pageList.length;
+							else{
+								
+								currPage =Math.round(nowP)+1;
+								if(_paperContainer.verticalScrollPosition<_pageList[currPage-1].y){
+									currPage-=1;
+								}
+							}
+							bFoundFirst = true;
+						}
+						else
+						{
+							bFoundFirst = true;
+							currPage = 1;
+						}
 					}
 										
 					if(checkIsVisible(i)){
