@@ -265,6 +265,7 @@ package com.devaldi.controls.flexpaper
 				if(_displayContainer!=null){_displayContainer.removeAllChildren();} 
 				if(_pageList!=null){for(var pl:int=0;pl<_pageList.length;pl++){if(_pageList[pl].parent!=null){_pageList[pl].parent.removeChild(_pageList[pl]);_pageList[pl].removeAllChildren();_pageList[pl].source = null;}delete(_pageList[pl]);_pageList[pl]=null;}}
 				if(_loader!=null){_loader.unload();}_fLoader = null;
+				if(s!=_swfFile&&_libMC!=null){if(_libMC.parent!=null){_libMC.parent.removeChild(_libMC);}_libMC = null;_loader.unload();}
 				
 				_swfFileChanged = true;
 				_swfFile = s;
