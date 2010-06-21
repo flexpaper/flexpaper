@@ -248,6 +248,14 @@
 			TrueFullScreenActive = event.fullScreen && !FullScreenAsMaxWindow;
 			txtSearch.enabled = !TrueFullScreenActive; 
         }
+		
+		public function loadSwf(s:String):void{
+			bttnInfo.visible = false;
+			spin1.visible = true;
+			lblProgress.text = "";
+			lblProgress.visible = true;
+			paper1.SwfFile = s;
+		}
 	]]>
 </mx:Script>
 <mx:Style source="styles/default.css" />
