@@ -258,22 +258,25 @@ package com.devaldi.controls.flexpaper
 		}	
 		
 		public function set SwfFile(s:String):void {
-			_swfFile = s;
-			_swfFileChanged = true;
-			
-			if(_loaderptr!=null){if(_loaderptr.parent!=null){_loaderptr.removeChild(_loaderptr);}_loaderptr.unload();_loaderptr = null;}
-			if(_loaderList!=null){for(var i:int=0;i<_loaderList.length;i++){_loaderList[i].unload();if(_loaderList[i].parent!=null){_loaderList[i].parent.removeChild(_loaderList[i]);}delete(_loaderList[i]);_loaderList[i]=null;}}_loaderList = null;
-			if(_displayContainer!=null){_displayContainer.removeAllChildren();} 
-			if(_pageList!=null){for(var pl:int=0;pl<_pageList.length;pl++){if(_pageList[pl].parent!=null){_pageList[pl].parent.removeChild(_pageList[pl]);_pageList[pl].removeAllChildren();_pageList[pl].source = null;}delete(_pageList[pl]);_pageList[pl]=null;}}
-			if(_loader!=null){_loader.unload();}_fLoader = null;
-			if(_libMC==null){if(_libMC.parent!=null){_libMC.parent.removeChild(_libMC);}_libMC.unload();}_libMC = null;
-			
-			try{
-				new flash.net.LocalConnection().connect('devaldiGCdummy');
-				new flash.net.LocalConnection().connect('devaldiGCdummy');
-			} catch (e:*) {}
-			
-			try{flash.system.System.gc();} catch (e:*) {}
+			if(s.length!=0){
+				_swfFile = s;
+				
+				if(_loaderptr!=null){if(_loaderptr.parent!=null){_loaderptr.removeChild(_loaderptr);}_loaderptr.unload();_loaderptr = null;}
+				if(_loaderList!=null){for(var i:int=0;i<_loaderList.length;i++){_loaderList[i].unload();if(_loaderList[i].parent!=null){_loaderList[i].parent.removeChild(_loaderList[i]);}delete(_loaderList[i]);_loaderList[i]=null;}}_loaderList = null;
+				if(_displayContainer!=null){_displayContainer.removeAllChildren();} 
+				if(_pageList!=null){for(var pl:int=0;pl<_pageList.length;pl++){if(_pageList[pl].parent!=null){_pageList[pl].parent.removeChild(_pageList[pl]);_pageList[pl].removeAllChildren();_pageList[pl].source = null;}delete(_pageList[pl]);_pageList[pl]=null;}}
+				if(_loader!=null){_loader.unload();}_fLoader = null;
+				if(s!=_swfFile&&_libMC!=null){if(_libMC.parent!=null){_libMC.parent.removeChild(_libMC);}_libMC.unload();_libMC = null;}
+				
+				_swfFileChanged = true;
+				
+				try{
+					new flash.net.LocalConnection().connect('devaldiGCdummy');
+					new flash.net.LocalConnection().connect('devaldiGCdummy');
+				} catch (e:*) {}
+				
+				try{flash.system.System.gc();} catch (e:*) {}
+			}
 			
 			_pageList = null;
 			_paperContainer.verticalScrollPosition = 0;
