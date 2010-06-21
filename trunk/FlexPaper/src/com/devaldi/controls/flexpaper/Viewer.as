@@ -929,7 +929,7 @@ package com.devaldi.controls.flexpaper
 			di.addEventListener(MouseEvent.MOUSE_OVER,dupImageMoverHandler);
 			di.addEventListener(MouseEvent.MOUSE_OUT,dupImageMoutHandler);
 			di.addEventListener(MouseEvent.CLICK,dupImageClickHandler);
-			di.addEventListener(MouseEvent.MOUSE_DOWN,textSelectorMouseDownHandler);
+			//di.addEventListener(MouseEvent.MOUSE_DOWN,textSelectorMouseDownHandler);
 			_pageList[index-1] = di;
 		}	
 		
