@@ -262,8 +262,11 @@ package com.devaldi.controls.flexpaper
 			_swfFileChanged = true;
 			_loaderptr = null;
 			_libMC = null;
+			if(_loaderList!=null){for(var i:int=0;i<_loaderList.length;i++){_loaderList[i].unload();delete(_loaderList[i]);_loaderList[i]=null;}}
 			_loaderList = null;
 			if(_displayContainer!=null){_displayContainer.removeAllChildren();} 
+			if(_pageList!=null){for(var pl:int=0;pl<_pageList.length;pl++){delete(_pageList[pl]);_pageList[pl]=null;}}
+			
 			_pageList = null;
 			_paperContainer.verticalScrollPosition = 0;
 			createDisplayContainer();
