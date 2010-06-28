@@ -33,6 +33,7 @@ package com.devaldi.controls.flexpaper
 	import flash.display.DisplayObject;
 	import flash.display.Loader;
 	import flash.display.MovieClip;
+	import flash.display.SimpleButton;
 	import flash.events.Event;
 	import flash.events.KeyboardEvent;
 	import flash.events.MouseEvent;
@@ -514,7 +515,6 @@ package com.devaldi.controls.flexpaper
 									if(_libMC.framesLoaded >= _pageList[i].dupIndex){
 										_loaderList[uloaderidx].content.gotoAndStop(_pageList[i].dupIndex);
 										_pageList[i].addChild(_loaderList[uloaderidx]);
-										
 										_pageList[i].loadedIndex = _pageList[i].dupIndex;
 									}
 									
@@ -556,8 +556,8 @@ package com.devaldi.controls.flexpaper
 					return  _pageList[pageIndex].parent.y + _pageList[pageIndex].height >= _paperContainer.verticalScrollPosition && 
 						(_pageList[pageIndex].parent.y - _pageList[pageIndex].height) < (_paperContainer.verticalScrollPosition + _paperContainer.height);
 				}else{
-					return  ((pageIndex + 1) * (_pageList[pageIndex].getScaledHeight() + 6)) >= _paperContainer.verticalScrollPosition && 
-						((pageIndex) * (_pageList[pageIndex].getScaledHeight() + 6)) < (_paperContainer.verticalScrollPosition + _paperContainer.height);
+					return  (_pageList[pageIndex].y + (_pageList[pageIndex].getScaledHeight() + 6)) >= _paperContainer.verticalScrollPosition && 
+						(_pageList[pageIndex].y - (_pageList[pageIndex].getScaledHeight() + 6)) < (_paperContainer.verticalScrollPosition + _paperContainer.height);
 				}
 			}catch(e:Error){
 				return false;	
@@ -733,7 +733,7 @@ package com.devaldi.controls.flexpaper
 			e.bytesLoaded = event.bytesLoaded;
 			dispatchEvent(e);
 		}
-		
+				
 		private function swfComplete(event:Event):void{
 			if(!ProgressiveLoading){
 				try{
@@ -744,7 +744,7 @@ package com.devaldi.controls.flexpaper
 					if(!_fLoader.Resigned){_fLoader.resignFileAttributesTag(_fLoader.InputBytes,_loader);return;}
 				}
 				
-				if(_libMC == null && !_fLoader.Resigned){_fLoader.resignFileAttributesTag(_fLoader.InputBytes,_loader);return;}
+				if((_libMC == null || (event.currentTarget!=null && event.currentTarget.content != null && event.currentTarget.content is AVM1Movie)) && !_fLoader.Resigned){_fLoader.resignFileAttributesTag(_fLoader.InputBytes,_loader);return;}
 
 				_inputBytes = _fLoader.InputBytes;
 					

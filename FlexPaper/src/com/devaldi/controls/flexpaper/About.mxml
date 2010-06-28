@@ -39,7 +39,7 @@
 	<mx:Label x="10" y="62" text="@Resource(key='Developedby', bundle='FlexPaper')"/>
 	<mx:Label x="10" y="98" text="@Resource(key='Formoreinformation', bundle='FlexPaper')"/>
 	<mx:LinkButton x="160" y="98" label="devaldi.com" click="navigateToURL(new URLRequest('http://flexpaper.devaldi.com/?ref=FlexPaper'), 'devaldi')" fontWeight="normal" textDecoration="underline" color="#4134EB" paddingBottom="0" paddingLeft="0" paddingRight="0" paddingTop="0"/>
-	<mx:Label x="165" y="19" text="1.3.1 r341"/>
+	<mx:Label x="165" y="19" text="1.3.1 r344"/>
 	<mx:Label x="10" y="80" text="GPL 3 (non-commercial) License."/>
 	
 </mx:TitleWindow>
