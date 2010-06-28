@@ -224,7 +224,6 @@
 			
 			contextMenu.customItems.push(cmi_about);
 			
-			
 			if(PrintEnabled){
 				var cmi_print:ContextMenuItem = new ContextMenuItem(resourceManager.getString("FlexPaper", "Print") + " ...");
 				cmi_print.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, printPaper);

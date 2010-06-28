@@ -25,6 +25,7 @@ package com.devaldi.streaming
 	import flash.events.MouseEvent;
 	import flash.filters.DropShadowFilter;
 	import flash.utils.setTimeout;
+	
 	import mx.controls.Image;
 	
 	public class DupImage extends Image
@@ -40,7 +41,7 @@ package com.devaldi.streaming
 		public function DupImage(){}
 		
 		override public function set source(value:Object):void{
-			if(this.source != null && this.source.bitmapData != null){
+			if(this.source != null && this.source is Bitmap && this.source.bitmapData != null){
 				this.source.bitmapData.dispose();
 			}
 			
@@ -115,7 +116,7 @@ package com.devaldi.streaming
 		
 		public function getScaledHeight():Number
 		{
-			return scaleX>0? super.unscaledHeight * this.scaleX:height;
+			return scaleX>0? unscaledHeight * this.scaleX:height;
 		}		
 	}
 }
