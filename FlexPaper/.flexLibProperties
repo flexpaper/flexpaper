@@ -31,6 +31,13 @@
     <classEntry path="com.devaldi.skinning.GradientImageButton"/>
     <classEntry path="com.devaldi.controls.FlowVBox"/>
     <classEntry path="com.devaldi.streaming.IGenericMovieClip"/>
+    <classEntry path="com.devaldi.controls.flexpaper.FlexPaperViewer_HTMLUI"/>
+    <classEntry path="com.devaldi.events.ScaleChangedEvent"/>
+    <classEntry path="com.devaldi.events.FitModeChangedEvent"/>
+    <classEntry path="com.devaldi.events.ViewModeChangedEvent"/>
+    <classEntry path="com.devaldi.events.CurrentPageChangedEvent"/>
+    <classEntry path="com.devaldi.events.DocumentLoadedEvent"/>
+    <classEntry path="com.devaldi.events.CursorModeChangedEvent"/>
   </includeClasses>
   <includeResources/>
   <namespaceManifests/>

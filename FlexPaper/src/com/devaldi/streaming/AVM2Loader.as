@@ -16,12 +16,14 @@ You should have received a copy of the GNU General Public License
 along with FlexPaper.  If not, see <http://www.gnu.org/licenses/>.	
 */
 
-
 package com.devaldi.streaming
 {
         import flash.display.Loader;
         import flash.errors.EOFError;
+        import flash.events.ErrorEvent;
         import flash.events.Event;
+        import flash.events.EventDispatcher;
+        import flash.events.IEventDispatcher;
         import flash.events.IOErrorEvent;
         import flash.events.ProgressEvent;
         import flash.events.SecurityErrorEvent;
@@ -39,8 +41,13 @@ package com.devaldi.streaming
          * fLoader.load(new URLRequest('swf7.swf'));
          * </pre>
          */
-        public class AVM2Loader
+		
+		[Event(name="onDocumentLoadedError", type="flash.events.ErrorEvent")]		
+        public class AVM2Loader implements IEventDispatcher
         {
+			
+				private var dispatcher:IEventDispatcher = new EventDispatcher();
+
                 public function AVM2Loader(loader:Loader, loaderCtx:LoaderContext, progressive:Boolean)
                 {
                         this.loader = loader;
@@ -294,16 +301,40 @@ package com.devaldi.streaming
                 {
                         b[3] = version;
                 }
+				
+				public function dispatchEvent(event:Event):Boolean {
+					return dispatcher.dispatchEvent(event);
+				}
+				
+				public function addEventListener(type:String, listener:Function, useCapture:Boolean = false, priority:int = 0, useWeakReference:Boolean = false):void {
+					dispatcher.addEventListener(type, listener, useCapture, priority, useWeakReference);
+				}
+				
+				public function hasEventListener(type:String):Boolean {
+					return dispatcher.hasEventListener(type);
+				}
+				
+				public function removeEventListener(type:String, listener:Function, useCapture:Boolean = false):void {
+					dispatcher.removeEventListener(type, listener, useCapture);
+				}
+				
+				public function willTrigger(type:String):Boolean {
+					return dispatcher.willTrigger(type);
+				}				
+				
                 
                 private function ioErrorHandler(event:IOErrorEvent):void
                 {
-                       // loader.contentLoaderInfo.dispatchEvent(new IOErrorEvent(IOErrorEvent.IO_ERROR));
+					var evt:ErrorEvent = new ErrorEvent("onDocumentLoadedError");
+					evt.text = event.text;
+                	dispatchEvent(evt);
                 }
                 
                 private function securityErrorHandler(event:SecurityErrorEvent):void
                 {
-                  //      loader.contentLoaderInfo.dispatchEvent(new SecurityErrorEvent(SecurityErrorEvent.SECURITY_ERROR));
+					var evt:ErrorEvent = new ErrorEvent("onDocumentLoadedError");
+					evt.text = event.text;
+					dispatchEvent(evt);
                 }
-                
         }
 }

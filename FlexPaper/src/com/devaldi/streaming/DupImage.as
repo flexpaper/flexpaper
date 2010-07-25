@@ -58,12 +58,12 @@ package com.devaldi.streaming
 			addEventListener(MouseEvent.ROLL_OVER,dupImageMoverHandler,false,0,true);
 		}
 		
-		private function dupImageMoverHandler(event:MouseEvent):void{
-		    if(!contains(paperSource)){
+		private function dupImageMoverHandler(event:MouseEvent):void{ // depricated.. only used when using bitmaps to render 
+		    /* if(!contains(paperSource)){
 				paperSource.gotoAndStop(dupIndex);
 				paperSource.alpha = 0;
 				addChild(paperSource);
-			}
+			} */
 		}
 				
 		public function addDropShadow():void
@@ -98,7 +98,12 @@ package com.devaldi.streaming
 		
 		override public function addChild(child:DisplayObject):DisplayObject{
 			//flash.utils.setTimeout(addDropShadow,200);
-			return super.addChild(child);
+			super.addChildAt(child,0);
+			
+			while(numChildren >= 2)
+				delete(removeChildAt(1));
+			
+			return super.getChildAt(0);
 		}
 		
 		override protected function updateDisplayList(w:Number, h:Number):void {
