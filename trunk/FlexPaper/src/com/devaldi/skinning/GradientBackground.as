@@ -18,12 +18,24 @@ along with FlexPaper.  If not, see <http://www.gnu.org/licenses/>.
 
 package com.devaldi.skinning
 {
-import mx.skins.ProgrammaticSkin;
+import flash.display.Bitmap;
+import flash.display.BitmapData;
+import flash.display.IBitmapDrawable;
+import flash.display.Sprite;
 import flash.geom.Matrix;
+import flash.geom.Point;
+import flash.geom.Rectangle;
+
+import mx.skins.ProgrammaticSkin;
 
  public class GradientBackground extends ProgrammaticSkin
-    {
-        override public function get measuredWidth():Number
+ 	{
+
+	 	public function GradientBackground()
+		{
+		}
+	 
+	 	override public function get measuredWidth():Number
         {
             return 20;
         }
@@ -35,6 +47,7 @@ import flash.geom.Matrix;
         
         override protected function updateDisplayList(unscaledWidth:Number, unscaledHeight:Number):void
         {
+			
             var fillColors:Array = getStyle("fillColors");
             var fillAlphas:Array = getStyle("fillAlphas");
             var cornerRadius:int = getStyle("cornerRadius");
@@ -64,7 +77,7 @@ import flash.geom.Matrix;
             graphics.beginGradientFill(gradientType, fillColors, fillAlphas, [0, 255] , matrix, "pad", "rgb", focalPointRatio);
             //graphics.drawRect(0, 0, unscaledWidth, unscaledHeight);
             graphics.drawRoundRect(0, 0, unscaledWidth, unscaledHeight, cornerRadius*.5, cornerRadius*.5); 
-            graphics.endFill();
+			graphics.endFill();
         }
     }
 }

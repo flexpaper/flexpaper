@@ -25,6 +25,7 @@
 		skin: ClassReference("mx.skins.ProgrammaticSkin");
 		overSkin:ClassReference("mx.skins.halo.SliderHighlightSkin");
 		downSkin:ClassReference("mx.skins.halo.SliderHighlightSkin");
+		thumbSkin: Embed(source="/../assets/sliderdot.gif");
 	}
 	
 
@@ -43,4 +44,3 @@
 		spinner-highlight-color: #000000;
 		spinner-color: #808080;
 	}	
-	
