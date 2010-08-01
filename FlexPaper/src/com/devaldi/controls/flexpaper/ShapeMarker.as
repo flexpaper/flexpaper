@@ -23,6 +23,7 @@ package com.devaldi.controls.flexpaper
 	public class ShapeMarker extends Shape
 	{
 		public var PageIndex:int = -1;
+		public var data:Object = null;
 		
 		public function ShapeMarker()
 		{

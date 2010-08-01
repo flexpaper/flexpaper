@@ -200,7 +200,7 @@ package com.devaldi.controls
          * Flag that the children of this control have changed,
          * and should be redrawn at the next convenient time
          */
-        private function relayoutChildren():void
+        public function relayoutChildren():void
         {
             _childrenChanged = true;
             invalidateProperties();    
