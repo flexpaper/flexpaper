@@ -231,7 +231,7 @@ along with FlexPaper.  If not, see <http://www.gnu.org/licenses/>.
 			private function toggleFullScreen():void {
 				try {
 					if(!FullScreenAsMaxWindow){
-						paper1.PaperVisible = false;
+						paper1.PaperVisible = false; // to avoid flickering and let it redraw properly
 						
 						if(this.stage.displayState == StageDisplayState.NORMAL){
 							_fixedWidth = paper1.width;
@@ -317,13 +317,18 @@ along with FlexPaper.  If not, see <http://www.gnu.org/licenses/>.
 				
 				if(paper1.FitMode == FitModeEnum.FITWIDTH){
 					flash.utils.setTimeout(paper1.fitWidth,200);
-				}
-				if(paper1.FitMode == FitModeEnum.FITHEIGHT){
+				} else if(paper1.FitMode == FitModeEnum.FITHEIGHT){
 					flash.utils.setTimeout(paper1.fitHeight,200);
+				} else if (paper1.ViewMode != ViewModeEnum.TWOPAGE){
+					paper1.PaperVisible = true;
 				}
 				
 				if(paper1.ViewMode == ViewModeEnum.TWOPAGE){
-					flash.utils.setTimeout(paper1.reScaleTwoPage,200);
+					if(event.fullScreen){
+						flash.utils.setTimeout(paper1.reScaleTwoPage,200);
+					}else{
+						flash.utils.setTimeout(paper1.reScaleTwoPage,200,true);
+					}
 				}
 				
 				TrueFullScreenActive = event.fullScreen && !FullScreenAsMaxWindow;
@@ -378,7 +383,7 @@ along with FlexPaper.  If not, see <http://www.gnu.org/licenses/>.
 		
 		<mx:Image source="@Embed('/../assets/bar.gif')" width="3" height="21" x="143" y="1" />
 		
-		<st:GradientTextInput x="363" y="1" fontSize="9" height="21" width="40" id="txtPage" text="{paper1.currPage}" keyDown="txtPageNumKeyDown(event)" enabled="{paper1.ViewMode == ViewModeEnum.PORTRAIT}" toolTip="@Resource(key='Current Page', bundle='FlexPaper')" tabIndex="8"/>
+		<st:GradientTextInput x="363" y="1" fontSize="9" height="21" width="40" id="txtPage" text="{paper1.currPage}" keyDown="txtPageNumKeyDown(event)" enabled="{paper1.ViewMode == ViewModeEnum.PORTRAIT || paper1.ViewMode == ViewModeEnum.TWOPAGE}" toolTip="@Resource(key='Current Page', bundle='FlexPaper')" tabIndex="8"/>
 		<st:GradientLabel x="407" y="3" fontSize="9" height="17" width="10" text="/"/>
 		<st:GradientLabel x="416" y="3" fontSize="9" height="19" width="28" text="{paper1.numPages}"/>
 		<st:GradientImageButton icon="@Embed('/../assets/textselect.gif')" styleName="toolbttn" toolTip="@Resource(key='TextSelect', bundle='FlexPaper')"  width="20" x="470" y="2" selected="{paper1.TextSelectEnabled}" click="{paper1.TextSelectEnabled=true}" tabIndex="11" />
