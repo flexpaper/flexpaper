@@ -27,6 +27,7 @@ package com.devaldi.controls.flexpaper
 	import com.devaldi.events.CursorModeChangedEvent;
 	import com.devaldi.events.DocumentLoadedEvent;
 	import com.devaldi.events.FitModeChangedEvent;
+	import com.devaldi.events.ExternalLinkClickedEvent;
 	import com.devaldi.events.ScaleChangedEvent;
 	import com.devaldi.events.ViewModeChangedEvent;
 	import com.devaldi.streaming.AVM2Loader;
@@ -76,6 +77,7 @@ package com.devaldi.controls.flexpaper
 	[Event(name="onNoMoreSearchResults", type="flash.events.Event")]
 	[Event(name="onLoadingProgress", type="flash.events.ProgressEvent")]
 	[Event(name="onScaleChanged", type="com.devaldi.events.ScaleChangedEvent")]
+	[Event(name="onExternalLinkClicked", type="com.devaldi.events.ExternalLinkClickedEvent")]
 	[Event(name="onCurrPageChanged", type="com.devaldi.events.CurrentPageChangedEvent")]
 	[Event(name="onViewModeChanged", type="com.devaldi.events.ViewModeChangedEvent")]
 	[Event(name="onFitModeChanged", type="com.devaldi.events.FitModeChangedEvent")]
@@ -1130,7 +1132,7 @@ package com.devaldi.controls.flexpaper
 					
 					if(prevYsave>0){
 						_selectionMarker.graphics.endFill();
-						_adjGotoPage = (prevYsave) * _scale - 50;
+						_adjGotoPage = (ViewMode==ViewModeEnum.PORTRAIT)?(prevYsave) * _scale - 50:0;
 						gotoPage(searchPageIndex);
 						break;
 					}
@@ -1301,6 +1303,11 @@ package com.devaldi.controls.flexpaper
 				var t:Timer = new Timer(100,1);
 				t.addEventListener("timer", resetClickHandler);
 				t.start();				
+				
+				if(event.target is SimpleButton && (event.target as SimpleButton).name.indexOf("http")>=0){
+					dispatchEvent(new ExternalLinkClickedEvent(ExternalLinkClickedEvent.EXTERNALLINK_CLICKED,
+								 (event.target as SimpleButton).name.substring((event.target as SimpleButton).name.indexOf("http"))));	
+				}
 			}
 		}
 		

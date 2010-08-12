@@ -38,6 +38,7 @@
     <classEntry path="com.devaldi.events.CurrentPageChangedEvent"/>
     <classEntry path="com.devaldi.events.DocumentLoadedEvent"/>
     <classEntry path="com.devaldi.events.CursorModeChangedEvent"/>
+    <classEntry path="com.devaldi.events.ExternalLinkClickedEvent"/>
   </includeClasses>
   <includeResources/>
   <namespaceManifests/>
