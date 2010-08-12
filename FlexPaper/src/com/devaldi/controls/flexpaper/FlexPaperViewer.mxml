@@ -22,26 +22,24 @@ along with FlexPaper.  If not, see <http://www.gnu.org/licenses/>.
 		[Event(name="onDocumentLoaded", type="com.devaldi.events.DocumentLoadedEvent")]
 		[Event(name="onLoadingProgress", type="flash.events.ProgressEvent")]
 		[Event(name="onDocumentLoadedError", type="flash.events.ErrorEvent")]
-		[Event(name="onScaleChanged", type="com.devaldi.events.ScaleChangedEvent")]
 		[Event(name="onCurrPageChanged", type="com.devaldi.events.CurrentPageChangedEvent")]
-		[Event(name="onViewModeChanged", type="com.devaldi.events.ViewModeChangedEvent")]
-		[Event(name="onFitModeChanged", type="com.devaldi.events.FitModeChangedEvent")]
 		[Event(name="onDocumentLoading", type="flash.events.Event")]
-		[Event(name="onCursorModeChanged", type="com.devaldi.events.CursorModeChangedEvent")]
+		[Event(name="onExternalLinkClicked", type="com.devaldi.events.ExternalLinkClickedEvent")]
 	</mx:Metadata>
 	<mx:Script>
 		<![CDATA[
+			import com.devaldi.events.CurrentPageChangedEvent;
+			import com.devaldi.events.CursorModeChangedEvent;
+			import com.devaldi.events.DocumentLoadedEvent;
+			import com.devaldi.events.ExternalLinkClickedEvent;
+			import com.devaldi.events.FitModeChangedEvent;
+			import com.devaldi.events.ScaleChangedEvent;
+			import com.devaldi.events.ViewModeChangedEvent;
+			
 			import flash.desktop.Clipboard;
 			import flash.desktop.ClipboardFormats;
 			import flash.display.StageDisplayState;
 			import flash.net.navigateToURL;
-			
-			import com.devaldi.events.CurrentPageChangedEvent;
-			import com.devaldi.events.CursorModeChangedEvent;
-			import com.devaldi.events.DocumentLoadedEvent;
-			import com.devaldi.events.FitModeChangedEvent;
-			import com.devaldi.events.ScaleChangedEvent;
-			import com.devaldi.events.ViewModeChangedEvent;
 			
 			import mx.controls.Alert;
 			import mx.controls.sliderClasses.Slider;
@@ -153,7 +151,11 @@ along with FlexPaper.  If not, see <http://www.gnu.org/licenses/>.
 				spin1.visible = true;
 			}
 			
-			public function sliderChange(event:SliderEvent):void 
+			private function onExternalLinkClickedHandler(event:ExternalLinkClickedEvent):void{
+				dispatchEvent(event);
+			}
+			
+			private function sliderChange(event:SliderEvent):void 
 			{
 				if(!paper1.BusyLoading && _sliderUserChange)
 				{
@@ -390,7 +392,7 @@ along with FlexPaper.  If not, see <http://www.gnu.org/licenses/>.
 		<st:GradientImageButton icon="@Embed('/../assets/hand2.gif')" styleName="toolbttn" toolTip="@Resource(key='TextDrag', bundle='FlexPaper')"  width="20" x="494" y="2" selected="{!paper1.TextSelectEnabled}"  click="{paper1.TextSelectEnabled=false}" tabIndex="12" />
 		
 		<st:GradientImageButton top="2" x="596" icon="@Embed('/../assets/find.gif')" styleName="toolbttn" width="20" height="20" click="paper1.searchText(txtSearch.text);" toolTip="@Resource(key='Search', bundle='FlexPaper')" tabIndex="14" enabled="{!TrueFullScreenActive}"/>
-		<st:GradientTextInput x="528" y="2" fontSize="9" height="20" width="65" id="txtSearch" keyDown="txtSearchKeyDown(event)" enabled="{paper1.ViewMode == ViewModeEnum.PORTRAIT}" toolTip="@Resource(key='Search', bundle='FlexPaper')" tabIndex="13"/>
+		<st:GradientTextInput x="528" y="2" fontSize="9" height="20" width="65" id="txtSearch" keyDown="txtSearchKeyDown(event)" enabled="{paper1.ViewMode == ViewModeEnum.PORTRAIT || paper1.ViewMode == ViewModeEnum.TWOPAGE}" toolTip="@Resource(key='Search', bundle='FlexPaper')" tabIndex="13"/>
 		
 		<st:GradientLabel id="lblProgress" x="{paper1.width-31}" textAlign="center" y="5" fontSize="8" height="19" width="32" text="" tabIndex="0"/>
 		<mx:Image source="@Embed('/../assets/bar.gif')" width="3" height="21" x="336" y="1" />
@@ -416,7 +418,7 @@ along with FlexPaper.  If not, see <http://www.gnu.org/licenses/>.
 			   onViewModeChanged="onViewModeChanged(event)"
 			   onCurrPageChanged="onCurrPageChanged(event)"
 			   onCursorModeChanged="onCursorModeChanged(event)"
-			   
+			   onExternalLinkClicked="onExternalLinkClickedHandler(event)" 
 			   
 			   SwfFile="{SwfFile}" 
 			   Scale="{Scale}" 
