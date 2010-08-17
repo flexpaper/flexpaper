@@ -143,7 +143,7 @@ package com.devaldi.controls.flexpaper
 		
 		private var _skinImg:Bitmap = new skinImg();
 		private var _skinImgc:Bitmap = new skinImgc();
-		private var _skinImgDo:Image = new Image();
+		private var _skinImgDo:Image;
 		
 		public function Viewer(){
 			super();
@@ -325,13 +325,15 @@ package com.devaldi.controls.flexpaper
 		public function set SwfFile(s:String):void {
 			if(s.length!=0){
 				
-				if(_loaderptr!=null){if(_loaderptr.parent!=null){_loaderptr.removeChild(_loaderptr);}_loaderptr.unload();_loaderptr = null;}
-				if(_loaderList!=null){for(var i:int=0;i<_loaderList.length;i++){_loaderList[i].unload();if(_loaderList[i].parent!=null){_loaderList[i].parent.removeChild(_loaderList[i]);}delete(_loaderList[i]);_loaderList[i]=null;}}_loaderList = null;
-				if(_displayContainer!=null){_displayContainer.removeAllChildren();} 
-				if(_pageList!=null){for(var pl:int=0;pl<_pageList.length;pl++){if(_pageList[pl].parent!=null){_pageList[pl].parent.removeChild(_pageList[pl]);_pageList[pl].removeAllChildren();_pageList[pl].source = null;}delete(_pageList[pl]);_pageList[pl]=null;}}
-				if(_loader!=null){_loader.unload();}_fLoader = null;
-				if(_selectionMarker!=null&&_selectionMarker.parent!=null){_selectionMarker.parent.removeChild(_selectionMarker);}
-				if(s!=_swfFile&&_libMC!=null){if(_libMC.parent!=null){_libMC.parent.removeChild(_libMC);}_libMC = null;_loader.unload();}
+				deleteLoaderPtr();
+				deleteLoaderList();
+				deleteDisplayContainer(); 
+				deletePageList();
+				deleteFLoader();
+				deleteSelectionMarker();
+				
+				if(s!=_swfFile)
+					deleteLibMC();
 				
 				_swfFileChanged = true;
 				_swfFile = s;
@@ -343,7 +345,6 @@ package com.devaldi.controls.flexpaper
 				
 				try{flash.system.System.gc();} catch (e:*) {}
 				
-				_pageList = null;
 				_paperContainer.verticalScrollPosition = 0;
 				_savePaddingTwoPage = -1;
 				
@@ -680,21 +681,30 @@ package com.devaldi.controls.flexpaper
 		}		
 		
 		private function createDisplayContainer():void{
-			if(_skinImgDo != null && _skinImgDo.parent == this){removeChild(_skinImgDo);}
-			addChild(_skinImgDo);
-			
+			if(_skinImgDo != null && _skinImgDo.parent == this){
+				removeChild(_skinImgDo);
+				_skinImgDo.removeEventListener(MouseEvent.MOUSE_OVER,skinMouseOver);
+				_skinImgDo.removeEventListener(MouseEvent.MOUSE_OUT,skinMouseOut);
+				_skinImgDo.removeEventListener(MouseEvent.MOUSE_DOWN,skinMouseDown);
+			}
+			_skinImgDo = new Image();
 			_skinImgDo.addEventListener(MouseEvent.MOUSE_OVER,skinMouseOver);
 			_skinImgDo.addEventListener(MouseEvent.MOUSE_OUT,skinMouseOut);
 			_skinImgDo.addEventListener(MouseEvent.MOUSE_DOWN,skinMouseDown);
 			_skinImgDo.buttonMode = true;
-				
+			addChild(_skinImgDo);
+			
 			// Add the swf to the invisible container.
 			_swfContainer.removeAllChildren();
 			var uic:UIComponent = new UIComponent();
 			_swfContainer.addChild(uic);
 			uic.addChild(_loader);
 			
-			if(_paperContainer !=null && _paperContainer.parent == this){removeChild(_paperContainer);}
+			if(_paperContainer !=null && _paperContainer.parent == this){
+				removeChild(_paperContainer);
+				_paperContainer.removeEventListener(FlexEvent.UPDATE_COMPLETE,updComplete);
+				_paperContainer.removeEventListener(MouseEvent.MOUSE_WHEEL, wheelHandler);
+			}
 			
 			_paperContainer = new ZoomCanvas();
 			_paperContainer.percentHeight = 100;
@@ -713,7 +723,8 @@ package com.devaldi.controls.flexpaper
 			try{flash.system.System.gc();} catch (e:*) {}
 			
 			if(_paperContainer.numChildren>0){_paperContainer.removeAllChildren();}
-			if(_displayContainer!=null){_displayContainer.removeAllChildren();}
+			
+			deleteDisplayContainer();
 			
 			if(_viewMode == ViewModeEnum.TILE){
 				_displayContainer = new FlowBox();
@@ -976,6 +987,10 @@ package com.devaldi.controls.flexpaper
 						if(_libMC.framesLoaded > 0)
 							addInLoadedPages();
 						
+						if(_libMC.framesLoaded == _libMC.totalFrames){	
+							dispatchEvent(new DocumentLoadedEvent(DocumentLoadedEvent.DOCUMENT_LOADED,numPages));
+						}
+						
 						if(_libMC.framesLoaded>_frameLoadCount){
 							flash.utils.setTimeout(repositionPapers,500);
 							_frameLoadCount = _libMC.framesLoaded;
@@ -983,18 +998,104 @@ package com.devaldi.controls.flexpaper
 						
 						_bbusyloading = false;
 						_swfLoaded = true
-						
-						if(_libMC.framesLoaded == _libMC.totalFrames){	
-							dispatchEvent(new DocumentLoadedEvent(DocumentLoadedEvent.DOCUMENT_LOADED,numPages));
-						}
 					}
 				}
 			}
 		}	
 		
+		private function deleteDisplayContainer():void{
+			if(_displayContainer!=null){
+				_displayContainer.removeAllChildren();
+				_displayContainer.removeEventListener(MouseEvent.ROLL_OVER,displayContainerrolloverHandler);
+				_displayContainer.removeEventListener(MouseEvent.ROLL_OUT,displayContainerrolloutHandler);
+				_displayContainer.removeEventListener(MouseEvent.MOUSE_DOWN,displayContainerMouseDownHandler);
+				_displayContainer.removeEventListener(MouseEvent.MOUSE_UP,displayContainerMouseUpHandler);
+				_displayContainer.removeEventListener(MouseEvent.DOUBLE_CLICK,displayContainerDoubleClickHandler);
+			}
+		}
+		
+		private function deleteLoaderList():void{
+			if(_loaderList!=null){
+				for(var i:int=0;i<_loaderList.length;i++){
+					_loaderList[i].unload();
+					if(_loaderList[i].parent!=null){
+						_loaderList[i].parent.removeChild(_loaderList[i]);
+					}
+					
+					if(_loaderList[i].contentLoaderInfo!=null){
+						_loaderList[i].contentLoaderInfo.removeEventListener(Event.COMPLETE, bytesLoaded);	
+					}
+					
+					_loaderList[i].removeEventListener(Event.ENTER_FRAME,onframeenter);
+					
+					delete(_loaderList[i]);
+					_loaderList[i]=null;
+				}
+			}
+			
+			_loaderList = null;
+		}
+		
+		private function deleteSelectionMarker():void{
+			if(_selectionMarker!=null&&_selectionMarker.parent!=null){
+				_selectionMarker.parent.removeChild(_selectionMarker);
+			}
+		}
+		
+		private function deleteLibMC():void{
+			if(_libMC!=null){
+				if(_libMC.parent!=null){
+					_libMC.parent.removeChild(_libMC);
+				}_libMC = null;
+			}
+		}
+		
+		private function deleteLoaderPtr():void{
+			if(_loaderptr!=null){
+				if(_loaderptr.parent!=null){
+					_loaderptr.removeChild(_loaderptr);
+				}
+				
+				if(_loaderptr.contentLoaderInfo !=null){
+					_loaderptr.contentLoaderInfo.removeEventListener(Event.COMPLETE, swfComplete);
+				}
+				
+				_loaderptr.unload();
+				_loaderptr = null;
+			}
+		}
+		
+		private function deletePageList():void{
+			if(_pageList!=null){
+				for(var pl:int=0;pl<_pageList.length;pl++){
+					if(_pageList[pl].parent!=null){
+						_pageList[pl].parent.removeChild(_pageList[pl]);
+						_pageList[pl].removeAllChildren();
+						_pageList[pl].source = null;
+					}
+					
+					_pageList[pl].removeEventListener(MouseEvent.MOUSE_OVER,dupImageMoverHandler);
+					_pageList[pl].removeEventListener(MouseEvent.MOUSE_OUT,dupImageMoutHandler);
+					_pageList[pl].removeEventListener(MouseEvent.CLICK,dupImageClickHandler);
+					_pageList[pl].removeEventListener(MouseEvent.MOUSE_DOWN,textSelectorMouseDownHandler);
+					
+					delete(_pageList[pl]);
+					_pageList[pl]=null;}
+			}
+			_pageList = null;
+		}
+		
+		private function deleteFLoader():void{
+			if(_loader!=null){
+				_loader.unload();
+			}
+			
+			_fLoader = null;
+		}
+		
 		private function addInLoadedPages(recreate:Boolean = false):void{
 			if(recreate){
-				_displayContainer.removeAllChildren(); _pageList = null;
+				_displayContainer.removeAllChildren(); deletePageList();
 			}
 			
 			if(_pageList==null || (_pageList != null && _pageList.length != numPages)){
@@ -1027,7 +1128,10 @@ package com.devaldi.controls.flexpaper
 			
 			_displayContainer.visible = false;
 			_displayContainer.removeAllChildren();
-			_pageList = new Array(numPages);			
+			
+			deletePageList();
+			_pageList = new Array(numPages);
+			
 			if(_markList==null){_markList = new Array(numPages);}
 			
 			_libMC.stop();
@@ -1276,7 +1380,7 @@ package com.devaldi.controls.flexpaper
 			var rev:int;
 			if(_firstHitIndex>_lastHitIndex){rev=_firstHitIndex;_firstHitIndex=_lastHitIndex;_lastHitIndex=rev;}
 			
-			_currentlySelectedText = snap.getText(_firstHitIndex,_lastHitIndex-1,true);
+			_currentlySelectedText = snap.getText(_firstHitIndex,_lastHitIndex-1);
 			_tri = snap.getTextRunInfo(_firstHitIndex,_lastHitIndex-1);
 			
 			if(_currentSelectionPage>0){
