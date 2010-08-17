@@ -82,6 +82,9 @@ along with FlexPaper.  If not, see <http://www.gnu.org/licenses/>.
 			[Bindable]
 			public var StartAtPage:Number = 1;
 			
+			[Bindable]
+			public var PrintEnabled:Boolean = true;
+			
 			private var prd:PrintRangeDialog;
 			private var _fixedWidth:Number = -1;
 			private var _fixedHeight:Number = -1;
@@ -149,6 +152,7 @@ along with FlexPaper.  If not, see <http://www.gnu.org/licenses/>.
 			private function papersLoadingHandler(event:Event):void{
 				spin1.start();
 				spin1.visible = true;
+				dispatchEvent(event);
 			}
 			
 			private function onExternalLinkClickedHandler(event:ExternalLinkClickedEvent):void{
@@ -191,7 +195,8 @@ along with FlexPaper.  If not, see <http://www.gnu.org/licenses/>.
 			}
 			
 			private function onDocumentLoadingProgressHandler(event:ProgressEvent):void{
-				lblProgress.text = String(Math.round(event.bytesLoaded/event.bytesTotal*100));			
+				lblProgress.text = String(Math.round(event.bytesLoaded/event.bytesTotal*100));
+				dispatchEvent(event);
 			}
 			
 			private function onScaleChanged(event:Event):void{
@@ -258,6 +263,7 @@ along with FlexPaper.  If not, see <http://www.gnu.org/licenses/>.
 						uv.ZoomInterval = ZoomInterval;
 						uv.FitPageOnLoad = paper1.FitMode == FitModeEnum.FITHEIGHT;
 						uv.FitWidthOnLoad = paper1.FitMode == FitModeEnum.FITWIDTH;
+						uv.PrintEnabled = PrintEnabled;
 						uv.ProgressiveLoading = ProgressiveLoading;
 						uv.FullScreenAsMaxWindow = FullScreenAsMaxWindow;
 						ur.data = uv;
@@ -273,7 +279,7 @@ along with FlexPaper.  If not, see <http://www.gnu.org/licenses/>.
 			}
 			
 			public function fitHeight():void{
-				paper1.fitWidth();
+				paper1.fitHeight();
 			}		
 			
 			public function gotoPage(p:Number):void{
@@ -297,10 +303,11 @@ along with FlexPaper.  If not, see <http://www.gnu.org/licenses/>.
 				
 				contextMenu.customItems.push(cmi_about);
 				
-				var cmi_print:ContextMenuItem = new ContextMenuItem(resourceManager.getString("FlexPaper", "Print") + " ...");
-				cmi_print.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, printPaper);
-				contextMenu.customItems.push(cmi_print);
-				
+				if(PrintEnabled){
+					var cmi_print:ContextMenuItem = new ContextMenuItem(resourceManager.getString("FlexPaper", "Print") + " ...");
+					cmi_print.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, printPaper);
+					contextMenu.customItems.push(cmi_print);
+				}
 			}
 			
 			private function setFocusTo(e:MouseEvent):void{
@@ -373,7 +380,7 @@ along with FlexPaper.  If not, see <http://www.gnu.org/licenses/>.
 	</mx:Script>
 	<mx:Style source="styles/default.css" />
 	<mx:Canvas styleName="toolbarBackground" width="100%" height="26" borderStyle="solid" verticalScrollPolicy="off" horizontalScrollPolicy="off">
-		<st:GradientImageButton top="3" x="1" icon="@Embed('/../assets/print-icon.gif')" styleName="toolbttn" width="20" click="printPaper(event)" toolTip="@Resource(key='Print', bundle='FlexPaper')" />
+		<st:GradientImageButton top="3" x="1" icon="@Embed('/../assets/print-icon.gif')" styleName="toolbttn" width="20" click="printPaper(event)" toolTip="@Resource(key='Print', bundle='FlexPaper')"  enabled="{PrintEnabled}" />
 		<mx:Image source="@Embed('/../assets/bar.gif')" width="3" height="21" x="23" y="1" />
 		<st:GradientImageButton id="bttnFitWidth" top="2" left="96" icon="@Embed('/../assets/fit.gif')" styleName="toolbttn" width="20" selected="{paper1.FitMode == FitModeEnum.FITWIDTH}" toggle="true" click="paper1.fitWidth();bttnFitHeight.selected=false;" enabled="{paper1.ViewMode == ViewModeEnum.PORTRAIT}" toolTip="@Resource(key='FitWidth', bundle='FlexPaper')"  tabIndex="5"/>
 		<st:GradientImageButton id="bttnFitHeight" top="2" left="119" icon="@Embed('/../assets/pagefit.gif')" styleName="toolbttn" width="20"  click="paper1.fitHeight();bttnFitWidth.selected=false;" selected="{paper1.FitMode == FitModeEnum.FITHEIGHT}" toggle="true" enabled="{paper1.ViewMode == ViewModeEnum.PORTRAIT}" toolTip="@Resource(key='FitPage', bundle='FlexPaper')"  tabIndex="6"/>
