@@ -41,13 +41,6 @@ The following parameters can be used in FlexPaper
 
  * *ProgressiveLoading* (_Boolean_) Will load and display the document progressively when set to true as opposed to downloading the complete document before displaying the pages. Documents need to be converted to at least Flash version 9 for this to work (-T 9 flag using PDF2SWF)
 
- * *LoadSwf* (Method) Takes string (document) as argument. Will load and display a specified document.  Example:
-{{{
-<script type="javascript">
-      window.document.FlexPaperViewer.LoadSwf("anotherdocument.swf");
-</script>
-}}}
-
 The parameters are passed using flashvars or by setting properties on the flexpaper component inside flex, depending on your choice of usage. The code block below shows an example of how the parameters can be passed using the pre-compiled flash version
 
 {{{
