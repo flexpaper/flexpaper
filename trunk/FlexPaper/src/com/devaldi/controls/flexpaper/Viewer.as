@@ -1039,6 +1039,8 @@ package com.devaldi.controls.flexpaper
 		private function deleteSelectionMarker():void{
 			if(_selectionMarker!=null&&_selectionMarker.parent!=null){
 				_selectionMarker.parent.removeChild(_selectionMarker);
+
+				_selectionMarker = null;
 			}
 		}
 		
@@ -1046,7 +1048,9 @@ package com.devaldi.controls.flexpaper
 			if(_libMC!=null){
 				if(_libMC.parent!=null){
 					_libMC.parent.removeChild(_libMC);
-				}_libMC = null;
+				}
+				
+				_libMC = null;
 			}
 		}
 		
@@ -1082,6 +1086,7 @@ package com.devaldi.controls.flexpaper
 					delete(_pageList[pl]);
 					_pageList[pl]=null;}
 			}
+			
 			_pageList = null;
 		}
 		
@@ -1380,7 +1385,11 @@ package com.devaldi.controls.flexpaper
 			var rev:int;
 			if(_firstHitIndex>_lastHitIndex){rev=_firstHitIndex;_firstHitIndex=_lastHitIndex;_lastHitIndex=rev;}
 			
-			_currentlySelectedText = snap.getText(_firstHitIndex,_lastHitIndex-1);
+			_currentlySelectedText = snap.getText(_firstHitIndex,_lastHitIndex-1,true);
+			if(_currentlySelectedText.length==0){
+				_currentlySelectedText = snap.getText(_firstHitIndex,_lastHitIndex-1,false);
+			}
+			
 			_tri = snap.getTextRunInfo(_firstHitIndex,_lastHitIndex-1);
 			
 			if(_currentSelectionPage>0){
