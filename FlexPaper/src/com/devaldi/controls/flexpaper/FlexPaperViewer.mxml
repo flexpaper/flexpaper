@@ -85,6 +85,27 @@ along with FlexPaper.  If not, see <http://www.gnu.org/licenses/>.
 			[Bindable]
 			public var PrintEnabled:Boolean = true;
 			
+			[Bindable]
+			public var PrintToolsVisible:Boolean = true;
+
+			[Bindable]
+			public var ViewModeToolsVisible:Boolean = true;
+			
+			[Bindable]
+			public var ZoomToolsVisible:Boolean = true;
+
+			[Bindable]
+			public var FullScreenVisible:Boolean = true;
+			
+			[Bindable]
+			public var NavToolsVisible:Boolean = true;
+			
+			[Bindable]
+			public var CursorToolsVisible:Boolean = true;
+			
+			[Bindable]
+			public var SearchToolsVisible:Boolean = true;
+			
 			private var prd:PrintRangeDialog;
 			private var _fixedWidth:Number = -1;
 			private var _fixedHeight:Number = -1;
@@ -379,40 +400,45 @@ along with FlexPaper.  If not, see <http://www.gnu.org/licenses/>.
 		]]>
 	</mx:Script>
 	<mx:Style source="styles/default.css" />
-	<mx:Canvas styleName="toolbarBackground" width="100%" height="26" borderStyle="solid" verticalScrollPolicy="off" horizontalScrollPolicy="off">
-		<st:GradientImageButton top="3" x="1" icon="@Embed('/../assets/print-icon.gif')" styleName="toolbttn" width="20" click="printPaper(event)" toolTip="@Resource(key='Print', bundle='FlexPaper')"  enabled="{PrintEnabled}" />
-		<mx:Image source="@Embed('/../assets/bar.gif')" width="3" height="21" x="23" y="1" />
-		<st:GradientImageButton id="bttnFitWidth" top="2" left="96" icon="@Embed('/../assets/fit.gif')" styleName="toolbttn" width="20" selected="{paper1.FitMode == FitModeEnum.FITWIDTH}" toggle="true" click="paper1.fitWidth();bttnFitHeight.selected=false;" enabled="{paper1.ViewMode == ViewModeEnum.PORTRAIT}" toolTip="@Resource(key='FitWidth', bundle='FlexPaper')"  tabIndex="5"/>
-		<st:GradientImageButton id="bttnFitHeight" top="2" left="119" icon="@Embed('/../assets/pagefit.gif')" styleName="toolbttn" width="20"  click="paper1.fitHeight();bttnFitWidth.selected=false;" selected="{paper1.FitMode == FitModeEnum.FITHEIGHT}" toggle="true" enabled="{paper1.ViewMode == ViewModeEnum.PORTRAIT}" toolTip="@Resource(key='FitPage', bundle='FlexPaper')"  tabIndex="6"/>
-		<st:GradientHSlider id="slidPctScale" x="147" y="1" maximum="5" mouseDown="_sliderUserChange=true" change="sliderChange(event)"  styleName="sliderbttn" dataTipFormatFunction="formatPct" liveDragging="true" snapInterval="{ZoomInterval}" minimum="0.1" value="{Scale}" width="120" enabled="{paper1.ViewMode == ViewModeEnum.PORTRAIT}" toolTip="@Resource(key='Scale', bundle='FlexPaper')"  tabIndex="6"/>
-		<st:GradientTextInput x="268" y="1" fontSize="9" height="21" width="40" id="txtPct" text="{formatPct(Scale)}" keyDown="txtPctKeyDown(event)" enabled="{paper1.ViewMode == ViewModeEnum.PORTRAIT}" toolTip="@Resource(key='Scale', bundle='FlexPaper')" tabIndex="7"/>		
-		<st:GradientImageButton top="2" x="73" icon="@Embed('/../assets/thumbs.gif')" styleName="toolbttn" width="20" click="paper1.switchMode('Tile');" toolTip="@Resource(key='ThumbView', bundle='FlexPaper')" selected="{paper1.ViewMode == ViewModeEnum.TILE}" tabIndex="4"/>
-		<st:GradientImageButton top="2" x="29" icon="@Embed('/../assets/singlepage.gif')" styleName="toolbttn" width="20" click="paper1.switchMode('Portrait');" toolTip="@Resource(key='SinglePage', bundle='FlexPaper')" selected="{paper1.ViewMode == ViewModeEnum.PORTRAIT}" tabIndex="2"/>
-		<st:GradientImageButton top="2" x="52" icon="@Embed('/../assets/twopage.gif')" styleName="toolbttn" width="20" click="paper1.switchMode('TwoPage');" toolTip="@Resource(key='TwoPage', bundle='FlexPaper')" selected="{paper1.ViewMode == ViewModeEnum.TWOPAGE}"  tabIndex="3"/>
+	<mx:HBox  styleName="toolbarBackground" width="100%" height="26" borderStyle="solid" verticalScrollPolicy="off" horizontalScrollPolicy="off" paddingTop="2" paddingLeft="2" horizontalGap="3">
+		<st:GradientImageButton icon="@Embed('/../assets/print-icon.gif')" styleName="toolbttn" width="20" click="printPaper(event)" toolTip="@Resource(key='Print', bundle='FlexPaper')" enabled="{PrintEnabled}" visible="{PrintToolsVisible}" includeInLayout="{PrintToolsVisible}" />
+		<mx:Image source="@Embed('/../assets/bar.gif')" width="3" height="21" visible="{PrintToolsVisible}" includeInLayout="{PrintToolsVisible}" />
 		
-		<mx:Image source="@Embed('/../assets/bar.gif')" width="3" height="21" x="143" y="1" />
+		<st:GradientImageButton icon="@Embed('/../assets/singlepage.gif')" styleName="toolbttn" width="20" click="paper1.switchMode('Portrait');" toolTip="@Resource(key='SinglePage', bundle='FlexPaper')" selected="{paper1.ViewMode == ViewModeEnum.PORTRAIT}" tabIndex="2" visible="{ViewModeToolsVisible}" includeInLayout="{ViewModeToolsVisible}"/>
+		<st:GradientImageButton icon="@Embed('/../assets/twopage.gif')" styleName="toolbttn" width="20" click="paper1.switchMode('TwoPage');" toolTip="@Resource(key='TwoPage', bundle='FlexPaper')" selected="{paper1.ViewMode == ViewModeEnum.TWOPAGE}"  tabIndex="3" visible="{ViewModeToolsVisible}" includeInLayout="{ViewModeToolsVisible}"/>
+		<st:GradientImageButton icon="@Embed('/../assets/thumbs.gif')" styleName="toolbttn" width="20" click="paper1.switchMode('Tile');" toolTip="@Resource(key='ThumbView', bundle='FlexPaper')" selected="{paper1.ViewMode == ViewModeEnum.TILE}" tabIndex="4" visible="{ViewModeToolsVisible}" includeInLayout="{ViewModeToolsVisible}"/>
+		<st:GradientImageButton id="bttnFitWidth" icon="@Embed('/../assets/fit.gif')" styleName="toolbttn" width="20" selected="{paper1.FitMode == FitModeEnum.FITWIDTH}" toggle="true" click="paper1.fitWidth();bttnFitHeight.selected=false;" enabled="{paper1.ViewMode == ViewModeEnum.PORTRAIT}" toolTip="@Resource(key='FitWidth', bundle='FlexPaper')"  tabIndex="5" visible="{ViewModeToolsVisible}" includeInLayout="{ViewModeToolsVisible}"/>
+		<st:GradientImageButton id="bttnFitHeight" icon="@Embed('/../assets/pagefit.gif')" styleName="toolbttn" width="20"  click="paper1.fitHeight();bttnFitWidth.selected=false;" selected="{paper1.FitMode == FitModeEnum.FITHEIGHT}" toggle="true" enabled="{paper1.ViewMode == ViewModeEnum.PORTRAIT}" toolTip="@Resource(key='FitPage', bundle='FlexPaper')"  tabIndex="6" visible="{ViewModeToolsVisible}" includeInLayout="{ViewModeToolsVisible}"/>
+		<mx:Image source="@Embed('/../assets/bar.gif')" width="3" height="21" visible="{ViewModeToolsVisible}" includeInLayout="{ViewModeToolsVisible}"/>
 		
-		<st:GradientTextInput x="363" y="1" fontSize="9" height="21" width="40" id="txtPage" text="{paper1.currPage}" keyDown="txtPageNumKeyDown(event)" enabled="{paper1.ViewMode == ViewModeEnum.PORTRAIT || paper1.ViewMode == ViewModeEnum.TWOPAGE}" toolTip="@Resource(key='Current Page', bundle='FlexPaper')" tabIndex="8"/>
-		<st:GradientLabel x="407" y="3" fontSize="9" height="17" width="10" text="/"/>
-		<st:GradientLabel x="416" y="3" fontSize="9" height="19" width="28" text="{paper1.numPages}"/>
-		<st:GradientImageButton icon="@Embed('/../assets/textselect.gif')" styleName="toolbttn" toolTip="@Resource(key='TextSelect', bundle='FlexPaper')"  width="20" x="470" y="2" selected="{paper1.TextSelectEnabled}" click="{paper1.TextSelectEnabled=true}" tabIndex="11" />
-		<st:GradientImageButton icon="@Embed('/../assets/hand2.gif')" styleName="toolbttn" toolTip="@Resource(key='TextDrag', bundle='FlexPaper')"  width="20" x="494" y="2" selected="{!paper1.TextSelectEnabled}"  click="{paper1.TextSelectEnabled=false}" tabIndex="12" />
+		<st:GradientHSlider id="slidPctScale" maximum="5" mouseDown="_sliderUserChange=true" change="sliderChange(event)"  styleName="sliderbttn" dataTipFormatFunction="formatPct" liveDragging="true" snapInterval="{ZoomInterval}" minimum="0.1" value="{Scale}" width="120" height="15" enabled="{paper1.ViewMode == ViewModeEnum.PORTRAIT}" toolTip="@Resource(key='Scale', bundle='FlexPaper')" tabIndex="6" visible="{ZoomToolsVisible}" includeInLayout="{ZoomToolsVisible}"/>
+		<st:GradientTextInput fontSize="9" height="21" width="40" id="txtPct" text="{formatPct(Scale)}" keyDown="txtPctKeyDown(event)" enabled="{paper1.ViewMode == ViewModeEnum.PORTRAIT}" toolTip="@Resource(key='Scale', bundle='FlexPaper')" tabIndex="7" visible="{ZoomToolsVisible}" includeInLayout="{ZoomToolsVisible}"/>
+		<st:GradientImageButton icon="@Embed('/../assets/fullscreen.gif')" styleName="toolbttn" toolTip="@Resource(key='Fullscreen', bundle='FlexPaper')"  width="20" height="20" x="312" y="2" click="toggleFullScreen();" tabIndex="8" visible="{FullScreenVisible}" includeInLayout="{FullScreenVisible}" />
+		<mx:Image source="@Embed('/../assets/bar.gif')" width="3" height="21" visible="{FullScreenVisible||ZoomToolsVisible}" includeInLayout="{FullScreenVisible||ZoomToolsVisible}" />
 		
-		<st:GradientImageButton top="2" x="596" icon="@Embed('/../assets/find.gif')" styleName="toolbttn" width="20" height="20" click="paper1.searchText(txtSearch.text);" toolTip="@Resource(key='Search', bundle='FlexPaper')" tabIndex="14" enabled="{!TrueFullScreenActive}"/>
-		<st:GradientTextInput x="528" y="2" fontSize="9" height="20" width="65" id="txtSearch" keyDown="txtSearchKeyDown(event)" enabled="{paper1.ViewMode == ViewModeEnum.PORTRAIT || paper1.ViewMode == ViewModeEnum.TWOPAGE}" toolTip="@Resource(key='Search', bundle='FlexPaper')" tabIndex="13"/>
+		<st:GradientImageButton icon="@Embed('/../assets/icon-arrow-left.gif')" styleName="toolbttn" toolTip="@Resource(key='PreviousPage', bundle='FlexPaper')" width="15" height="20" click="mvPrev();" tabIndex="8" visible="{NavToolsVisible}" includeInLayout="{NavToolsVisible}"/>
+		<st:GradientTextInput fontSize="9" height="21" width="40" id="txtPage" text="{paper1.currPage}" keyDown="txtPageNumKeyDown(event)" enabled="{paper1.ViewMode == ViewModeEnum.PORTRAIT || paper1.ViewMode == ViewModeEnum.TWOPAGE}" toolTip="@Resource(key='Current Page', bundle='FlexPaper')" tabIndex="9" visible="{NavToolsVisible}" includeInLayout="{NavToolsVisible}"/>
+		<mx:HBox horizontalGap="2" paddingTop="2" visible="{NavToolsVisible}" includeInLayout="{NavToolsVisible}">
+			<st:GradientLabel fontSize="9" height="21" width="10" text="/"/>
+			<st:GradientLabel fontSize="9" height="21" width="23" text="{paper1.numPages}"/>
+		</mx:HBox>
+		<st:GradientImageButton icon="@Embed('/../assets/icon-arrow-right.gif')" styleName="toolbttn" toolTip="@Resource(key='NextPage', bundle='FlexPaper')"  width="15" height="20"  click="mvNext();" tabIndex="10" visible="{NavToolsVisible}" includeInLayout="{NavToolsVisible}"/>
+		<mx:Image source="@Embed('/../assets/bar.gif')" width="3" height="21" visible="{NavToolsVisible}" includeInLayout="{NavToolsVisible}" />
 		
-		<st:GradientLabel id="lblProgress" x="{paper1.width-31}" textAlign="center" y="5" fontSize="8" height="19" width="32" text="" tabIndex="0"/>
-		<mx:Image source="@Embed('/../assets/bar.gif')" width="3" height="21" x="336" y="1" />
-		<mx:Image source="@Embed('/../assets/bar.gif')" width="3" height="21" x="463" y="1" />
-		<st:GradientImageButton icon="@Embed('/../assets/icon-arrow-right.gif')" styleName="toolbttn" toolTip="@Resource(key='NextPage', bundle='FlexPaper')"  width="20" height="20"  x="440" y="2" click="mvNext();"   tabIndex="10"/>
-		<st:GradientImageButton icon="@Embed('/../assets/icon-arrow-left.gif')" styleName="toolbttn" toolTip="@Resource(key='PreviousPage', bundle='FlexPaper')"  width="20" height="20"  x="341" y="2" click="mvPrev();"   tabIndex="9"/>
-		<st:GradientImageButton icon="@Embed('/../assets/fullscreen.gif')" styleName="toolbttn" toolTip="@Resource(key='Fullscreen', bundle='FlexPaper')"  width="20" height="20" x="312" y="2" click="toggleFullScreen();"   tabIndex="8"/>
-		<mx:Image source="@Embed('/../assets/bar.gif')" width="3" height="21" x="620" y="1" />
+		<st:GradientImageButton icon="@Embed('/../assets/textselect.gif')" styleName="toolbttn" toolTip="@Resource(key='TextSelect', bundle='FlexPaper')"  width="20" selected="{paper1.TextSelectEnabled}" click="{paper1.TextSelectEnabled=true}" tabIndex="11" visible="{CursorToolsVisible}" includeInLayout="{CursorToolsVisible}"/>
+		<st:GradientImageButton icon="@Embed('/../assets/hand2.gif')" styleName="toolbttn" toolTip="@Resource(key='TextDrag', bundle='FlexPaper')"  width="22" selected="{!paper1.TextSelectEnabled}"  click="{paper1.TextSelectEnabled=false}" tabIndex="12" visible="{CursorToolsVisible}" includeInLayout="{CursorToolsVisible}" />
+		<mx:Image source="@Embed('/../assets/bar.gif')" width="3" height="21" visible="{CursorToolsVisible}" includeInLayout="{CursorToolsVisible}" />
 		
-		<ct:Spinner styleName="gradientlines" startImmediately="false" id="spin1" spinnerType="gradientcircle" left="{paper1.width-27}" top="1" width="22" height="22"/>
-		<st:GradientImageButton id="bttnInfo" top="1" left="{paper1.width-27}" visible="false" icon="@Embed('/../assets/logosmallgray.png')" styleName="toolbttn" width="22" height="22" click="showInfo(event);" toolTip="@Resource(key='About', bundle='FlexPaper')" />
-		<mx:Image source="@Embed('/../assets/bar.gif')" width="3" height="21" x="518" y="1" />
-	</mx:Canvas> 
+		<st:GradientTextInput fontSize="9" height="20" width="65" id="txtSearch" keyDown="txtSearchKeyDown(event)" enabled="{paper1.ViewMode == ViewModeEnum.PORTRAIT || paper1.ViewMode == ViewModeEnum.TWOPAGE}" toolTip="@Resource(key='Search', bundle='FlexPaper')" tabIndex="13" visible="{SearchToolsVisible}" includeInLayout="{SearchToolsVisible}"/>
+		<st:GradientImageButton icon="@Embed('/../assets/find.gif')" styleName="toolbttn" width="20" height="20" click="paper1.searchText(txtSearch.text);" toolTip="@Resource(key='Search', bundle='FlexPaper')" tabIndex="14" enabled="{!TrueFullScreenActive}" visible="{SearchToolsVisible}" includeInLayout="{SearchToolsVisible}"/>
+		<mx:Image source="@Embed('/../assets/bar.gif')" width="3" height="21" visible="{SearchToolsVisible}" includeInLayout="{SearchToolsVisible}"/>
+		
+		<mx:Canvas width="100%" id="cnv_info" horizontalScrollPolicy="off" verticalScrollPolicy="off" height="100%">
+			<st:GradientImageButton id="bttnInfo" left="{cnv_info.width-21}" visible="false" icon="@Embed('/../assets/logosmallgray.png')" styleName="toolbttn" width="20" height="20" click="showInfo(event);" toolTip="@Resource(key='About', bundle='FlexPaper')" />
+			<st:GradientLabel id="lblProgress" left="{cnv_info.width-26}" textAlign="center" y="4" fontSize="8" height="19" width="32" text="" tabIndex="0"/>
+			<ct:Spinner id="spin1" left="{cnv_info.width-22}" styleName="gradientlines" y="-1" startImmediately="false" spinnerType="gradientcircle" width="22" height="22"/>
+		</mx:Canvas>
+	</mx:HBox>
 	<fp:Viewer id="paper1"	onDocumentLoaded="documentLoadedHandler(event)" 
 			   onDocumentLoading="papersLoadingHandler(event)"
 			   onDocumentLoadedError="documentLoadedErrorHandler(event)"
