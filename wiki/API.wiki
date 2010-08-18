@@ -34,4 +34,4 @@ The following set of functions and events can be used to interact with FlexPaper
 
 *onCurrentPageChanged* (Number pagenumber) : fired when the currently viewer page has changed 
 
-*onExternalLinkClicked* (String link) : fired when a user clicks a external document. Only works when supplying argument "-s linknameurl" in conversion with PDF2SWF. 
+*onExternalLinkClicked* (String link) : fired when a user clicks a external link. Only works when supplying argument "-s linknameurl" in conversion with PDF2SWF. 
