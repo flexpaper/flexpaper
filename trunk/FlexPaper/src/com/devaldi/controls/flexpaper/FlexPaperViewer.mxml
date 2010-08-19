@@ -426,9 +426,9 @@ along with FlexPaper.  If not, see <http://www.gnu.org/licenses/>.
 		
 		<st:GradientImageButton icon="@Embed('/../assets/icon-arrow-left.gif')" styleName="toolbttn" toolTip="@Resource(key='PreviousPage', bundle='FlexPaper')" width="15" height="20" click="mvPrev();" tabIndex="8" visible="{NavToolsVisible}" includeInLayout="{NavToolsVisible}"/>
 		<st:GradientTextInput fontSize="9" height="21" width="40" id="txtPage" text="{paper1.currPage}" keyDown="txtPageNumKeyDown(event)" enabled="{paper1.ViewMode == ViewModeEnum.PORTRAIT || paper1.ViewMode == ViewModeEnum.TWOPAGE}" toolTip="@Resource(key='Current Page', bundle='FlexPaper')" tabIndex="9" visible="{NavToolsVisible}" includeInLayout="{NavToolsVisible}"/>
-		<mx:HBox horizontalGap="2" paddingTop="2" visible="{NavToolsVisible}" includeInLayout="{NavToolsVisible}">
+		<mx:HBox horizontalGap="1" paddingTop="2" visible="{NavToolsVisible}" includeInLayout="{NavToolsVisible}">
 			<st:GradientLabel fontSize="9" height="21" width="10" text="/"/>
-			<st:GradientLabel fontSize="9" height="21" width="23" text="{paper1.numPages}"/>
+			<st:GradientLabel fontSize="9" height="21" width="33" text="{paper1.numPages}"/>
 		</mx:HBox>
 		<st:GradientImageButton icon="@Embed('/../assets/icon-arrow-right.gif')" styleName="toolbttn" toolTip="@Resource(key='NextPage', bundle='FlexPaper')"  width="15" height="20"  click="mvNext();" tabIndex="10" visible="{NavToolsVisible}" includeInLayout="{NavToolsVisible}"/>
 		<mx:Image source="@Embed('/../assets/bar.gif')" width="3" height="21" visible="{NavToolsVisible}" includeInLayout="{NavToolsVisible}" />

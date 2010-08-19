@@ -689,6 +689,8 @@ package com.devaldi.controls.flexpaper
 				_skinImgDo.removeEventListener(MouseEvent.MOUSE_DOWN,skinMouseDown);
 			}
 			_skinImgDo = new Image();
+			_skinImgDo.source = _skinImg;
+			_skinImgDo.x = this.width-_skinImg.width - 27; _skinImgDo.y = this.height-_skinImg.height - 10;
 			_skinImgDo.addEventListener(MouseEvent.MOUSE_OVER,skinMouseOver);
 			_skinImgDo.addEventListener(MouseEvent.MOUSE_OUT,skinMouseOut);
 			_skinImgDo.addEventListener(MouseEvent.MOUSE_DOWN,skinMouseDown);
