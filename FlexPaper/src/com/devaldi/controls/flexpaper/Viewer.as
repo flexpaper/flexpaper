@@ -26,8 +26,8 @@ package com.devaldi.controls.flexpaper
 	import com.devaldi.events.CurrentPageChangedEvent;
 	import com.devaldi.events.CursorModeChangedEvent;
 	import com.devaldi.events.DocumentLoadedEvent;
-	import com.devaldi.events.FitModeChangedEvent;
 	import com.devaldi.events.ExternalLinkClickedEvent;
+	import com.devaldi.events.FitModeChangedEvent;
 	import com.devaldi.events.ScaleChangedEvent;
 	import com.devaldi.events.ViewModeChangedEvent;
 	import com.devaldi.streaming.AVM2Loader;
@@ -281,7 +281,7 @@ package com.devaldi.controls.flexpaper
 		
 		public function set FitPageOnLoad(b2:Boolean):void {
 			_fitPageOnLoad = b2;
-		}				
+		}			
 		
 		public function gotoPage(p:Number):void{
 			if(p<1 || p-1 >_pageList.length || (ViewMode == ViewModeEnum.TWOPAGE && p-1 >= _pageList.length))
@@ -324,7 +324,7 @@ package com.devaldi.controls.flexpaper
 		
 		public function set SwfFile(s:String):void {
 			if(s.length!=0){
-				
+
 				deleteLoaderPtr();
 				deleteLoaderList();
 				deleteDisplayContainer(); 
@@ -336,6 +336,7 @@ package com.devaldi.controls.flexpaper
 					deleteLibMC();
 				
 				_swfFileChanged = true;
+				_frameLoadCount = 0;
 				_swfFile = s;
 				
 				try{
@@ -987,7 +988,7 @@ package com.devaldi.controls.flexpaper
 						if(_libMC.framesLoaded > 0)
 							addInLoadedPages();
 						
-						if(_libMC.framesLoaded == _libMC.totalFrames){	
+						if(_libMC.framesLoaded == _libMC.totalFrames && _frameLoadCount != _libMC.framesLoaded){	
 							dispatchEvent(new DocumentLoadedEvent(DocumentLoadedEvent.DOCUMENT_LOADED,numPages));
 						}
 						
