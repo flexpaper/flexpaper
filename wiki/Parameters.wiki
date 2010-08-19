@@ -69,8 +69,18 @@ var flashvars = {
   				  FitPageOnLoad : false,
   				  FitWidthOnLoad : false,
   				  PrintEnabled : false,
-  				  localeChain : "en_US",
-  				  FullScreenAsMaxWindow : true
+  				  FullScreenAsMaxWindow : true,
+  				  ProgressiveLoading : true,
+  				  
+  				  PrintToolsVisible : true,
+  				  ViewModeToolsVisible : true,
+  				  ZoomToolsVisible : true,
+  				  FullScreenVisible : true,
+  				  NavToolsVisible : true,
+  				  CursorToolsVisible : true,
+  				  SearchToolsVisible : true,
+
+  				  localeChain : "en_US"
 				  };
 			 var params = {
 				
