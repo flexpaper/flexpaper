@@ -1,4 +1,8 @@
-The following set of functions and events can be used to interact with FlexPaper (as of FlexPaper 1.4.0 and onwards)
+The following set of functions and events can be used to interact with FlexPaper (as of FlexPaper 1.4.0 and onwards).
+
+All methods and events can be seen and tested using the following test page:
+http://flexpaper.googlecode.com/svn/trunk/Example/flash/debug/FlexPaperViewer.html
+
 ----
 ==Functions==
 *gotoPage* (Number pageNumber) : navigates the viewer to the specified page
