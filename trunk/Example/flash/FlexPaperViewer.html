@@ -11,33 +11,7 @@
         </style> 
 		
 		<script type="text/javascript" src="js/swfobject/swfobject.js"></script>
-		
-		<script type="text/javascript">
-			if(window.addEventListener)
-			window.addEventListener('DOMMouseScroll', handleWheel, false);
-			window.onmousewheel = document.onmousewheel = handleWheel;
-			
-			if (window.attachEvent) 
-			window.attachEvent("onmousewheel", handleWheel);
-			
-			function handleWheel(event){
-				try{
-					if(!window.document.FlexPaperViewer.hasFocus()){return true;}
-					window.document.FlexPaperViewer.setViewerFocus(true);
-					window.document.FlexPaperViewer.focus();
-					
-					if(navigator.appName == "Netscape"){
-						if (event.detail)
-							delta = 0;
-						if (event.preventDefault){
-							event.preventDefault();
-							event.returnValue = false;
-							}
-					}
-					return false;	
-				}catch(err){return true;}		
-			}
-		</script>
+		<script type="text/javascript" src="js/flexpaper_flash.js"></script>
 		
         <script type="text/javascript"> 
             <!-- For version detection, set to min. required Flash Player version, or 0 (or 0.0.0), for no version detection. --> 
@@ -45,7 +19,7 @@
             <!-- To use express install, set to playerProductInstall.swf, otherwise the empty string. -->
             var xiSwfUrlStr = "${expressInstallSwf}";
             var flashvars = { 
-                  SwfFile : escape("Paper.swf?v1.4.0rc1v2"),
+                  SwfFile : escape("Paper.swf?v1.4.0rc1v33"),
 				  Scale : 0.8, 
 				  ZoomTransition : "easeOut",
 				  ZoomTime : 0.5,
@@ -55,6 +29,15 @@
   				  PrintEnabled : true,
   				  FullScreenAsMaxWindow : false,
 				  ProgressiveLoading : false,
+				  
+				  PrintToolsVisible : true,
+  				  ViewModeToolsVisible : true,
+  				  ZoomToolsVisible : true,
+  				  FullScreenVisible : true,
+  				  NavToolsVisible : true,
+  				  CursorToolsVisible : true,
+  				  SearchToolsVisible : true,
+  				  
   				  localeChain: "en_US"
 				  };
 			 var params = {
