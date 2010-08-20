@@ -9,6 +9,6 @@ The last 4 parameters specifies that:
  * *-T 9* : Sets the target flash version to 9, improves stability
  * *-t* : Inserts a stop between each frame, improves stability
  * *-G* : Makes the document smaller and faster to render
- * *-s storeallcharacters* : Stores character information about the texts in the document, improves searchability 
+ * *-s storeallcharacters* : Stores all character information about the texts in the document, improves searchability 
 
 Please see http://www.swftools.org/pdf2swf.html for a complete list of PDF2SWF arguments and their explanations.
