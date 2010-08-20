@@ -154,6 +154,7 @@ package com.devaldi.streaming
 					
 					if(_inputBytes.length>4){
 						version = uint(_inputBytes[3]);
+						
 						if (version <= 9) {
 							updateVersion(9,_inputBytes);
 						}					
@@ -200,7 +201,7 @@ package com.devaldi.streaming
                 
                 public function isCompressed(bytes:ByteArray):Boolean
                 {
-                        return bytes[0] == 0x43;
+				    return bytes[0] == 0x43;
                 }
                 
                 private function uncompress(bytes:ByteArray):void
