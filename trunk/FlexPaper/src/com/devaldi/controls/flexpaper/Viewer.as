@@ -688,6 +688,7 @@ package com.devaldi.controls.flexpaper
 				_skinImgDo.removeEventListener(MouseEvent.MOUSE_OUT,skinMouseOut);
 				_skinImgDo.removeEventListener(MouseEvent.MOUSE_DOWN,skinMouseDown);
 			}
+			
 			_skinImgDo = new Image();
 			_skinImgDo.source = _skinImg;
 			_skinImgDo.x = this.width-_skinImg.width - 27; _skinImgDo.y = this.height-_skinImg.height - 10;
@@ -1225,22 +1226,9 @@ package com.devaldi.controls.flexpaper
 				if(searchIndex > 0){ // found a new match
 					_selectionMarker = new ShapeMarker();
 					
-					_selectionMarker.graphics.beginFill(0x0095f7,0.3);
-					
-					for(var ti:int=0;ti<text.length;ti++){
-						tri = snap.getTextRunInfo(searchIndex+ti,searchIndex+ti+1);
-						
-						// only draw the "selected" rect if fonts are embedded otherwise draw a line thingy
-						if(tri.length>1){
-							prevYsave = tri[0].matrix_ty;
-							
-							if((tri[0].corner1x-tri[0].corner3x)>0 && (tri[0].corner3y-tri[0].corner1y)>0){
-								_selectionMarker.graphics.drawRect(tri[0].corner3x,tri[0].corner1y,((tri[1].corner1y==tri[0].corner1y)?tri[1].corner3x:tri[0].corner1x)-tri[0].corner3x,tri[0].corner3y-tri[0].corner1y);
-							}else{
-								_selectionMarker.graphics.drawRect(tri[0].matrix_tx,tri[0].matrix_ty+1,tri[1].matrix_tx-tri[0].matrix_tx,4);
-							}
-						}
-					}
+					tri = snap.getTextRunInfo(searchIndex,searchIndex+text.length);
+					prevYsave = tri[0].matrix_ty;
+					drawCurrentSelection(0x0095f7,_selectionMarker,tri);
 					
 					if(prevYsave>0){
 						_selectionMarker.graphics.endFill();
@@ -1333,7 +1321,7 @@ package com.devaldi.controls.flexpaper
 			_lastHitIndex = hitIndex;
 		}
 		
-		private function drawCurrentSelection(color:uint, shape:Shape):void{
+		private function drawCurrentSelection(color:uint, shape:Shape, tri:Array):void{
 			var ly:Number=-1;
 			var li:int;var lx:int;
 			var miny:int=-1;
@@ -1342,24 +1330,47 @@ package com.devaldi.controls.flexpaper
 			var maxx:int=-1;
 			snap.setSelected(1,snap.charCount,false);
 			
-			for(var i:int=0;i<_tri.length-1;i++){
-				if(miny==-1||miny>_tri[i].corner1y){miny=_tri[i].corner1y;}
-				if(minx==-1||minx>_tri[li].corner3x){minx=_tri[li].corner3x;}
-				if(maxy==-1||maxy<_tri[i].corner3y){maxy=_tri[i].corner3y;}
-				if(maxx==-1||maxx<_tri[i].corner1x){maxx=_tri[i].corner1x;}
+			shape.graphics.beginFill(color,0.3);
+			var rect_commands:Vector.<int>;
+			rect_commands = new Vector.<int>((tri.length-1) * 5, true);
+			
+			var rect_coords:Vector.<Number>;
+			rect_coords = new Vector.<Number>((tri.length-1) * 10, true);
+			
+			for(var i:int=0;i<tri.length-1;i++){
+				if(miny==-1||miny>tri[i].corner1y){miny=tri[i].corner1y;}
+				if(minx==-1||minx>tri[li].corner3x){minx=tri[li].corner3x;}
+				if(maxy==-1||maxy<tri[i].corner3y){maxy=tri[i].corner3y;}
+				if(maxx==-1||maxx<tri[i].corner1x){maxx=tri[i].corner1x;}
 				
-				if(ly==-1){ly=_tri[i].corner1y;li=0;}
+				if(ly==-1){ly=tri[i].corner1y;li=0;}
 				
-				//if(ly!=_tri[i+1].corner1y||i==_tri.length-2||lx>_tri[i+1].corner3x){ // causes error on bullet point lists
-				shape.graphics.beginFill(color,0.3);
+				rect_commands[i*5] = 1;
+				rect_commands[i*5 + 1] = 2;
+				rect_commands[i*5 + 2] = 2;
+				rect_commands[i*5 + 3] = 2;
+				rect_commands[i*5 + 4] = 2;
+
+				rect_coords[i*10] = tri[li].corner3x;
+				rect_coords[i*10 + 1] = tri[i].corner1y;
+				rect_coords[i*10 + 2] = rect_coords[i * 10] + ((i==tri.length-2)?tri[i+1].corner1x:tri[i].corner1x)-tri[li].corner3x;
+				rect_coords[i*10 + 3] = rect_coords[i*10 + 1]; 
+				rect_coords[i*10 + 4] = rect_coords[i*10 + 2];
+				rect_coords[i*10 + 5] = rect_coords[i*10 + 1] + tri[i].corner3y-tri[i].corner1y;
+				rect_coords[i*10 + 6] = rect_coords[i*10];
+				rect_coords[i*10 + 7] = rect_coords[i*10 + 5];
+				rect_coords[i*10 + 8] = rect_coords[i*10];
+				rect_coords[i*10 + 9] = rect_coords[i*10 + 1];
 				
-				shape.graphics.drawRect(_tri[li].corner3x,_tri[i].corner1y,((i==_tri.length-2)?_tri[i+1].corner1x:_tri[i].corner1x)-_tri[li].corner3x,_tri[i].corner3y-_tri[i].corner1y);
-				//shape.graphics.drawRect(_tri[li].corner3x,_tri[i].corner1y,(ly==_tri[i+1].corner1y?_tri[i+1].corner3x:_tri[i].corner1x)-_tri[li].corner3x,_tri[i].corner3y-_tri[i].corner1y);
-				shape.graphics.endFill();
+				//if(ly!=tri[i+1].corner1y||i==tri.length-2||lx>tri[i+1].corner3x){ // causes error on bullet point lists
 				
-				ly=_tri[i+1].corner1y;lx=_tri[i+1].corner3x;li=i+1;
+				//shape.graphics.drawRect(tri[li].corner3x,tri[i].corner1y,((i==tri.length-2)?tri[i+1].corner1x:tri[i].corner1x)-tri[li].corner3x,tri[i].corner3y-tri[i].corner1y);
+				
+				ly=tri[i+1].corner1y;lx=tri[i+1].corner3x;li=i+1;
 				//}
 			}
+			shape.graphics.drawPath(rect_commands,rect_coords,"nonZero");
+			shape.graphics.endFill();
 			
 			// draw a transparent box covering the whole area to increase hitTest accuracy on mousedown
 			shape.graphics.beginFill(0xffffff,0);
@@ -1400,7 +1411,7 @@ package com.devaldi.controls.flexpaper
 				
 				_selectionMarker = new ShapeMarker();
 				_selectionMarker.PageIndex = _currentSelectionPage;
-				drawCurrentSelection(0x0095f7,_selectionMarker);
+				drawCurrentSelection(0x0095f7,_selectionMarker,_tri);
 				_pageList[_currentSelectionPage-1].addChildAt(_selectionMarker,_pageList[_selectionMc.currentFrame-1].numChildren);
 			}
 			
