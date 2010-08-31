@@ -39,6 +39,8 @@
     <classEntry path="com.devaldi.events.DocumentLoadedEvent"/>
     <classEntry path="com.devaldi.events.CursorModeChangedEvent"/>
     <classEntry path="com.devaldi.events.ExternalLinkClickedEvent"/>
+    <classEntry path="com.devaldi.controls.flexpaper.utils.TextMapUtil"/>
+    <classEntry path="com.devaldi.controls.flexpaper.utils.MacMouseWheelHandler"/>
   </includeClasses>
   <includeResources/>
   <namespaceManifests/>

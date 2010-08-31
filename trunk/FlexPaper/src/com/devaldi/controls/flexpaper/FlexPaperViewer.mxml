@@ -48,6 +48,7 @@ along with FlexPaper.  If not, see <http://www.gnu.org/licenses/>.
 			import mx.managers.IBrowserManager;
 			import mx.managers.PopUpManager;
 			
+			import com.devaldi.controls.flexpaper.utils.MacMouseWheelHandler;
 			
 			[Bindable]
 			public var Scale:Number = 1;
@@ -337,6 +338,7 @@ along with FlexPaper.  If not, see <http://www.gnu.org/licenses/>.
 					cmi_print.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, printPaper);
 					contextMenu.customItems.push(cmi_print);
 				}
+				
 			}
 			
 			private function setFocusTo(e:MouseEvent):void{
@@ -469,6 +471,6 @@ along with FlexPaper.  If not, see <http://www.gnu.org/licenses/>.
 			   FitWidthOnLoad="{FitWidthOnLoad}"
 			   ProgressiveLoading="{ProgressiveLoading}"
 			   ZoomInterval="{ZoomInterval}"
-			   
+			   addedToStage="MacMouseWheelHandler.init(stage)" 
 			   height="100%" width="100%" borderStyle="solid"  tabIndex="0" />							
 </mx:VBox>
