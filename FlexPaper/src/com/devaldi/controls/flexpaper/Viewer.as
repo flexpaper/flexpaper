@@ -23,6 +23,7 @@ package com.devaldi.controls.flexpaper
 	import com.devaldi.controls.FlowBox;
 	import com.devaldi.controls.FlowVBox;
 	import com.devaldi.controls.ZoomCanvas;
+	import com.devaldi.controls.flexpaper.utils.TextMapUtil;
 	import com.devaldi.events.CurrentPageChangedEvent;
 	import com.devaldi.events.CursorModeChangedEvent;
 	import com.devaldi.events.DocumentLoadedEvent;
@@ -61,6 +62,7 @@ package com.devaldi.controls.flexpaper
 	import flash.ui.Keyboard;
 	import flash.utils.ByteArray;
 	import flash.utils.Timer;
+	import flash.utils.setTimeout;
 	
 	import mx.containers.Box;
 	import mx.containers.Canvas;
@@ -70,6 +72,7 @@ package com.devaldi.controls.flexpaper
 	import mx.core.Container;
 	import mx.core.UIComponent;
 	import mx.events.FlexEvent;
+	import mx.events.IndexChangedEvent;
 	import mx.managers.CursorManager;
 	
 	[Event(name="onDocumentLoaded", type="com.devaldi.events.DocumentLoadedEvent")]
@@ -707,6 +710,7 @@ package com.devaldi.controls.flexpaper
 			if(_paperContainer !=null && _paperContainer.parent == this){
 				removeChild(_paperContainer);
 				_paperContainer.removeEventListener(FlexEvent.UPDATE_COMPLETE,updComplete);
+				
 				_paperContainer.removeEventListener(MouseEvent.MOUSE_WHEEL, wheelHandler);
 			}
 			
@@ -958,9 +962,10 @@ package com.devaldi.controls.flexpaper
 				_swfLoaded = true
 				reCreateAllPages();
 				
-				dispatchEvent(new DocumentLoadedEvent(DocumentLoadedEvent.DOCUMENT_LOADED,numPages));
 				_bbusyloading = false;
 				repositionPapers();
+				dispatchEvent(new DocumentLoadedEvent(DocumentLoadedEvent.DOCUMENT_LOADED,numPages));
+				
 			}else{
 				if(event.currentTarget.content != null){
 					var mobj:Object = event.currentTarget.content;
@@ -991,14 +996,20 @@ package com.devaldi.controls.flexpaper
 						if(_libMC.framesLoaded > 0)
 							addInLoadedPages();
 						
-						if(_libMC.framesLoaded == _libMC.totalFrames && _frameLoadCount != _libMC.framesLoaded){	
-							dispatchEvent(new DocumentLoadedEvent(DocumentLoadedEvent.DOCUMENT_LOADED,numPages));
-						}
 						
-						if(_libMC.framesLoaded>_frameLoadCount){
-							flash.utils.setTimeout(repositionPapers,500);
-							_frameLoadCount = _libMC.framesLoaded;
-						}
+							flash.utils.setTimeout(function():void{
+								var bDocLoaded:Boolean=(_libMC.framesLoaded == _libMC.totalFrames && _frameLoadCount != _libMC.framesLoaded);	
+								
+								if(_libMC.framesLoaded>_frameLoadCount){
+									repositionPapers();	
+									_frameLoadCount = _libMC.framesLoaded;
+								}
+								
+								if(bDocLoaded)
+									dispatchEvent(new DocumentLoadedEvent(DocumentLoadedEvent.DOCUMENT_LOADED,numPages));
+
+							},500);
+							
 						
 						_bbusyloading = false;
 						_swfLoaded = true
@@ -1208,6 +1219,8 @@ package com.devaldi.controls.flexpaper
 				//searchPageIndex = -1;
 				prevSearchText = text;
 			}
+			
+			
 			if(_selectionMarker!=null && _selectionMarker.parent != null){_selectionMarker.parent.removeChild(_selectionMarker);}
 			
 			// start searching from the current page
@@ -1221,13 +1234,17 @@ package com.devaldi.controls.flexpaper
 			
 			while((searchPageIndex -1) < _libMC.framesLoaded){
 				snap = _libMC.textSnapshot;
-				searchIndex = snap.findText((searchIndex==-1?0:searchIndex),text,false);
+				//searchIndex = snap.findText((searchIndex==-1?0:searchIndex),text,false);
+				searchIndex = TextMapUtil.checkUnicodeIntegrity(snap.getText(0,snap.charCount),text).toLowerCase().indexOf(text,(searchIndex==-1?0:searchIndex));
 				
 				if(searchIndex > 0){ // found a new match
 					_selectionMarker = new ShapeMarker();
+					_selectionMarker.graphics.beginFill(0x0095f7,0.3);
 					
-					tri = snap.getTextRunInfo(searchIndex,searchIndex+text.length);
-					prevYsave = tri[0].matrix_ty;
+					tri = snap.getTextRunInfo(searchIndex,searchIndex+text.length-1);
+					if(tri.length>0)
+						prevYsave = tri[0].matrix_ty;
+					
 					drawCurrentSelection(0x0095f7,_selectionMarker,tri);
 					
 					if(prevYsave>0){
@@ -1399,11 +1416,26 @@ package com.devaldi.controls.flexpaper
 			var rev:int;
 			if(_firstHitIndex>_lastHitIndex){rev=_firstHitIndex;_firstHitIndex=_lastHitIndex;_lastHitIndex=rev;}
 			
-			_currentlySelectedText = snap.getText(_firstHitIndex,_lastHitIndex-1,true);
-			if(_currentlySelectedText.length==0){
+			//var totaltext:String = snap.getText(0,snap.charCount,false);
+			
+			if(_firstHitIndex>0 && _lastHitIndex>0)
 				_currentlySelectedText = snap.getText(_firstHitIndex,_lastHitIndex-1,false);
+			else
+				_currentlySelectedText = "";
+			
+			
+			if(_currentlySelectedText.length==0 && _firstHitIndex>0 && _lastHitIndex>0){
+				_currentlySelectedText = snap.getText(_firstHitIndex,_lastHitIndex-1,true);
 			}
 			
+			/* trace(_currentlySelectedText.charCodeAt(0)+"|");
+			trace(_currentlySelectedText.charCodeAt(1)+"|");
+			trace(_currentlySelectedText.charCodeAt(2)+"|");
+			trace(_currentlySelectedText.charCodeAt(3)+"|"); 
+			*/
+			
+			_currentlySelectedText = TextMapUtil.checkUnicodeIntegrity(_currentlySelectedText);
+						
 			_tri = snap.getTextRunInfo(_firstHitIndex,_lastHitIndex-1);
 			
 			if(_currentSelectionPage>0){
@@ -1579,6 +1611,7 @@ package com.devaldi.controls.flexpaper
 				
 			}
 			return loaderCtx; 
-		} 
+		}
+				
 	}
 }
