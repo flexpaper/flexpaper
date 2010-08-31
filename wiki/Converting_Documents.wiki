@@ -11,4 +11,4 @@ The last 5 parameters specifies that:
  * *-G* : Makes the document smaller and faster to render
  * *-s storeallcharacters* : Stores all character information about the texts in the document, improves searchability 
 
-Please see http://www.swftools.org/pdf2swf.html for a complete list of PDF2SWF arguments and their explanations.
+Please see http://wiki.swftools.org/index.php/Pdf2swf for a complete list of PDF2SWF arguments and their explanations.
