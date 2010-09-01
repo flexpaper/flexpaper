@@ -11,38 +11,6 @@ function getDocViewer(){
 	return null;
 }
 
-if(window.addEventListener)
-window.addEventListener('DOMMouseScroll', handleWheel, false);
-window.onmousewheel = document.onmousewheel = handleWheel;
-
-if (window.attachEvent) 
-window.attachEvent("onmousewheel", handleWheel);
-
-
-
-/**
- * Handles mouse wheel scrolling
- *
- */
-function handleWheel(event){
-	try{
-		if(!getDocViewer().hasFocus()){return true;}
-		getDocViewer().setViewerFocus(true);
-		getDocViewer().focus();
-		
-		if(navigator.appName == "Netscape"){
-			if (event.detail)
-				delta = 0;
-			if (event.preventDefault){
-				event.preventDefault();
-				event.returnValue = false;
-				}
-		}
-		return false;	
-	}catch(err){return true;}		
-}
-
-
 /**
  * Handles the event of external links getting clicked in the document. 
  *
