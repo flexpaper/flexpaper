@@ -588,7 +588,7 @@ package com.devaldi.controls.flexpaper
 									p = _pageList.length;
 								else{
 									p = Math.round(nowP)+1;
-									if(_paperContainer.verticalScrollPosition<_pageList[p-1].y && p!=_pageList.length){
+									if(_pageList.length>=p-1&&_paperContainer.verticalScrollPosition<_pageList[p-1].y && p!=_pageList.length){
 										p-=1;
 									}
 								}

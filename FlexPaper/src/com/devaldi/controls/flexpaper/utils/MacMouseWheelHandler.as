@@ -129,7 +129,10 @@ package com.devaldi.controls.flexpaper.utils
 								window.addEventListener('DOMMouseMove', _mousemove, false);
 							}
 							window.onmousewheel = document.onmousewheel = _mousewheel;
-							window.onmousemove = document.onmousemove = _mousemove;
+							//window.onmousemove = document.onmousemove = _mousemove;
+							window.addEventListener("mousemove",_mousemove);
+							document.addEventListener("mousemove",_mousemove);
+			
 						}else if(swf && !eb.platform.mac){
 							
 							var _handleWheel = function(event){
