@@ -320,20 +320,22 @@ along with FlexPaper.  If not, see <http://www.gnu.org/licenses/>.
 				stage.removeEventListener(FullScreenEvent.FULL_SCREEN, fullScreenRedraw);
 				stage.addEventListener(FullScreenEvent.FULL_SCREEN, fullScreenRedraw);
 				this.addEventListener(MouseEvent.CLICK,setFocusTo);
-				this.addEventListener(Event.COPY,copyHandler);
 				
-				contextMenu = new ContextMenu();
-				contextMenu.hideBuiltInItems();
-				contextMenu.clipboardMenu = true;
-				contextMenu.clipboardItems.copy = true;
-				contextMenu.clipboardItems.selectAll = false;
+				if(CursorToolsVisible){
+					this.addEventListener(Event.COPY,copyHandler);
+					contextMenu = new ContextMenu();
+					contextMenu.hideBuiltInItems();
+					contextMenu.clipboardMenu = true;
+					contextMenu.clipboardItems.copy = true;
+					contextMenu.clipboardItems.selectAll = false;
+				}
 				
 				var cmi_about:ContextMenuItem = new ContextMenuItem(resourceManager.getString("FlexPaper", "About")+' FlexPaper');
 				cmi_about.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, showInfo);
 				
 				contextMenu.customItems.push(cmi_about);
 				
-				if(PrintEnabled){
+				if(PrintEnabled && PrintToolsVisible){
 					var cmi_print:ContextMenuItem = new ContextMenuItem(resourceManager.getString("FlexPaper", "Print") + " ...");
 					cmi_print.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, printPaper);
 					contextMenu.customItems.push(cmi_print);
