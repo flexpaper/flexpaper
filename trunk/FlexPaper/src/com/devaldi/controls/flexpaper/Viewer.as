@@ -1211,8 +1211,8 @@ package com.devaldi.controls.flexpaper
 			if(text==null){return;}
 			
 			var tri:Array;
-			
 			if(text.length==0){return;}
+			text = text.toLowerCase();
 			
 			if(prevSearchText != text){
 				searchIndex = -1;
