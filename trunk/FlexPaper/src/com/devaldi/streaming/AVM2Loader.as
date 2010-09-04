@@ -15,8 +15,8 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with FlexPaper.  If not, see <http://www.gnu.org/licenses/>.
 
-Initially based on the ForcibleLoader class by BeInteractive! (www.be-interactive.org)
-http://www.libspark.org/browser/as3/ForcibleLoader/src/org/libspark/utils/ForcibleLoader.as
+Inspired by and initially based on the ForcibleLoader class by 
+BeInteractive! (www.be-interactive.org)
 */
 
 package com.devaldi.streaming
