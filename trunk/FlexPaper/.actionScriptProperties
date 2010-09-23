@@ -11,6 +11,7 @@
   </compiler>
   <applications>
     <application path="FlexPaper.as"/>
+    <application path="FlexPaperViewer_Annotations.mxml"/>
   </applications>
   <modules/>
   <buildCSSFiles/>

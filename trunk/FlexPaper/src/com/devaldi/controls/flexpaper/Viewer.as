@@ -23,6 +23,7 @@ package com.devaldi.controls.flexpaper
 	import com.devaldi.controls.FlowBox;
 	import com.devaldi.controls.FlowVBox;
 	import com.devaldi.controls.ZoomCanvas;
+	import com.devaldi.controls.flexpaper.plugins.NotePanel;
 	import com.devaldi.controls.flexpaper.utils.TextMapUtil;
 	import com.devaldi.events.CurrentPageChangedEvent;
 	import com.devaldi.events.CursorModeChangedEvent;
@@ -30,6 +31,7 @@ package com.devaldi.controls.flexpaper
 	import com.devaldi.events.ExternalLinkClickedEvent;
 	import com.devaldi.events.FitModeChangedEvent;
 	import com.devaldi.events.ScaleChangedEvent;
+	import com.devaldi.events.SelectionCreatedEvent;
 	import com.devaldi.events.ViewModeChangedEvent;
 	import com.devaldi.streaming.AVM2Loader;
 	import com.devaldi.streaming.DupImage;
@@ -70,6 +72,7 @@ package com.devaldi.controls.flexpaper
 	import mx.containers.VBox;
 	import mx.controls.Image;
 	import mx.core.Container;
+	import mx.core.SpriteAsset;
 	import mx.core.UIComponent;
 	import mx.events.FlexEvent;
 	import mx.events.IndexChangedEvent;
@@ -87,6 +90,7 @@ package com.devaldi.controls.flexpaper
 	[Event(name="onCursorModeChanged", type="com.devaldi.events.CursorModeChangedEvent")]
 	[Event(name="onDocumentLoadedError", type="flash.events.ErrorEvent")]
 	[Event(name="onLogoClicked", type="flash.events.Event")]
+	[Event(name="onSelectionCreated", type="com.devaldi.events.SelectionCreatedEvent")]
 	
 	public class Viewer extends Canvas
 	{
@@ -125,9 +129,11 @@ package com.devaldi.controls.flexpaper
 		private var _zoomInterval:Number = 0;
 		private var _inputBytes:ByteArray;
 		private var _textSelectEnabled:Boolean = false;
+		private var _cursorsEnabled:Boolean = true;
 		private var _grabCursorID:Number = 0;
 		private var _grabbingCursorID:Number = 0;
 		private var _savePaddingTwoPage:Number = -1;
+		private var _pluginList:Array;
 		
 		[Embed(source="/../assets/grab.gif")]
 		private var grabCursor:Class;	  
@@ -155,6 +161,14 @@ package com.devaldi.controls.flexpaper
 		public function get BusyLoading():Boolean {
 			return _bbusyloading;
 		}	
+		
+		public function get libMC():MovieClip {
+			return _libMC;
+		}
+		
+		public function get PageList():Array {
+			return _pageList;
+		}
 		
 		[Bindable]
 		public function get ViewMode():String {
@@ -223,6 +237,15 @@ package com.devaldi.controls.flexpaper
 		public function get TextSelectEnabled():Boolean {
 			return _textSelectEnabled;
 		}	
+		
+		[Bindable]
+		public function get CursorsEnabled():Boolean {
+			return _cursorsEnabled;
+		}	
+
+		public function set CursorsEnabled(b:Boolean):void {
+			 _cursorsEnabled = b;
+		}	
 				
 		public function setPaperFocus():void{
 			_paperContainer.setFocus();
@@ -244,6 +267,14 @@ package com.devaldi.controls.flexpaper
 			_zoomtime = n;
 		}		
 		
+		public function get PluginList():Array{
+			return _pluginList;
+		}
+		
+		public function set PluginList(p:Array):void{
+			_pluginList = p;
+		}
+
 		public function get ZoomInterval():Number {
 			return _zoomInterval;
 		}	
@@ -286,7 +317,9 @@ package com.devaldi.controls.flexpaper
 			_fitPageOnLoad = b2;
 		}			
 		
-		public function gotoPage(p:Number):void{
+		public function gotoPage(p:Number, adjGotoPage:int=0):void{
+			if(adjGotoPage!=0){_adjGotoPage=adjGotoPage;}
+			
 			if(p<1 || p-1 >_pageList.length || (ViewMode == ViewModeEnum.TWOPAGE && p-1 >= _pageList.length))
 				return;
 			else{
@@ -328,6 +361,7 @@ package com.devaldi.controls.flexpaper
 		public function set SwfFile(s:String):void {
 			if(s.length!=0){
 
+				clearPlugins();
 				deleteLoaderPtr();
 				deleteLoaderList();
 				deleteDisplayContainer(); 
@@ -588,7 +622,7 @@ package com.devaldi.controls.flexpaper
 									p = _pageList.length;
 								else{
 									p = Math.round(nowP)+1;
-									if(_pageList.length>=p-1&&_paperContainer.verticalScrollPosition<_pageList[p-1].y && p!=_pageList.length){
+									if(_pageList.length>p-1&&_paperContainer.verticalScrollPosition<_pageList[p-1].y && p!=_pageList.length){
 										p-=1;
 									}
 								}
@@ -636,12 +670,13 @@ package com.devaldi.controls.flexpaper
 								_thumb = new Bitmap(_thumbData);
 								_pageList[i].source = _thumb;
 								_thumbData.draw(_libMC,new Matrix(_scale, 0, 0, _scale),null,null,null,true);
-								if(_markList[i] != null){
-									_thumbData.draw(_markList[i],new Matrix(_scale, 0, 0, _scale),null,null,null,true);
+								
+								if(_pluginList!=null){
+									for(var pl:int=0;pl<_pluginList.length;pl++){
+										_pluginList[pl].drawSelf(i,_thumbData,_scale);
+									}
 								}
 							}
-							
-							
 						}
 						
 						if(_viewMode != ViewModeEnum.TILE && _selectionMarker != null){
@@ -651,6 +686,15 @@ package com.devaldi.controls.flexpaper
 								_pageList[i].setChildIndex(_selectionMarker,_pageList[i].numChildren -1);
 							}
 						}
+						
+						if(_viewMode != ViewModeEnum.TILE){
+							if(_pluginList!=null){
+								for(var pl:int=0;pl<_pluginList.length;pl++){
+									_pluginList[pl].drawSelf(i,_pageList[i],_scale);
+								}
+							}
+						}
+
 						
 						loaderidx++;
 					}else{
@@ -814,7 +858,7 @@ package com.devaldi.controls.flexpaper
 			if(_viewMode == ViewModeEnum.PORTRAIT){
 				if(TextSelectEnabled){
 					_grabCursorID = CursorManager.setCursor(textSelectCursor);
-				}else{
+				}else if(CursorsEnabled){
 					_grabCursorID = CursorManager.setCursor(grabCursor);
 				}
 			}
@@ -825,7 +869,7 @@ package com.devaldi.controls.flexpaper
 				CursorManager.removeCursor(_grabbingCursorID);
 				if(TextSelectEnabled){
 					_grabCursorID = CursorManager.setCursor(textSelectCursor);
-				}else{
+				}else if(CursorsEnabled){
 					_grabCursorID = CursorManager.setCursor(grabCursor);
 				}
 			}
@@ -842,7 +886,7 @@ package com.devaldi.controls.flexpaper
 				CursorManager.removeCursor(_grabCursorID);
 				if(TextSelectEnabled){
 					_grabbingCursorID = CursorManager.setCursor(textSelectCursor);
-				}else{
+				}else if(CursorsEnabled){
 					_grabbingCursorID = CursorManager.setCursor(grabbingCursor);
 				}
 			}
@@ -1051,7 +1095,7 @@ package com.devaldi.controls.flexpaper
 			_loaderList = null;
 		}
 		
-		private function deleteSelectionMarker():void{
+		public function deleteSelectionMarker():void{
 			if(_selectionMarker!=null&&_selectionMarker.parent!=null){
 				_selectionMarker.parent.removeChild(_selectionMarker);
 
@@ -1081,6 +1125,14 @@ package com.devaldi.controls.flexpaper
 				
 				_loaderptr.unload();
 				_loaderptr = null;
+			}
+		}
+		
+		private function clearPlugins():void{
+			if(_pluginList==null){return;}
+			
+			for(var pl:int=0;pl<_pluginList.length;pl++){
+				_pluginList[pl].clear();
 			}
 		}
 		
@@ -1120,7 +1172,6 @@ package com.devaldi.controls.flexpaper
 			
 			if(_pageList==null || (_pageList != null && _pageList.length != numPages)){
 				_pageList = new Array(numPages);
-				if(_markList==null){_markList = new Array(numPages);}
 				
 				_displayContainer.visible = false;
 				_libMC.stop();
@@ -1135,6 +1186,12 @@ package com.devaldi.controls.flexpaper
 				}		
 				
 				addPages();
+				
+				if(_pluginList!=null){
+					for(var p:int=0;p<_pluginList.length;p++){
+						_pluginList[p].init();
+					}
+				}
 				
 				if(_fitWidthOnLoad){_scale = getFitWidthFactor();}
 				if(_fitPageOnLoad){_scale = getFitHeightFactor();}
@@ -1152,7 +1209,11 @@ package com.devaldi.controls.flexpaper
 			deletePageList();
 			_pageList = new Array(numPages);
 			
-			if(_markList==null){_markList = new Array(numPages);}
+			if(_pluginList!=null){
+				for(var p:int=0;p<_pluginList.length;p++){
+					_pluginList[p].init();
+				}
+			}
 			
 			_libMC.stop();
 			
@@ -1200,13 +1261,21 @@ package com.devaldi.controls.flexpaper
 			return pHeight;
 		}
 		
-		private var snap:TextSnapshot;
+		public var snap:TextSnapshot;
 		private var searchIndex:int = -1;		
 		private var searchPageIndex:int = -1;
 		private var _selectionMarker:ShapeMarker;
 		private var prevSearchText:String = "";
 		private var prevYsave:Number=-1;
 		
+		public function get SearchPageIndex():int {
+			return searchPageIndex;
+		}	
+		
+		public function set SearchPageIndex(s:int):void {
+			searchPageIndex = s; 
+		}	
+
 		public function searchText(text:String):void{
 			if(text==null){return;}
 			
@@ -1277,6 +1346,11 @@ package com.devaldi.controls.flexpaper
 			di.addEventListener(MouseEvent.MOUSE_OUT,dupImageMoutHandler);
 			di.addEventListener(MouseEvent.CLICK,dupImageClickHandler);
 			di.addEventListener(MouseEvent.MOUSE_DOWN,textSelectorMouseDownHandler);
+			
+			if(_pluginList!=null)
+				for(var pl:int=0;pl<_pluginList.length;pl++)
+					_pluginList[pl].bindPaperEventHandler(di);	
+
 			_pageList[index-1] = di;
 		}	
 		
@@ -1308,22 +1382,61 @@ package com.devaldi.controls.flexpaper
 		private var _currentlySelectedText:String = "";
 		private var _tri:Array;
 		private var _currentSelectionPage:int = -1;
-		private var _markList:Array;
 		private var _selectionMc:MovieClip
 		private var _selecting:Boolean = false;
+		public static var DefaultMarkerColor:uint = 0xb5deff;
+		private var _markerColor:uint = 0xb5deff;
+		public static var DefaultSelectionColor:uint = 0x0095f7;
+		private var _selectionColor:uint = 0x0095f7;
+		
+		public function get MarkerColor():uint {
+			return _markerColor;
+		}
+		
+		public function set MarkerColor(c:uint):void {
+			_markerColor = c;
+		}
+		
+		public function get SelectionColor():uint {
+			return _selectionColor;
+		}
+		
+		public function set SelectionColor(c:uint):void {
+			_selectionColor = c;
+		}
+		
+		public function get CurrentSelectionPage():int {
+			return _currentSelectionPage;
+		}
+
+		public function get FirstHitIndex():int {
+			return _firstHitIndex;
+		}	
+		
+		public function get LastHitIndex():int {
+			return _lastHitIndex;
+		}	
+
+		public function get TextRunInfo():Array {
+			return _tri;
+		}	
+		
+		public function set TextRunInfo(a:Array):void {
+			_tri = a;
+		}
 		
 		private function textSelectorMoveHandler(event:MouseEvent):void{
 			event.stopImmediatePropagation();
 			
 			var hitIndex:int = snap.hitTestTextNearPos(event.target.parent.mouseX,event.target.parent.mouseY,10);
 			
-			if(hitIndex==_lastHitIndex||hitIndex<=0){return;}
+			if(hitIndex==_lastHitIndex||hitIndex<0){return;}
 			if(!(event.target is DupLoader)){return;}
 			
 			if(_firstHitIndex==-1){_firstHitIndex=hitIndex;}
 			_currentSelectionPage = _selectionMc.currentFrame;
 			
-			snap.setSelectColor(0xb5deff);
+			snap.setSelectColor(_markerColor);
 			snap.setSelected(1,snap.charCount,false);
 			
 			if(_firstHitIndex<=hitIndex){	
@@ -1338,7 +1451,7 @@ package com.devaldi.controls.flexpaper
 			_lastHitIndex = hitIndex;
 		}
 		
-		private function drawCurrentSelection(color:uint, shape:Shape, tri:Array):void{
+		public function drawCurrentSelection(color:uint, shape:Shape, tri:Array):void{
 			var ly:Number=-1;
 			var li:int;var lx:int;
 			var miny:int=-1;
@@ -1435,7 +1548,6 @@ package com.devaldi.controls.flexpaper
 			*/
 			
 			_currentlySelectedText = TextMapUtil.checkUnicodeIntegrity(_currentlySelectedText);
-						
 			_tri = snap.getTextRunInfo(_firstHitIndex,_lastHitIndex-1);
 			
 			if(_currentSelectionPage>0){
@@ -1443,10 +1555,12 @@ package com.devaldi.controls.flexpaper
 				
 				_selectionMarker = new ShapeMarker();
 				_selectionMarker.PageIndex = _currentSelectionPage;
-				drawCurrentSelection(0x0095f7,_selectionMarker,_tri);
+				drawCurrentSelection(_selectionColor,_selectionMarker,_tri);
 				_pageList[_currentSelectionPage-1].addChildAt(_selectionMarker,_pageList[_selectionMc.currentFrame-1].numChildren);
 			}
 			
+			dispatchEvent(new SelectionCreatedEvent(SelectionCreatedEvent.SELECTION_CREATED,_currentlySelectedText));
+
 			_selectionMc = null;
 		}
 		
@@ -1478,12 +1592,12 @@ package com.devaldi.controls.flexpaper
 			if(_viewMode == ViewModeEnum.TILE && event.target != null && event.target is DupImage){
 				addGlowFilter(event.target as DupImage);
 			}else{
-				if(event.target is flash.display.SimpleButton){
+				if(event.target is flash.display.SimpleButton || event.target is SpriteAsset || (event.target is NotePanel) || (event.target.parent !=null && event.target.parent.parent !=null && event.target.parent.parent is NotePanel)){
 					CursorManager.removeAllCursors();
 				}else{
 					if(TextSelectEnabled){
 						_grabCursorID = CursorManager.setCursor(textSelectCursor);	
-					}else{
+					}else if(CursorsEnabled){
 						_grabCursorID = CursorManager.setCursor(grabCursor);
 					}
 				}
