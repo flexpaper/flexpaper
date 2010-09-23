@@ -28,6 +28,8 @@ along with FlexPaper.  If not, see <http://www.gnu.org/licenses/>.
 	</mx:Metadata>
 	<mx:Script>
 		<![CDATA[
+			import com.devaldi.controls.flexpaper.Viewer;
+			import com.devaldi.controls.flexpaper.utils.MacMouseWheelHandler;
 			import com.devaldi.events.CurrentPageChangedEvent;
 			import com.devaldi.events.CursorModeChangedEvent;
 			import com.devaldi.events.DocumentLoadedEvent;
@@ -47,8 +49,6 @@ along with FlexPaper.  If not, see <http://www.gnu.org/licenses/>.
 			import mx.managers.BrowserManager;
 			import mx.managers.IBrowserManager;
 			import mx.managers.PopUpManager;
-			
-			import com.devaldi.controls.flexpaper.utils.MacMouseWheelHandler;
 			
 			[Bindable]
 			public var Scale:Number = 1;
@@ -140,6 +140,10 @@ along with FlexPaper.  If not, see <http://www.gnu.org/licenses/>.
 				return paper1.currPage;
 			}
 			
+			public function get viewer():com.devaldi.controls.flexpaper.Viewer{
+				return paper1;
+			}
+			
 			public function nextPage():void{
 				return paper1.gotoPage(paper1.currPage+1);
 			}		
@@ -148,6 +152,13 @@ along with FlexPaper.  If not, see <http://www.gnu.org/licenses/>.
 				return paper1.gotoPage(paper1.currPage-1);
 			}
 			
+			public function get PluginList():Array{
+				return paper1.PluginList;
+			}
+
+			public function set PluginList(p:Array):void{
+				paper1.PluginList = p;
+			}
 			
 			private function onNoMoreSearchResultsHandler(event:Event):void{
 				Alert.show(resourceManager.getString("FlexPaper", "Finishedsearching"),resourceManager.getString("FlexPaper", "Searchfinished"),mx.controls.Alert.OK,this);
