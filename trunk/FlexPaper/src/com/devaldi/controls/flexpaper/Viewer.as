@@ -23,7 +23,6 @@ package com.devaldi.controls.flexpaper
 	import com.devaldi.controls.FlowBox;
 	import com.devaldi.controls.FlowVBox;
 	import com.devaldi.controls.ZoomCanvas;
-	import com.devaldi.controls.flexpaper.plugins.NotePanel;
 	import com.devaldi.controls.flexpaper.utils.TextMapUtil;
 	import com.devaldi.events.CurrentPageChangedEvent;
 	import com.devaldi.events.CursorModeChangedEvent;
@@ -1592,7 +1591,7 @@ package com.devaldi.controls.flexpaper
 			if(_viewMode == ViewModeEnum.TILE && event.target != null && event.target is DupImage){
 				addGlowFilter(event.target as DupImage);
 			}else{
-				if(event.target is flash.display.SimpleButton || event.target is SpriteAsset || (event.target is NotePanel) || (event.target.parent !=null && event.target.parent.parent !=null && event.target.parent.parent is NotePanel)){
+				if(event.target is flash.display.SimpleButton || event.target is SpriteAsset || (event.target is IFlexPaperPluginControl) || (event.target.parent !=null && event.target.parent.parent !=null && event.target.parent.parent is IFlexPaperPluginControl)){
 					CursorManager.removeAllCursors();
 				}else{
 					if(TextSelectEnabled){

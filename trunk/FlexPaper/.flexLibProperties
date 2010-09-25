@@ -43,11 +43,7 @@
     <classEntry path="com.devaldi.controls.flexpaper.utils.MacMouseWheelHandler"/>
     <classEntry path="com.devaldi.controls.flexpaper.IFlexPaperPlugin"/>
     <classEntry path="com.devaldi.events.SelectionCreatedEvent"/>
-    <classEntry path="com.devaldi.controls.flexpaper.FlexPaperViewer_Annotations"/>
-    <classEntry path="com.devaldi.controls.flexpaper.plugins.MarkClickedEvent"/>
-    <classEntry path="com.devaldi.controls.flexpaper.plugins.AnnotationPlugin"/>
-    <classEntry path="com.devaldi.controls.flexpaper.plugins.NotePanel"/>
-    <classEntry path="com.devaldi.controls.flexpaper.plugins.RubberBandComp"/>
+    <classEntry path="com.devaldi.controls.flexpaper.IFlexPaperPluginControl"/>
   </includeClasses>
   <includeResources/>
   <namespaceManifests/>
