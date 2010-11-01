@@ -12,6 +12,7 @@
   <applications>
     <application path="FlexPaper.as"/>
     <application path="FlexPaperViewer_Annotations.mxml"/>
+    <application path="testproject.mxml"/>
   </applications>
   <modules/>
   <buildCSSFiles/>

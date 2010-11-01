@@ -45,60 +45,77 @@ package com.devaldi.streaming
          * </pre>
          */
 		
-		[Event(name="onDocumentLoadedError", type="flash.events.ErrorEvent")]		
+		[Event(name="onDocumentLoadedError", type="flash.events.ErrorEvent")]
+		[Event(name="onLoadersLoaded", type="flash.events.Event")]
         public class AVM2Loader implements IEventDispatcher
         {
-			
 				private var dispatcher:IEventDispatcher = new EventDispatcher();
-
+				private var _loader:Loader;
+				private var _stream:URLStream;
+				private var _inputBytes:ByteArray;
+				private var _loaderCtx:LoaderContext;
+				private var _resigned:Boolean = false;
+				private var _bytesPending:uint = 0;
+				private var _prevLength:uint = 0;
+				private var _attempts:Number = 0;
+				private var _doretry:Boolean = true;
+				private var _request:URLRequest;
+				public var version:uint = 0;
+				private var numframes:int = -1;
+				private var _progressive:Boolean = false;
+				public var LoaderList:Array;
+								
                 public function AVM2Loader(loader:Loader, loaderCtx:LoaderContext, progressive:Boolean)
                 {
                         this.loader = loader;
                         
                         _loaderCtx = loaderCtx;
-                        _stream = new URLStream();
-                        
-                        if(!progressive){
-                        	_stream.addEventListener(Event.COMPLETE, completeHandler);
-							_stream.addEventListener(ProgressEvent.PROGRESS , nonProgressiveProgress);
-                        }else{
-                        	_stream.addEventListener(ProgressEvent.PROGRESS , streamProgressHandler);
-                        	_stream.addEventListener(Event.COMPLETE, streamCompleteHandler);
-                        }
-                        
-                        _stream.addEventListener(IOErrorEvent.IO_ERROR, ioErrorHandler);
-                        _stream.addEventListener(SecurityErrorEvent.SECURITY_ERROR, securityErrorHandler);
+                        _progressive = progressive;
+						resetURLStream();
                 }
-                
-                
-                private var _loader:Loader;
-                private var _stream:URLStream;
-                private var _inputBytes:ByteArray;
-                private var _loaderCtx:LoaderContext;
-                private var _resigned:Boolean = false;
-                private var _bytesPending:uint = 0;
-                private var _prevLength:uint = 0;
-				private var _loaderList:Array;
-				private var _attempts:Number = 0;
-				private var _doretry:Boolean = true;
-				private var _request:URLRequest;
 				
+				public function resetURLStream():void{
+					
+					if(_stream!=null){
+						try{if(stream.connected){_stream.close();}
+						}catch(e:Error){}
+						
+						if(!_progressive){
+							_stream.removeEventListener(Event.COMPLETE, completeHandler);
+							_stream.removeEventListener(ProgressEvent.PROGRESS , nonProgressiveProgress);
+						}else{
+							_stream.removeEventListener(ProgressEvent.PROGRESS , streamProgressHandler);
+							_stream.removeEventListener(Event.COMPLETE, streamCompleteHandler);
+						}
+
+					}
+					
+					_stream = new URLStream();
+					
+					if(!_progressive){
+						_stream.addEventListener(Event.COMPLETE, completeHandler,false,0,true);
+						_stream.addEventListener(ProgressEvent.PROGRESS , nonProgressiveProgress,false,0,true);
+					}else{
+						_stream.addEventListener(ProgressEvent.PROGRESS , streamProgressHandler,false,0,true);
+						_stream.addEventListener(Event.COMPLETE, streamCompleteHandler,false,0,true);
+					}
+					
+					_stream.addEventListener(IOErrorEvent.IO_ERROR, ioErrorHandler);
+					_stream.addEventListener(SecurityErrorEvent.SECURITY_ERROR, securityErrorHandler);
+				}
+                
                 public function get Resigned():Boolean{
                 	return _resigned;
                 }
 				
 				public function get InputBytes():ByteArray {
 					return _inputBytes;
+				}
+				
+				public function set InputBytes(b:ByteArray):void {
+					_inputBytes = b;
 				}					
 				
-				public function get LoaderList():Array {
-					return _loaderList;
-				}	
-				
-				public function set LoaderList(a:Array):void {
-					_loaderList = a;
-				}				
-                
                 public function get stream():URLStream
                 {
                         return _stream;
@@ -135,6 +152,7 @@ package com.devaldi.streaming
                 
                 private function streamCompleteHandler(event:Event):void{
                 	flash.utils.setTimeout(confirmBytesLoaded,500);
+					_stream.close();
                 }
                 
                 private function confirmBytesLoaded():void{
@@ -218,12 +236,8 @@ package com.devaldi.streaming
                         bytes[0] = 0x46;
                         cBytes.length = 0;
                 }
-                
-                
-                public var version:uint = 0;
-                private var numframes:int = -1;
-                
-                private function getBodyPosition(bytes:ByteArray):uint
+
+				private function getBodyPosition(bytes:ByteArray):uint
                 {
                         var result:uint = 0;
                         
@@ -340,5 +354,6 @@ package com.devaldi.streaming
 					evt.text = event.text;
 					dispatchEvent(evt);
                 }
+				
         }
 }
