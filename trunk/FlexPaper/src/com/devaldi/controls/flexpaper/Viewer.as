@@ -1576,7 +1576,7 @@ package com.devaldi.controls.flexpaper
 		private function textSelectorMoveHandler(event:MouseEvent):void{
 			event.stopImmediatePropagation();
 			
-			var hitIndex:int = snap.hitTestTextNearPos(event.target.parent.mouseX,event.target.parent.mouseY,10);
+			var hitIndex:int = snap.hitTestTextNearPos(event.target.parent.mouseX,event.target.parent.mouseY,10)+1;
 			
 			if(hitIndex==_lastHitIndex||hitIndex<0){return;}
 			if(!(event.target is DupLoader)){return;}
