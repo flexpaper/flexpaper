@@ -24,6 +24,7 @@ package com.devaldi.streaming
 	import flash.display.MovieClip;
 	import flash.events.MouseEvent;
 	import flash.filters.DropShadowFilter;
+	import flash.filters.GlowFilter;
 	import flash.utils.setTimeout;
 	
 	import mx.controls.Image;
@@ -35,10 +36,27 @@ package com.devaldi.streaming
 		public var scaleWidth:int;
 		public var scaleHeight:int;
 		public var loadedIndex:int = -1;
-		
+		public var _paperRotation:int = 0;
+		public var doAddDropShadow:Boolean = true;
+		public var doAddGlowFilter:Boolean = false;
+		public var glowFilterColor:uint = 0x000000;
 		public static var paperSource:MovieClip; 
 		
 		public function DupImage(){}
+		
+		public function get paperRotation():Number {
+			return _paperRotation;
+		}	
+		
+		public function set paperRotation(n:Number):void {
+			if(n==90){
+				var w:int = width;
+				width = height;	
+				height = w;
+			}
+			
+			_paperRotation = n;
+		}
 		
 		override public function set source(value:Object):void{
 			if(this.source != null && this.source is Bitmap && this.source.bitmapData != null){
@@ -47,15 +65,24 @@ package com.devaldi.streaming
 			
 			super.source = value;
 			
-			if(value!=null){
+			if(value!=null && doAddDropShadow){
 				if(this.filters.length==0){addDropShadow();}
+			}
+			
+			if(value!=null && doAddGlowFilter){
+				if(this.filters.length==0){addGlowFilter();}
+			}
+			
+			if(value == null && hasEventListener(MouseEvent.ROLL_OVER)){
+				removeEventListener(MouseEvent.ROLL_OVER,dupImageMoverHandler);
+			}else{
+				if(!hasEventListener(MouseEvent.ROLL_OVER))
+					addEventListener(MouseEvent.ROLL_OVER,dupImageMoverHandler,false,0,true);
 			}
 		}
 		
 		override protected function createChildren():void {
 			super.createChildren();
-			
-			addEventListener(MouseEvent.ROLL_OVER,dupImageMoverHandler,false,0,true);
 		}
 		
 		private function dupImageMoverHandler(event:MouseEvent):void{ // depricated.. only used when using bitmaps to render 
@@ -64,6 +91,14 @@ package com.devaldi.streaming
 				paperSource.alpha = 0;
 				addChild(paperSource);
 			} */
+		}
+		
+		public function addGlowFilter():void{
+			if(this.filters.length==0){
+				this.filters = null;
+				var filter : GlowFilter = new GlowFilter(glowFilterColor, 1, 3, 3, 5, 1, true, false);
+				this.filters = [ filter ];
+			}
 		}
 				
 		public function addDropShadow():void
@@ -82,12 +117,6 @@ package com.devaldi.streaming
 			 this.filters = [ filter ];
 			}
 		}			
-		
-		public function addGlowFilter():void{
-			var filter : flash.filters.GlowFilter = new flash.filters.GlowFilter(0x111111, 1, 5, 5, 2, 1, false, false);
-			filters = [ filter ];
-		}
-		
 		
 		public function removeAllChildren():void{
 			while(numChildren > 0)
@@ -109,9 +138,16 @@ package com.devaldi.streaming
 		override protected function updateDisplayList(w:Number, h:Number):void {
 			if(w>0&&h>0){
 			try{
-			graphics.beginFill(0xffffff,1);
-			graphics.drawRect(0,0,w,h);
+
+			if(_paperRotation!=90||_paperRotation==180){
+				graphics.beginFill(0xffffff,1);
+				graphics.drawRect(0,0,w,h);
+			}else{
+				graphics.clear();
+			}
+			
 			super.updateDisplayList(w,h);}catch (e:*) {}}
+			
 		}	 
 		
 		public function addGlowShadow():void

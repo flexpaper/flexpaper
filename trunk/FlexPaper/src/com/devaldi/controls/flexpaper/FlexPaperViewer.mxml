@@ -16,7 +16,7 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with FlexPaper.  If not, see <http://www.gnu.org/licenses/>.	
 -->
-<mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml" width="100%" height="100%" verticalGap="0"  xmlns:fp="com.devaldi.controls.flexpaper.*" xmlns:ct="com.devaldi.controls.*" xmlns:st="com.devaldi.skinning.*" borderColor="#8a8a8a" borderThickness="1" addedToStage="bindStageEvents(event)" creationComplete="Init()" verticalScrollPolicy="off" horizontalScrollPolicy="off">
+<fp:FlexPaperViewer_Base xmlns:mx="http://www.adobe.com/2006/mxml" addedToStage="bindStageEvents(event)" xmlns:fp="com.devaldi.controls.flexpaper.*" xmlns:ct="com.devaldi.controls.*" xmlns:st="com.devaldi.skinning.*">
 	<mx:Metadata>
 		[ResourceBundle("FlexPaper")]
 		[Event(name="onDocumentLoaded", type="com.devaldi.events.DocumentLoadedEvent")]
@@ -38,160 +38,53 @@ along with FlexPaper.  If not, see <http://www.gnu.org/licenses/>.
 			import com.devaldi.events.ScaleChangedEvent;
 			import com.devaldi.events.ViewModeChangedEvent;
 			
-			import flash.desktop.Clipboard;
-			import flash.desktop.ClipboardFormats;
 			import flash.display.StageDisplayState;
 			import flash.net.navigateToURL;
 			
 			import mx.controls.Alert;
 			import mx.controls.sliderClasses.Slider;
 			import mx.events.SliderEvent;
-			import mx.managers.BrowserManager;
-			import mx.managers.IBrowserManager;
 			import mx.managers.PopUpManager;
 			
-			[Bindable]
-			public var Scale:Number = 1;
-			
-			[Bindable]
-			public var SwfFile:String = "";
-			
-			[Bindable]
-			public var ZoomTransition:String = "easeOut";
-			
-			[Bindable]
-			public var ZoomTime:Number = 0.6;
-			
-			[Bindable]
-			public var ZoomInterval:Number = 0.1;
-			
-			[Bindable]
-			public var FitPageOnLoad:Boolean = false;
-			
-			[Bindable]
-			public var FitWidthOnLoad:Boolean = false;
-			
-			[Bindable]
-			public var FullScreenAsMaxWindow:Boolean = false;
-			
-			[Bindable]
-			public var ProgressiveLoading:Boolean = false;
-			
-			[Bindable]
-			private var TrueFullScreenActive:Boolean = false;
-			
-			[Bindable]
-			public var StartAtPage:Number = 1;
-			
-			[Bindable]
-			public var PrintEnabled:Boolean = true;
-			
-			[Bindable]
-			public var PrintToolsVisible:Boolean = true;
-
-			[Bindable]
-			public var ViewModeToolsVisible:Boolean = true;
-			
-			[Bindable]
-			public var ZoomToolsVisible:Boolean = true;
-
-			[Bindable]
-			public var FullScreenVisible:Boolean = true;
-			
-			[Bindable]
-			public var NavToolsVisible:Boolean = true;
-			
-			[Bindable]
-			public var CursorToolsVisible:Boolean = true;
-			
-			[Bindable]
-			public var SearchToolsVisible:Boolean = true;
-			
-			private var prd:PrintRangeDialog;
-			private var _fixedWidth:Number = -1;
-			private var _fixedHeight:Number = -1;
-			private var _browserManager:IBrowserManager;
 			private var _sliderUserChange:Boolean = false;
 			
-			private function Init():void{
-				_browserManager = BrowserManager.getInstance();
-			}	
-			
-			public function printPaper(e:Event):void{
-				prd = new PrintRangeDialog(); 
-				PopUpManager.addPopUp(prd, this, true);
-				PopUpManager.centerPopUp(prd);
-				prd["bttnPrint"].addEventListener("click", printHandler); 
-			}
-			
-			private function printHandler(event:Event):void{
-				if(prd.PrintRange != "" && prd.validated){
-					paper1.printPaperRange(prd.PrintRange);
-				}else if(prd.validated){
-					paper1.printPaper();
-				}
-			}
-			
-			public function setViewerFocus():void{
-				paper1.setPaperFocus();	
-			}
-			
-			public function getCurrPage():Number{
-				return paper1.currPage;
-			}
-			
-			public function get viewer():com.devaldi.controls.flexpaper.Viewer{
+			public override function get viewer():com.devaldi.controls.flexpaper.Viewer{
 				return paper1;
 			}
 			
-			public function nextPage():void{
-				return paper1.gotoPage(paper1.currPage+1);
-			}		
-			
-			public function prevPage():void{
-				return paper1.gotoPage(paper1.currPage-1);
+			private function bindStageEvents(e:Event):void{
+				stage.removeEventListener(FullScreenEvent.FULL_SCREEN, fullScreenRedraw);
+				stage.addEventListener(FullScreenEvent.FULL_SCREEN, fullScreenRedraw);
 			}
 			
-			public function get PluginList():Array{
-				return paper1.PluginList;
-			}
-
-			public function set PluginList(p:Array):void{
-				paper1.PluginList = p;
+			private function fullScreenRedraw(event:FullScreenEvent):void{
+				txtSearch.enabled = !TrueFullScreenActive; 
 			}
 			
 			private function onNoMoreSearchResultsHandler(event:Event):void{
 				Alert.show(resourceManager.getString("FlexPaper", "Finishedsearching"),resourceManager.getString("FlexPaper", "Searchfinished"),mx.controls.Alert.OK,this);
 			}
 			
-			private function documentLoadedHandler(event:Event):void{
+			protected override function documentLoadedHandler(event:Event):void{
 				spin1.visible = false;
 				lblProgress.visible = false;
 				spin1.stop();
 				bttnInfo.visible = true;
 				
 				if(StartAtPage!=1&&!isNaN(StartAtPage)){paper1.gotoPage(StartAtPage);}
-				dispatchEvent(event);
-			}
-			
-			private function documentLoadedErrorHandler(event:Event):void{
-				dispatchEvent(event);
+				super.documentLoadedHandler(event);
 			}
 			
 			private function logoClickedEventHandler(event:Event):void{
 				showInfo(event);			
 			}
 			
-			private function papersLoadingHandler(event:Event):void{
+			protected override function papersLoadingHandler(event:Event):void{
 				spin1.start();
 				spin1.visible = true;
-				dispatchEvent(event);
+				super.papersLoadingHandler(event);
 			}
-			
-			private function onExternalLinkClickedHandler(event:ExternalLinkClickedEvent):void{
-				dispatchEvent(event);
-			}
-			
+						
 			private function sliderChange(event:SliderEvent):void 
 			{
 				if(!paper1.BusyLoading && _sliderUserChange)
@@ -201,12 +94,6 @@ along with FlexPaper.  If not, see <http://www.gnu.org/licenses/>.
 				
 				_sliderUserChange = true;
 			}		
-			
-			private function formatPct(item:Object):String {
-				var spct:String = (Math.round(Number(item)*100)) + "%";
-				txtPct.text = spct;
-				return spct;
-			}
 			
 			private function txtPctKeyDown(event:KeyboardEvent):void{
 				if(event.keyCode == Keyboard.ENTER && txtPct.text.length>1 && !isNaN(Number(txtPct.text.replace("%","")))){
@@ -220,16 +107,15 @@ along with FlexPaper.  If not, see <http://www.gnu.org/licenses/>.
 				}
 			}
 			
-			
 			private function txtPageNumKeyDown(event:KeyboardEvent):void{
 				if(event.keyCode == Keyboard.ENTER && txtPage.text.length>0 && !isNaN(Number(txtPage.text))){
 					paper1.gotoPage(new Number(txtPage.text));
 				}
 			}
 			
-			private function onDocumentLoadingProgressHandler(event:ProgressEvent):void{
+			protected override function onDocumentLoadingProgressHandler(event:ProgressEvent):void{
 				lblProgress.text = String(Math.round(event.bytesLoaded/event.bytesTotal*100));
-				dispatchEvent(event);
+				super.onDocumentLoadingProgressHandler(event);
 			}
 			
 			private function onScaleChanged(event:Event):void{
@@ -238,188 +124,19 @@ along with FlexPaper.  If not, see <http://www.gnu.org/licenses/>.
 				slidPctScale.value = Number(paper1.Scale);
 			}
 			
-			public function switchMode(mode:String=null):void{
-				paper1.switchMode(mode);
-			}
-			
-			public function setCurrentCursor(cursor:String):void{
-				if(cursor=="TextSelectorCursor"){
-					paper1.TextSelectEnabled = true;
-				}else if (cursor=="ArrowCursor"){
-					paper1.TextSelectEnabled = false;
-				}
-			}
-			
 			private function showInfo(e:Event):void {
 				var vabout:About = new About();
 				PopUpManager.addPopUp(vabout, this, true);
 				PopUpManager.centerPopUp(vabout);
 			}
 			
-			private function mvNext():void{
-				if(paper1.currPage<paper1.numPages){paper1.gotoPage(paper1.currPage+1);}
-			}
-			
-			private function mvPrev():void{
-				if(paper1.ViewMode == ViewModeEnum.TWOPAGE){
-					if(paper1.currPage>1){paper1.gotoPage(paper1.currPage-2);}
-				}
-				else
-					if(paper1.currPage>1){paper1.gotoPage(paper1.currPage-1);}			
-			}
-			
-			private function toggleFullScreen():void {
-				try {
-					if(!FullScreenAsMaxWindow){
-						paper1.PaperVisible = false; // to avoid flickering and let it redraw properly
-						
-						if(this.stage.displayState == StageDisplayState.NORMAL){
-							_fixedWidth = paper1.width;
-							_fixedHeight = paper1.height;
-						}
-						
-						switch (this.stage.displayState) {
-							case StageDisplayState.FULL_SCREEN:
-								this.stage.displayState = StageDisplayState.NORMAL;
-								break;
-							default:
-								this.stage.displayState = StageDisplayState.FULL_SCREEN;
-								break;
-						}
-					}else{
-						var ur:URLRequest = new URLRequest(this.stage.loaderInfo.url);
-						var uv:URLVariables = new URLVariables();
-						uv.Scale = Scale;
-						uv.SwfFile = SwfFile;
-						uv.ZoomTransition = ZoomTransition;
-						uv.ZoomTime = ZoomTime;
-						uv.ZoomInterval = ZoomInterval;
-						uv.FitPageOnLoad = paper1.FitMode == FitModeEnum.FITHEIGHT;
-						uv.FitWidthOnLoad = paper1.FitMode == FitModeEnum.FITWIDTH;
-						uv.PrintEnabled = PrintEnabled;
-						uv.ProgressiveLoading = ProgressiveLoading;
-						uv.FullScreenAsMaxWindow = FullScreenAsMaxWindow;
-						uv.PrintToolsVisible = PrintToolsVisible;
-						uv.ViewModeToolsVisible = ViewModeToolsVisible;
-						uv.ZoomToolsVisible = ZoomToolsVisible;
-						uv.FullScreenVisible = FullScreenVisible;
-						uv.NavToolsVisible = NavToolsVisible;
-						uv.CursorToolsVisible = CursorToolsVisible;
-						uv.SearchToolsVisible = SearchToolsVisible;
-						
-						ur.data = uv;
-						navigateToURL(ur,"FlexPaperFullScreen");
-					}
-				} catch (err:SecurityError) {
-					
-				}
-			}
-			
-			public function fitWidth():void{
-				paper1.fitWidth();
-			}
-			
-			public function fitHeight():void{
-				paper1.fitHeight();
-			}		
-			
-			public function gotoPage(p:Number):void{
-				paper1.gotoPage(p);
-			}
-			
-			private function bindStageEvents(e:Event):void{
-				stage.removeEventListener(FullScreenEvent.FULL_SCREEN, fullScreenRedraw);
-				stage.addEventListener(FullScreenEvent.FULL_SCREEN, fullScreenRedraw);
-				this.addEventListener(MouseEvent.CLICK,setFocusTo);
-				
-				if(CursorToolsVisible){
-					this.addEventListener(Event.COPY,copyHandler);
-					contextMenu = new ContextMenu();
-					contextMenu.hideBuiltInItems();
-					contextMenu.clipboardMenu = true;
-					contextMenu.clipboardItems.copy = true;
-					contextMenu.clipboardItems.selectAll = false;
-				}
-				
-				var cmi_about:ContextMenuItem = new ContextMenuItem(resourceManager.getString("FlexPaper", "About")+' FlexPaper');
-				cmi_about.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, showInfo);
-				
-				contextMenu.customItems.push(cmi_about);
-				
-				if(PrintEnabled && PrintToolsVisible){
-					var cmi_print:ContextMenuItem = new ContextMenuItem(resourceManager.getString("FlexPaper", "Print") + " ...");
-					cmi_print.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, printPaper);
-					contextMenu.customItems.push(cmi_print);
-				}
-				
-			}
-			
-			private function setFocusTo(e:MouseEvent):void{
-				stage.stageFocusRect = false;
-				stage.focus = e.target as InteractiveObject;
-			}
-			
-			private function copyHandler(e:Event):void{
-				try{Clipboard.generalClipboard.setData(ClipboardFormats.TEXT_FORMAT, paper1.CurrentlySelectedText);}catch (e:*) {}
-			}
-			
-			private function fullScreenRedraw(event:FullScreenEvent):void{
-				if(!event.fullScreen && _fixedWidth>0){
-					paper1.setActualSize(_fixedWidth,_fixedHeight);
-				}
-				
-				if(paper1.FitMode == FitModeEnum.FITWIDTH){
-					flash.utils.setTimeout(paper1.fitWidth,200);
-				} else if(paper1.FitMode == FitModeEnum.FITHEIGHT){
-					flash.utils.setTimeout(paper1.fitHeight,200);
-				} else if (paper1.ViewMode != ViewModeEnum.TWOPAGE){
-					paper1.PaperVisible = true;
-				}
-				
-				if(paper1.ViewMode == ViewModeEnum.TWOPAGE){
-					if(event.fullScreen){
-						flash.utils.setTimeout(paper1.reScaleTwoPage,200);
-					}else{
-						flash.utils.setTimeout(paper1.reScaleTwoPage,200,true);
-					}
-				}
-				
-				TrueFullScreenActive = event.fullScreen && !FullScreenAsMaxWindow;
-				txtSearch.enabled = !TrueFullScreenActive; 
-			}
-			
-			public function loadSwf(s:String):void{
+			public override function loadSwf(s:String):void{
 				bttnInfo.visible = false;
 				spin1.visible = true;
 				lblProgress.text = "";
 				lblProgress.visible = true;
-				paper1.SwfFile = s;
+				super.loadSwf(s);
 			}
-			
-			public function Zoom(factor:Number):void{
-				paper1.Zoom(factor);
-			}
-			
-			public function searchText(text:String):void{
-				paper1.searchText(text);				
-			}		
-			
-			private function onFitModeChanged(event:FitModeChangedEvent):void{
-				dispatchEvent(event);
-			}
-			
-			private function onViewModeChanged(event:ViewModeChangedEvent):void{
-				dispatchEvent(event);
-			}
-			
-			private function onCurrPageChanged(event:CurrentPageChangedEvent):void{
-				dispatchEvent(event);
-			}
-			
-			private function onCursorModeChanged(event:CursorModeChangedEvent):void{
-				dispatchEvent(event);
-			}
-			
 		]]>
 	</mx:Script>
 	<mx:Style source="styles/default.css" />
@@ -434,13 +151,13 @@ along with FlexPaper.  If not, see <http://www.gnu.org/licenses/>.
 		<st:GradientImageButton id="bttnFitHeight" icon="@Embed('/../assets/pagefit.gif')" styleName="toolbttn" width="20"  click="paper1.fitHeight();bttnFitWidth.selected=false;" selected="{paper1.FitMode == FitModeEnum.FITHEIGHT}" toggle="true" enabled="{paper1.ViewMode == ViewModeEnum.PORTRAIT}" toolTip="@Resource(key='FitPage', bundle='FlexPaper')"  tabIndex="6" visible="{ViewModeToolsVisible}" includeInLayout="{ViewModeToolsVisible}"/>
 		<mx:Image source="@Embed('/../assets/bar.gif')" width="3" height="21" visible="{ViewModeToolsVisible}" includeInLayout="{ViewModeToolsVisible}"/>
 		
-		<st:GradientHSlider id="slidPctScale" maximum="5" mouseDown="_sliderUserChange=true" change="sliderChange(event)"  styleName="sliderbttn" dataTipFormatFunction="formatPct" liveDragging="true" snapInterval="{ZoomInterval}" minimum="0.1" value="{Scale}" width="120" height="15" enabled="{paper1.ViewMode == ViewModeEnum.PORTRAIT}" toolTip="@Resource(key='Scale', bundle='FlexPaper')" tabIndex="6" visible="{ZoomToolsVisible}" includeInLayout="{ZoomToolsVisible}"/>
+		<st:GradientHSlider id="slidPctScale" maximum="5" mouseDown="_sliderUserChange=true" change="sliderChange(event)"  styleName="sliderbttn" dataTipFormatFunction="formatPct" liveDragging="true" snapInterval="{ZoomInterval}" minimum="0.1" value="{Scale}" width="120" height="15" enabled="true" toolTip="@Resource(key='Scale', bundle='FlexPaper')" tabIndex="6" visible="{ZoomToolsVisible}" includeInLayout="{ZoomToolsVisible}"/>
 		<st:GradientTextInput fontSize="9" height="21" width="40" id="txtPct" text="{formatPct(Scale)}" keyDown="txtPctKeyDown(event)" enabled="{paper1.ViewMode == ViewModeEnum.PORTRAIT}" toolTip="@Resource(key='Scale', bundle='FlexPaper')" tabIndex="7" visible="{ZoomToolsVisible}" includeInLayout="{ZoomToolsVisible}"/>
 		<st:GradientImageButton icon="@Embed('/../assets/fullscreen.gif')" styleName="toolbttn" toolTip="@Resource(key='Fullscreen', bundle='FlexPaper')"  width="20" height="20" x="312" y="2" click="toggleFullScreen();" tabIndex="8" visible="{FullScreenVisible}" includeInLayout="{FullScreenVisible}" />
 		<mx:Image source="@Embed('/../assets/bar.gif')" width="3" height="21" visible="{FullScreenVisible||ZoomToolsVisible}" includeInLayout="{FullScreenVisible||ZoomToolsVisible}" />
 		
 		<st:GradientImageButton icon="@Embed('/../assets/icon-arrow-left.gif')" styleName="toolbttn" toolTip="@Resource(key='PreviousPage', bundle='FlexPaper')" width="15" height="20" click="mvPrev();" tabIndex="8" visible="{NavToolsVisible}" includeInLayout="{NavToolsVisible}"/>
-		<st:GradientTextInput fontSize="9" height="21" width="40" id="txtPage" text="{paper1.currPage}" keyDown="txtPageNumKeyDown(event)" enabled="{paper1.ViewMode == ViewModeEnum.PORTRAIT || paper1.ViewMode == ViewModeEnum.TWOPAGE}" toolTip="@Resource(key='Current Page', bundle='FlexPaper')" tabIndex="9" visible="{NavToolsVisible}" includeInLayout="{NavToolsVisible}"/>
+		<st:GradientTextInput fontSize="9" height="21" width="40" id="txtPage" text="{paper1.currPage}" keyDown="txtPageNumKeyDown(event)" enabled="{paper1.ViewMode == ViewModeEnum.PORTRAIT||paper1.ViewMode == ViewModeEnum.TWOPAGE}" toolTip="@Resource(key='Current Page', bundle='FlexPaper')" tabIndex="9" visible="{NavToolsVisible}" includeInLayout="{NavToolsVisible}"/>
 		<mx:HBox horizontalGap="1" paddingTop="2" visible="{NavToolsVisible}" includeInLayout="{NavToolsVisible}">
 			<st:GradientLabel fontSize="9" height="21" width="10" text="/"/>
 			<st:GradientLabel fontSize="9" height="21" width="33" text="{paper1.numPages}"/>
@@ -452,7 +169,7 @@ along with FlexPaper.  If not, see <http://www.gnu.org/licenses/>.
 		<st:GradientImageButton icon="@Embed('/../assets/hand2.gif')" styleName="toolbttn" toolTip="@Resource(key='TextDrag', bundle='FlexPaper')"  width="22" selected="{!paper1.TextSelectEnabled}"  click="{paper1.TextSelectEnabled=false}" tabIndex="12" visible="{CursorToolsVisible}" includeInLayout="{CursorToolsVisible}" />
 		<mx:Image source="@Embed('/../assets/bar.gif')" width="3" height="21" visible="{CursorToolsVisible}" includeInLayout="{CursorToolsVisible}" />
 		
-		<st:GradientTextInput fontSize="9" height="20" width="65" id="txtSearch" keyDown="txtSearchKeyDown(event)" enabled="{paper1.ViewMode == ViewModeEnum.PORTRAIT || paper1.ViewMode == ViewModeEnum.TWOPAGE}" toolTip="@Resource(key='Search', bundle='FlexPaper')" tabIndex="13" visible="{SearchToolsVisible}" includeInLayout="{SearchToolsVisible}"/>
+		<st:GradientTextInput fontSize="9" height="20" width="65" id="txtSearch" keyDown="txtSearchKeyDown(event)" enabled="{paper1.ViewMode == ViewModeEnum.PORTRAIT||paper1.ViewMode == ViewModeEnum.TWOPAGE}" toolTip="@Resource(key='Search', bundle='FlexPaper')" tabIndex="13" visible="{SearchToolsVisible}" includeInLayout="{SearchToolsVisible}"/>
 		<st:GradientImageButton icon="@Embed('/../assets/find.gif')" styleName="toolbttn" width="20" height="20" click="paper1.searchText(txtSearch.text);" toolTip="@Resource(key='Search', bundle='FlexPaper')" tabIndex="14" enabled="{!TrueFullScreenActive}" visible="{SearchToolsVisible}" includeInLayout="{SearchToolsVisible}"/>
 		<mx:Image source="@Embed('/../assets/bar.gif')" width="3" height="21" visible="{SearchToolsVisible}" includeInLayout="{SearchToolsVisible}"/>
 		
@@ -486,4 +203,4 @@ along with FlexPaper.  If not, see <http://www.gnu.org/licenses/>.
 			   ZoomInterval="{ZoomInterval}"
 			   addedToStage="MacMouseWheelHandler.init(stage)" 
 			   height="100%" width="100%" borderStyle="solid"  tabIndex="0" />							
-</mx:VBox>
+</fp:FlexPaperViewer_Base>
