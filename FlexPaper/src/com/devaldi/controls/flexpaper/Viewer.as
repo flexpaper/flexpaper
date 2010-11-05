@@ -1785,11 +1785,17 @@ package com.devaldi.controls.flexpaper
 				var options:PrintJobOptions = new PrintJobOptions();
 				//options.printAsBitmap = true;
 				
-				for(var i:int=0;i<numPagesLoaded;i++){
-					_libMC.gotoAndStop(i+1);
-					pj.addPage(_swfContainer,null,options);
-				}			
-				
+				var i:int=0;
+				_libMC.gotoAndStop(i+1);
+				while(_libMC.totalFrames > _libMC.currentFrame){
+					if(_libMC.currentFrame==i+1){
+						pj.addPage(_swfContainer,null,options);
+						i++;
+					}
+					
+					_libMC.gotoAndStop(_libMC.currentFrame+1);
+				}
+				pj.addPage(_swfContainer,null,options);
 				pj.send();
 			}
 			
@@ -1832,14 +1838,25 @@ package com.devaldi.controls.flexpaper
 				else if((pj.pageWidth/_libMC.width) < 1)
 					_libMC.scaleX = _libMC.scaleY = (pj.pageWidth/_libMC.width);
 				
-				for(var ip:int=0;ip<numPagesLoaded;ip++){
-					if(pageNumList[ip+1] != null){
-						_libMC.gotoAndStop(ip+1);
-						pj.addPage(_swfContainer,null,options);
+				
+				var i:int=0;
+				_libMC.gotoAndStop(i+1);
+				while(_libMC.totalFrames > _libMC.currentFrame){
+					if(_libMC.currentFrame==i+1){
+						if(pageNumList[i+1] != null)
+							pj.addPage(_swfContainer,null,options);
+						
+						i++;
 					}
-				}			
+					
+					_libMC.gotoAndStop(_libMC.currentFrame+1);
+				}
+				
+				if(pageNumList[_libMC.totalFrames] != null)
+					pj.addPage(_swfContainer,null,options);
 				
 				pj.send();
+				
 			}
 			
 			_libMC.scaleX = _libMC.scaleY = 1;
