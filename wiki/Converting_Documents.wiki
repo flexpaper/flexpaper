@@ -8,7 +8,10 @@ The last 5 parameters specifies that:
  * *-f* : Fonts should be embedded, improves searchability in the document
  * *-T 9* : Sets the target flash version to 9, improves stability
  * *-t* : Inserts a stop between each frame, improves stability
- * *-G* : Makes the document smaller and faster to render
  * *-s storeallcharacters* : Stores all character information about the texts in the document, improves searchability 
+
+*Optional Parameters*
+ * *-G* : Makes the document smaller and faster to render
+ * *-s subpixels=1.5* : Adjusts image resolution in the document. Should be used in cases where the document contains lots of large images. The value (1.5) can be experimented with to archive desired quality.  
 
 Please see http://wiki.swftools.org/index.php/Pdf2swf for a complete list of PDF2SWF arguments and their explanations.
