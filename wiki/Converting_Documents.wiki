@@ -2,7 +2,7 @@ There is a range of available converters, both commercial and free. The followin
 
 Converting your documents using PDF2SWF is fairly straight forward. Documents are preferrably converted using the command line executable. The following example shows the currently recommended setting for converting your document:
 
-*C:\SWFTools\pdf2swf.exe Paper.pdf -o Paper.swf -f -T 9 -t -G -s storeallcharacters*
+*C:\SWFTools\pdf2swf.exe Paper.pdf -o Paper.swf -f -T 9 -t -s storeallcharacters*
 
 The last 4 parameters specifies that:
  * *-f* : Fonts should be embedded, improves searchability in the document
