@@ -455,6 +455,7 @@ package com.devaldi.controls.flexpaper
 				deleteLoaderList();
 				deleteFLoader();
 				deleteSelectionMarker();
+				TextMapUtil.totalFragments = "";
 				
 				if(s!=_swfFile)
 					deleteLibMC();
@@ -1695,7 +1696,7 @@ package com.devaldi.controls.flexpaper
 			var rev:int;
 			if(_firstHitIndex>_lastHitIndex){rev=_firstHitIndex;_firstHitIndex=_lastHitIndex;_lastHitIndex=rev;}
 			
-			var totaltext:String = snap.getText(0,snap.charCount,false);
+			//var totaltext:String = snap.getText(0,snap.charCount,false);
 			
 			if(_firstHitIndex>=0 && _lastHitIndex>0)
 				_currentlySelectedText = snap.getText(_firstHitIndex,_lastHitIndex-1,false);
