@@ -101,7 +101,6 @@ package com.devaldi.controls.flexpaper.utils
 					eb.InitMacMouseWheel = function(id) {	
 						var swf = eb.findSwf(id);
 						if(swf && eb.platform.mac) {
-							
 							var mouseOver = false;
 		
 							/// Mouse move detection for mouse wheel support
@@ -111,6 +110,10 @@ package com.devaldi.controls.flexpaper.utils
 		
 							/// Mousewheel support
 							var _mousewheel = function(event) {
+								if(!getDocViewer().hasFocus()){return true;}
+								getDocViewer().setViewerFocus(true);
+								getDocViewer().focus();
+
 								if(!swf.hasFocus()){return true;}
 								if(mouseOver) {
 									var delta = 0;
@@ -129,7 +132,11 @@ package com.devaldi.controls.flexpaper.utils
 								window.addEventListener('DOMMouseMove', _mousemove, false);
 							}
 							window.onmousewheel = document.onmousewheel = _mousewheel;
-							//window.onmousemove = document.onmousemove = _mousemove;
+							
+							if(eb.browser.mozilla){
+								window.onmousemove = document.onmousemove = _mousemove;
+							}
+			
 							window.addEventListener("mousemove",_mousemove);
 							document.addEventListener("mousemove",_mousemove);
 			
@@ -158,7 +165,7 @@ package com.devaldi.controls.flexpaper.utils
 							window.onmousewheel = document.onmousewheel = _handleWheel;
 
 							if (window.attachEvent) 
-							window.attachEvent("onmousewheel", _handleWheel);
+								window.attachEvent("onmousewheel", _handleWheel);
 						}
 					}	
 				}

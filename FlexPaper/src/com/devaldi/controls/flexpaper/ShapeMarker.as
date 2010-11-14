@@ -18,9 +18,9 @@ along with FlexPaper.  If not, see <http://www.gnu.org/licenses/>.
 	
 package com.devaldi.controls.flexpaper
 {
-	import flash.display.Shape;
+	import flash.display.Sprite;
 	
-	public class ShapeMarker extends Shape
+	public class ShapeMarker extends Sprite
 	{
 		public var PageIndex:int = -1;
 		public var data:Object = null;
