@@ -100,11 +100,12 @@
 				stage.removeEventListener(FullScreenEvent.FULL_SCREEN, fullScreenRedraw);
 				stage.addEventListener(FullScreenEvent.FULL_SCREEN, fullScreenRedraw);
 				this.addEventListener(MouseEvent.CLICK,setFocusTo);
-				
+
+				contextMenu = new ContextMenu();
+				contextMenu.hideBuiltInItems();
+
 				if(CursorToolsVisible){
 					this.addEventListener(Event.COPY,copyHandler);
-					contextMenu = new ContextMenu();
-					contextMenu.hideBuiltInItems();
 					contextMenu.clipboardMenu = true;
 					contextMenu.clipboardItems.copy = true;
 					contextMenu.clipboardItems.selectAll = false;
