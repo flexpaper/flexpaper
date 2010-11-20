@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<flexLibProperties includeAllClasses="false" version="1">
+  <includeClasses>
+    <classEntry path="com.devaldi.controls.flexpaper.FitModeEnum"/>
+    <classEntry path="caurina.transitions.SpecialPropertySplitter"/>
+    <classEntry path="caurina.transitions.PropertyInfoObj"/>
+    <classEntry path="com.devaldi.skinning.GradientHSlider"/>
+    <classEntry path="caurina.transitions.Equations"/>
+    <classEntry path="com.devaldi.controls.Spinner"/>
+    <classEntry path="caurina.transitions.properties.CurveModifiers"/>
+    <classEntry path="caurina.transitions.properties.DisplayShortcuts"/>
+    <classEntry path="caurina.transitions.TweenListObj"/>
+    <classEntry path="caurina.transitions.properties.ColorShortcuts"/>
+    <classEntry path="com.devaldi.controls.FlowBox"/>
+    <classEntry path="com.devaldi.streaming.DupImage"/>
+    <classEntry path="com.devaldi.controls.flexpaper.Viewer"/>
+    <classEntry path="com.devaldi.skinning.GradientLabel"/>
+    <classEntry path="caurina.transitions.AuxFunctions"/>
+    <classEntry path="caurina.transitions.Tweener"/>
+    <classEntry path="caurina.transitions.properties.FilterShortcuts"/>
+    <classEntry path="com.devaldi.controls.flexpaper.FlexPaperViewer"/>
+    <classEntry path="caurina.transitions.properties.TextShortcuts"/>
+    <classEntry path="caurina.transitions.SpecialProperty"/>
+    <classEntry path="caurina.transitions.properties.SoundShortcuts"/>
+    <classEntry path="com.devaldi.controls.flexpaper.PrintRangeDialog"/>
+    <classEntry path="com.devaldi.controls.flexpaper.ShapeMarker"/>
+    <classEntry path="com.devaldi.skinning.GradientBackground"/>
+    <classEntry path="caurina.transitions.SpecialPropertyModifier"/>
+    <classEntry path="com.devaldi.controls.ZoomCanvas"/>
+    <classEntry path="com.devaldi.skinning.GradientTextInput"/>
+    <classEntry path="com.devaldi.skinning.GradientImageButton"/>
+    <classEntry path="com.devaldi.controls.FlowVBox"/>
+    <classEntry path="com.devaldi.streaming.IGenericMovieClip"/>
+    <classEntry path="com.devaldi.events.ScaleChangedEvent"/>
+    <classEntry path="com.devaldi.events.FitModeChangedEvent"/>
+    <classEntry path="com.devaldi.events.ViewModeChangedEvent"/>
+    <classEntry path="com.devaldi.events.CurrentPageChangedEvent"/>
+    <classEntry path="com.devaldi.events.DocumentLoadedEvent"/>
+    <classEntry path="com.devaldi.events.CursorModeChangedEvent"/>
+    <classEntry path="com.devaldi.events.ExternalLinkClickedEvent"/>
+    <classEntry path="com.devaldi.controls.flexpaper.utils.TextMapUtil"/>
+    <classEntry path="com.devaldi.controls.flexpaper.utils.MacMouseWheelHandler"/>
+    <classEntry path="com.devaldi.controls.flexpaper.IFlexPaperPlugin"/>
+    <classEntry path="com.devaldi.events.SelectionCreatedEvent"/>
+    <classEntry path="com.devaldi.controls.flexpaper.IFlexPaperPluginControl"/>
+    <classEntry path="com.devaldi.controls.MatrixTransformer"/>
+    <classEntry path="com.devaldi.controls.flexpaper.IFlexPaperViewModePlugin"/>
+    <classEntry path="com.devaldi.controls.FlowTwoPage"/>
+    <classEntry path="com.devaldi.controls.flexpaper.utils.FullscreenHandler"/>
+    <classEntry path="com.devaldi.controls.flexpaper.FlexPaperViewer_Base"/>
+  </includeClasses>
+  <includeResources/>
+  <namespaceManifests/>
+</flexLibProperties>
