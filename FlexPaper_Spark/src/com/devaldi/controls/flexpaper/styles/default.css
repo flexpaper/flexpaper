@@ -7,7 +7,7 @@
 	}
 	
 	.viewerBackground {
-		backgroundImage: ClassReference("com.devaldi.skinning.GradientBackground");
+		backgroundImage: ClassReference("com.devaldi.skinning.GradientBackground"); 
 		backgroundSize: "100%";
 		fillColors: #aab3b3, #d5dddd;
 		fillAlphas: 1, 1;
