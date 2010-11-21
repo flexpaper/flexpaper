@@ -1629,10 +1629,10 @@ package com.devaldi.controls.flexpaper
 			
 			shape.graphics.beginFill(color,0.3);
 			var rect_commands:Vector.<int>;
-			rect_commands = new Vector.<int>((tri.length-1) * 5, true);
+			rect_commands = new Vector.<int>((tri.length) * 5, true);
 			
 			var rect_coords:Vector.<Number>;
-			rect_coords = new Vector.<Number>((tri.length-1) * 10, true);
+			rect_coords = new Vector.<Number>((tri.length) * 10, true);
 			
 			for(var i:int=0;i<tri.length-1;i++){
 				if(miny==-1||miny>tri[i].corner1y){miny=tri[i].corner1y;}
@@ -1650,21 +1650,44 @@ package com.devaldi.controls.flexpaper
 
 				rect_coords[i*10] = tri[li].corner3x;
 				rect_coords[i*10 + 1] = tri[i].corner1y;
-				rect_coords[i*10 + 2] = rect_coords[i * 10] + ((i==tri.length-2)?tri[i+1].corner1x:tri[i].corner1x)-tri[li].corner3x;
+				
+				rect_coords[i*10 + 5] = rect_coords[i*10 + 1] + tri[i].corner3y-tri[i].corner1y;
+				
+				if(i!=tri.length-2 && tri[i].corner1x>tri[li].corner3x)
+					rect_coords[i*10 + 2] = rect_coords[i * 10] + tri[i].corner1x-tri[li].corner3x;
+				else if(i==tri.length-2 && tri[i+1].corner1x > tri[li].corner3x)
+					rect_coords[i*10 + 2] = rect_coords[i * 10] + tri[i+1].corner1x-tri[li].corner3x;
+				else if(i==tri.length-2 && tri[i+1].corner1x < tri[li].corner3x){
+					rect_coords[i*10 + 2] = rect_coords[i * 10] + tri[li].corner1x-tri[li].corner3x;
+					rect_coords[i*10] = tri[li].corner3x;	
+					
+					/* add an extra struct for the last char*/
+					rect_commands[(i+1)*5] = 1;
+					rect_commands[(i+1)*5 + 1] = 2;
+					rect_commands[(i+1)*5 + 2] = 2;
+					rect_commands[(i+1)*5 + 3] = 2;
+					rect_commands[(i+1)*5 + 4] = 2;
+					
+					rect_coords[(i+1)*10] = tri[(i+1)].corner3x;
+					rect_coords[(i+1)*10 + 1] = tri[(i+1)].corner1y;
+					rect_coords[(i+1)*10 + 2] = rect_coords[(i+1) * 10] + tri[i+1].corner1x-tri[i+1].corner3x;
+					rect_coords[(i+1)*10 + 3] = rect_coords[(i+1)*10 + 1];
+					rect_coords[(i+1)*10 + 4] = rect_coords[(i+1)*10 + 2];
+					rect_coords[(i+1)*10 + 5] = rect_coords[(i+1)*10 + 1] + tri[i+1].corner3y-tri[i+1].corner1y;
+					rect_coords[(i+1)*10 + 6] = rect_coords[(i+1)*10];
+					rect_coords[(i+1)*10 + 7] = rect_coords[(i+1)*10 + 5];
+					rect_coords[(i+1)*10 + 8] = rect_coords[(i+1)*10];
+					rect_coords[(i+1)*10 + 9] = rect_coords[(i+1)*10 + 1]; 
+				}
+					
 				rect_coords[i*10 + 3] = rect_coords[i*10 + 1]; 
 				rect_coords[i*10 + 4] = rect_coords[i*10 + 2];
-				rect_coords[i*10 + 5] = rect_coords[i*10 + 1] + tri[i].corner3y-tri[i].corner1y;
 				rect_coords[i*10 + 6] = rect_coords[i*10];
 				rect_coords[i*10 + 7] = rect_coords[i*10 + 5];
 				rect_coords[i*10 + 8] = rect_coords[i*10];
 				rect_coords[i*10 + 9] = rect_coords[i*10 + 1];
 				
-				//if(ly!=tri[i+1].corner1y||i==tri.length-2||lx>tri[i+1].corner3x){ // causes error on bullet point lists
-				
-				//shape.graphics.drawRect(tri[li].corner3x,tri[i].corner1y,((i==tri.length-2)?tri[i+1].corner1x:tri[i].corner1x)-tri[li].corner3x,tri[i].corner3y-tri[i].corner1y);
-				
 				ly=tri[i+1].corner1y;lx=tri[i+1].corner3x;li=i+1;
-				//}
 			}
 			shape.graphics.drawPath(rect_commands,rect_coords,"nonZero");
 			shape.graphics.endFill();
@@ -1750,7 +1773,11 @@ package com.devaldi.controls.flexpaper
 				if(event.target is SimpleButton && (event.target as SimpleButton).name.indexOf("http")>=0){
 					dispatchEvent(new ExternalLinkClickedEvent(ExternalLinkClickedEvent.EXTERNALLINK_CLICKED,
 								 (event.target as SimpleButton).name.substring((event.target as SimpleButton).name.indexOf("http"))));	
+				}else if(event.target is SimpleButton && (event.target as SimpleButton).name.indexOf("url:")>=0){
+					dispatchEvent(new ExternalLinkClickedEvent(ExternalLinkClickedEvent.EXTERNALLINK_CLICKED,
+						(event.target as SimpleButton).name.substring((event.target as SimpleButton).name.indexOf("url:"))));	
 				}
+
 			}
 		}
 		
