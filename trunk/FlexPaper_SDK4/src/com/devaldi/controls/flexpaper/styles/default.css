@@ -4,6 +4,7 @@
 		fillColors: #e6e6e6, #fdfdfd;
 		fillAlphas: 1, 1;
 		borderColor: #8a8a8a;
+		backgroundColor: #DDDDDD;
 	}
 	
 	.viewerBackground {
@@ -43,4 +44,4 @@
 		spinner-type: lines;
 		spinner-highlight-color: #000000;
 		spinner-color: #808080;
-	}	
+	}

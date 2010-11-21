@@ -7,7 +7,7 @@
 		 xmlns:ct="com.devaldi.controls.*" 
 		 xmlns:st="com.devaldi.skinning.*" 
 		 borderColor="#8a8a8a" 
-		 borderThickness="1" 
+		 
 		 verticalScrollPolicy="off" 
 		 horizontalScrollPolicy="off"
 		 
