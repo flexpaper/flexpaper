@@ -147,7 +147,7 @@
 				viewer.PluginList = p;
 			}
 			
-			private function showInfo(e:Event):void {
+			public function showInfo(e:Event):void {
 				var vabout:About = new About();
 				PopUpManager.addPopUp(vabout, this, true);
 				PopUpManager.centerPopUp(vabout);
