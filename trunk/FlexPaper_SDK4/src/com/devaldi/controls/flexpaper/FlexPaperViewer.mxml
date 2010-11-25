@@ -123,13 +123,7 @@ along with FlexPaper.  If not, see <http://www.gnu.org/licenses/>.
 				_sliderUserChange = false;
 				slidPctScale.value = Number(paper1.Scale);
 			}
-			
-			private function showInfo(e:Event):void {
-				var vabout:About = new About();
-				PopUpManager.addPopUp(vabout, this, true);
-				PopUpManager.centerPopUp(vabout);
-			}
-			
+						
 			public override function loadSwf(s:String):void{
 				bttnInfo.visible = false;
 				spin1.visible = true;
