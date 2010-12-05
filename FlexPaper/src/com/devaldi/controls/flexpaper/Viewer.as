@@ -274,7 +274,7 @@ package com.devaldi.controls.flexpaper
 		public function set TextSelectEnabled(b1:Boolean):void {
 			_textSelectEnabled = b1;
 			
-			if(_textSelectEnabled)	
+			if(_textSelectEnabled && CursorsEnabled)	
 				dispatchEvent(new CursorModeChangedEvent(CursorModeChangedEvent.CURSORMODE_CHANGED,"TextSelectorCursor"));
 			else
 				dispatchEvent(new CursorModeChangedEvent(CursorModeChangedEvent.CURSORMODE_CHANGED,"ArrowCursor"));
@@ -995,7 +995,7 @@ package com.devaldi.controls.flexpaper
 		private function displayContainerrolloverHandler(event:MouseEvent):void{
 			
 			if(_viewMode==ViewModeEnum.PORTRAIT||(UsingExtViewMode && CurrExtViewMode.supportsTextSelect)){
-				if(TextSelectEnabled){
+				if(TextSelectEnabled && CursorsEnabled){
 					_grabCursorID = CursorManager.setCursor(textSelectCursor);
 				}else if(CursorsEnabled){
 					resetCursor();
@@ -1005,8 +1005,11 @@ package com.devaldi.controls.flexpaper
 		
 		private function displayContainerMouseUpHandler(event:MouseEvent):void{
 			if(_viewMode==ViewModeEnum.PORTRAIT||(UsingExtViewMode && CurrExtViewMode.supportsTextSelect)){
-				CursorManager.removeCursor(_grabbingCursorID);
-				if(TextSelectEnabled){
+				
+				if(CursorsEnabled)
+					CursorManager.removeCursor(_grabbingCursorID);
+				
+				if(TextSelectEnabled && CursorsEnabled){
 					_grabCursorID = CursorManager.setCursor(textSelectCursor);
 				}else if(CursorsEnabled && !(event.target is IFlexPaperPluginControl) || (event.target.parent !=null && event.target.parent.parent !=null && event.target.parent.parent is IFlexPaperPluginControl)){
 					resetCursor();
@@ -1025,8 +1028,11 @@ package com.devaldi.controls.flexpaper
 		
 		private function displayContainerMouseDownHandler(event:MouseEvent):void{
 			if(_viewMode==ViewModeEnum.PORTRAIT||(UsingExtViewMode && CurrExtViewMode.supportsTextSelect)){
-				CursorManager.removeCursor(_grabCursorID);
-				if(TextSelectEnabled){
+				
+				if(CursorsEnabled)
+					CursorManager.removeCursor(_grabCursorID);
+				
+				if(TextSelectEnabled && CursorsEnabled){
 					_grabbingCursorID = CursorManager.setCursor(textSelectCursor);
 				}else if(CursorsEnabled){
 					_grabbingCursorID = CursorManager.setCursor(grabbingCursor);
@@ -1035,7 +1041,8 @@ package com.devaldi.controls.flexpaper
 		}
 		
 		private function displayContainerrolloutHandler(event:Event):void{
-			CursorManager.removeAllCursors();
+			if(CursorsEnabled)
+				CursorManager.removeAllCursors();
 		}		
 		
 		private function wheelHandler(evt:MouseEvent):void {
@@ -1618,7 +1625,7 @@ package com.devaldi.controls.flexpaper
 			_lastHitIndex = hitIndex;
 		}
 		
-		public function drawCurrentSelection(color:uint, shape:Sprite, tri:Array):void{
+		public function drawCurrentSelection(color:uint, shape:Sprite, tri:Array, strikeout:Boolean=false):void{
 			var ly:Number=-1;
 			var li:int;var lx:int;
 			var miny:int=-1;
@@ -1627,7 +1634,7 @@ package com.devaldi.controls.flexpaper
 			var maxx:int=-1;
 			snap.setSelected(1,snap.charCount,false);
 			
-			shape.graphics.beginFill(color,0.3);
+			shape.graphics.beginFill(color,(strikeout)?0.5:0.3);
 			var rect_commands:Vector.<int>;
 			rect_commands = new Vector.<int>((tri.length) * 5, true);
 			
@@ -1649,9 +1656,9 @@ package com.devaldi.controls.flexpaper
 				rect_commands[i*5 + 4] = 2;
 
 				rect_coords[i*10] = tri[li].corner3x;
-				rect_coords[i*10 + 1] = tri[i].corner1y;
+				rect_coords[i*10 + 1] = tri[i].corner1y + (strikeout?(tri[i].corner3y-tri[i].corner1y)/3:0);
 				
-				rect_coords[i*10 + 5] = rect_coords[i*10 + 1] + tri[i].corner3y-tri[i].corner1y;
+				rect_coords[i*10 + 5] = rect_coords[i*10 + 1] + (tri[i].corner3y-tri[i].corner1y) / ((strikeout)?5:1); //h
 				
 				if(i!=tri.length-2 && tri[i].corner1x>tri[li].corner3x)
 					rect_coords[i*10 + 2] = rect_coords[i * 10] + tri[i].corner1x-tri[li].corner3x;
@@ -1793,7 +1800,7 @@ package com.devaldi.controls.flexpaper
 				if(event.target is flash.display.SimpleButton || event.target is SpriteAsset || (event.target is IFlexPaperPluginControl) || (event.target.parent !=null && event.target.parent.parent !=null && event.target.parent.parent is IFlexPaperPluginControl)){
 					CursorManager.removeAllCursors();
 				}else{
-					if(TextSelectEnabled){
+					if(TextSelectEnabled && CursorsEnabled){
 						_grabCursorID = CursorManager.setCursor(textSelectCursor);	
 					}else if(CursorsEnabled){
 						resetCursor();
@@ -1803,7 +1810,8 @@ package com.devaldi.controls.flexpaper
 		}
 		
 		public function resetCursor():void{
-			_grabCursorID = CursorManager.setCursor(grabCursor);
+			if(CursorsEnabled)
+				_grabCursorID = CursorManager.setCursor(grabCursor);
 		}
 		
 		private function dupImageMoutHandler(event:MouseEvent):void{
