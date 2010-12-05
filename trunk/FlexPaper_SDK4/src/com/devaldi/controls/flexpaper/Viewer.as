@@ -1625,7 +1625,7 @@ package com.devaldi.controls.flexpaper
 			_lastHitIndex = hitIndex;
 		}
 		
-		public function drawCurrentSelection(color:uint, shape:Sprite, tri:Array):void{
+		public function drawCurrentSelection(color:uint, shape:Sprite, tri:Array, strikeout:Boolean=false):void{
 			var ly:Number=-1;
 			var li:int;var lx:int;
 			var miny:int=-1;
@@ -1634,7 +1634,7 @@ package com.devaldi.controls.flexpaper
 			var maxx:int=-1;
 			snap.setSelected(1,snap.charCount,false);
 			
-			shape.graphics.beginFill(color,0.3);
+			shape.graphics.beginFill(color,(strikeout)?0.5:0.3);
 			var rect_commands:Vector.<int>;
 			rect_commands = new Vector.<int>((tri.length) * 5, true);
 			
@@ -1656,9 +1656,9 @@ package com.devaldi.controls.flexpaper
 				rect_commands[i*5 + 4] = 2;
 				
 				rect_coords[i*10] = tri[li].corner3x;
-				rect_coords[i*10 + 1] = tri[i].corner1y;
+				rect_coords[i*10 + 1] = tri[i].corner1y + (strikeout?(tri[i].corner3y-tri[i].corner1y)/3:0);
 				
-				rect_coords[i*10 + 5] = rect_coords[i*10 + 1] + tri[i].corner3y-tri[i].corner1y;
+				rect_coords[i*10 + 5] = rect_coords[i*10 + 1] + (tri[i].corner3y-tri[i].corner1y) / ((strikeout)?5:1); //h
 				
 				if(i!=tri.length-2 && tri[i].corner1x>tri[li].corner3x)
 					rect_coords[i*10 + 2] = rect_coords[i * 10] + tri[i].corner1x-tri[li].corner3x;

@@ -113,7 +113,13 @@ package com.devaldi.controls.flexpaper.utils
 								if(!getDocViewer().hasFocus()){return true;}
 								getDocViewer().setViewerFocus(true);
 								getDocViewer().focus();
-
+									
+								if(eb.browser.chrome){
+									swf.externalMouseEvent(event.wheelDelta);
+									if(event.preventDefault)	event.preventDefault();
+									return true;
+								}
+			
 								if(!swf.hasFocus()){return true;}
 								if(mouseOver) {
 									var delta = 0;
@@ -121,6 +127,7 @@ package com.devaldi.controls.flexpaper.utils
 									else if(event.detail)		delta = -event.detail;
 									if(event.preventDefault)	event.preventDefault();
 									swf.externalMouseEvent(delta);
+									
 									return true;
 								}
 								return false;
