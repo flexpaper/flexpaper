@@ -110,17 +110,18 @@ package com.devaldi.controls.flexpaper.utils
 		
 							/// Mousewheel support
 							var _mousewheel = function(event) {
-								if(!getDocViewer().hasFocus()){return true;}
+								if((getDocViewer()&&!getDocViewer().hasFocus())||!getDocViewer()){return true;}
 								getDocViewer().setViewerFocus(true);
 								getDocViewer().focus();
-									
+								
+								if((swf&&!swf.hasFocus())||!swf){return true;}
+								
 								if(eb.browser.chrome){
 									swf.externalMouseEvent(event.wheelDelta);
 									if(event.preventDefault)	event.preventDefault();
 									return true;
 								}
-			
-								if(!swf.hasFocus()){return true;}
+								
 								if(mouseOver) {
 									var delta = 0;
 									if(event.wheelDelta)		delta = event.wheelDelta / (eb.browser.opera ? 12 : 120);
@@ -151,7 +152,9 @@ package com.devaldi.controls.flexpaper.utils
 							
 							var _handleWheel = function(event){
 								try{
-									if(!getDocViewer().hasFocus()){return true;}
+									if(	!getDocViewer()||
+										(getDocViewer()&&
+										!getDocViewer().hasFocus())){return true;}
 										getDocViewer().setViewerFocus(true);
 										getDocViewer().focus();
 										

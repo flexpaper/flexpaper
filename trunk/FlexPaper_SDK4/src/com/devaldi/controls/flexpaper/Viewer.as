@@ -462,7 +462,7 @@ package com.devaldi.controls.flexpaper
 				
 				_swfFileChanged = true;
 				_frameLoadCount = 0;
-				_swfFile = s;
+				_swfFile = encodeURI(s);
 				
 				try{
 					new flash.net.LocalConnection().connect('devaldiGCdummy');
