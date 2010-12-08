@@ -462,7 +462,7 @@ package com.devaldi.controls.flexpaper
 				
 				_swfFileChanged = true;
 				_frameLoadCount = 0;
-				_swfFile = s;
+				_swfFile = encodeURI(s);
 				
 				try{
 					new flash.net.LocalConnection().connect('devaldiGCdummy');
@@ -569,7 +569,7 @@ package com.devaldi.controls.flexpaper
 				Tweener.addTween(_target, {scaleX:factor, scaleY:factor,time: 0, transition: 'easenone', onComplete: tweenComplete});
 			}			
 			
-			_fitMode = FitModeEnum.FITHEIGHT;
+			FitMode = FitModeEnum.FITHEIGHT;
 			
 			dispatchEvent(new ScaleChangedEvent(ScaleChangedEvent.SCALE_CHANGED,_scale));
 		}
