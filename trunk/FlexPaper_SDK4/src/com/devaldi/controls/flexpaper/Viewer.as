@@ -410,7 +410,7 @@ package com.devaldi.controls.flexpaper
 					CurrExtViewMode.gotoPage(p,adjGotoPage);	
 			
 				// retry if y is not set
-				if(p>1 && _pageList[p-1].y ==0)
+				if(ViewMode != ViewModeEnum.TWOPAGE && p>1 && _pageList[p-1].y ==0)
 				{ 
 					flash.utils.setTimeout(gotoPage,200,p);
 				}
