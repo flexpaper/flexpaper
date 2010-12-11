@@ -62,30 +62,6 @@
 			[Bindable]
 			public var StartAtPage:Number = 1;
 			
-			[Bindable]
-			public var PrintEnabled:Boolean = true;
-			
-			[Bindable]
-			public var PrintToolsVisible:Boolean = true;
-			
-			[Bindable]
-			public var ViewModeToolsVisible:Boolean = true;
-			
-			[Bindable]
-			public var ZoomToolsVisible:Boolean = true;
-			
-			[Bindable]
-			public var FullScreenVisible:Boolean = true;
-			
-			[Bindable]
-			public var NavToolsVisible:Boolean = true;
-			
-			[Bindable]
-			public var CursorToolsVisible:Boolean = true;
-			
-			[Bindable]
-			public var SearchToolsVisible:Boolean = true;
-			
 			private var _fixedWidth:Number = -1;
 			private var _fixedHeight:Number = -1;
 			private var prd:PrintRangeDialog;
@@ -105,23 +81,19 @@
 				contextMenu = new ContextMenu();
 				contextMenu.hideBuiltInItems();
 
-				if(CursorToolsVisible){
-					this.addEventListener(Event.COPY,copyHandler);
-					contextMenu.clipboardMenu = true;
-					contextMenu.clipboardItems.copy = true;
-					contextMenu.clipboardItems.selectAll = false;
-				}
+				this.addEventListener(Event.COPY,copyHandler);
+				contextMenu.clipboardMenu = true;
+				contextMenu.clipboardItems.copy = true;
+				contextMenu.clipboardItems.selectAll = false;
 				
 				var cmi_about:ContextMenuItem = new ContextMenuItem(resourceManager.getString("FlexPaper", "About")+' FlexPaper');
 				cmi_about.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, showInfo);
 				
 				contextMenu.customItems.push(cmi_about);
 				
-				if(PrintEnabled && PrintToolsVisible){
-					var cmi_print:ContextMenuItem = new ContextMenuItem(resourceManager.getString("FlexPaper", "Print") + " ...");
-					cmi_print.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, printPaper);
-					contextMenu.customItems.push(cmi_print);
-				}
+				var cmi_print:ContextMenuItem = new ContextMenuItem(resourceManager.getString("FlexPaper", "Print") + " ...");
+				cmi_print.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, printPaper);
+				contextMenu.customItems.push(cmi_print);
 			}
 			
 			public function setViewerFocus():void{
@@ -230,16 +202,8 @@
 						uv.ZoomInterval = ZoomInterval;
 						uv.FitPageOnLoad = viewer.FitMode == FitModeEnum.FITHEIGHT;
 						uv.FitWidthOnLoad = viewer.FitMode == FitModeEnum.FITWIDTH;
-						uv.PrintEnabled = PrintEnabled;
 						uv.ProgressiveLoading = ProgressiveLoading;
 						uv.FullScreenAsMaxWindow = FullScreenAsMaxWindow;
-						uv.PrintToolsVisible = PrintToolsVisible;
-						uv.ViewModeToolsVisible = ViewModeToolsVisible;
-						uv.ZoomToolsVisible = ZoomToolsVisible;
-						uv.FullScreenVisible = FullScreenVisible;
-						uv.NavToolsVisible = NavToolsVisible;
-						uv.CursorToolsVisible = CursorToolsVisible;
-						uv.SearchToolsVisible = SearchToolsVisible;
 						uv.localeChain = resourceManager.localeChain;
 						ur.data = uv;
 						navigateToURL(ur,"FlexPaperFullScreen");
