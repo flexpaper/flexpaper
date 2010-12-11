@@ -25,6 +25,7 @@
 			import com.devaldi.events.DocumentLoadedEvent;
 			import com.devaldi.events.ExternalLinkClickedEvent;
 			import com.devaldi.events.FitModeChangedEvent;
+			import com.devaldi.events.DocumentPrintedEvent;
 			import com.devaldi.events.ScaleChangedEvent;
 			import com.devaldi.events.ViewModeChangedEvent;
 			
@@ -289,6 +290,10 @@
 			}
 			
 			protected function papersLoadingHandler(event:Event):void{
+				dispatchEvent(event);
+			}
+			
+			protected function documentPrintedHandler(event:DocumentPrintedEvent):void{
 				dispatchEvent(event);
 			}
 			

@@ -30,6 +30,7 @@ package com.devaldi.controls.flexpaper
 	import com.devaldi.events.CursorModeChangedEvent;
 	import com.devaldi.events.DocumentLoadedEvent;
 	import com.devaldi.events.ExternalLinkClickedEvent;
+	import com.devaldi.events.DocumentPrintedEvent;
 	import com.devaldi.events.FitModeChangedEvent;
 	import com.devaldi.events.ScaleChangedEvent;
 	import com.devaldi.events.SelectionCreatedEvent;
@@ -93,6 +94,7 @@ package com.devaldi.controls.flexpaper
 	[Event(name="onDocumentLoadedError", type="flash.events.ErrorEvent")]
 	[Event(name="onLogoClicked", type="flash.events.Event")]
 	[Event(name="onSelectionCreated", type="com.devaldi.events.SelectionCreatedEvent")]
+	[Event(name="onDocumentPrinted", type="com.devaldi.events.DocumentPrintedEvent")]
 	
 	public class Viewer extends Canvas
 	{
@@ -739,6 +741,9 @@ package com.devaldi.controls.flexpaper
 							}
 						}
 					}
+					
+					if(p>numPages)
+						return;
 					
 					if(UsingExtViewMode){
 						if(currPage != CurrExtViewMode.currentPage)
@@ -1862,6 +1867,8 @@ package com.devaldi.controls.flexpaper
 			
 			_libMC.scaleX = _libMC.scaleY = 1;
 			_libMC.alpha = 0;
+			
+			dispatchEvent(new DocumentPrintedEvent(DocumentPrintedEvent.DOCUMENT_PRINTED));
 		}
 		
 		public function printPaperRange(range:String):void{
@@ -1922,6 +1929,8 @@ package com.devaldi.controls.flexpaper
 			
 			_libMC.scaleX = _libMC.scaleY = 1;
 			_libMC.alpha = 0;
+			
+			dispatchEvent(new DocumentPrintedEvent(DocumentPrintedEvent.DOCUMENT_PRINTED));
 		}
 		
 		private function addGlowFilter(img:Image):void{

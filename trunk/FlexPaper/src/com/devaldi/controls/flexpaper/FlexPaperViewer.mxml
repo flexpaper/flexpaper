@@ -25,6 +25,7 @@ along with FlexPaper.  If not, see <http://www.gnu.org/licenses/>.
 		[Event(name="onCurrPageChanged", type="com.devaldi.events.CurrentPageChangedEvent")]
 		[Event(name="onDocumentLoading", type="flash.events.Event")]
 		[Event(name="onExternalLinkClicked", type="com.devaldi.events.ExternalLinkClickedEvent")]
+		[Event(name="onDocumentPrinted", type="com.devaldi.events.DocumentPrintedEvent")]
 	</mx:Metadata>
 	<mx:Script>
 		<![CDATA[
@@ -186,6 +187,7 @@ along with FlexPaper.  If not, see <http://www.gnu.org/licenses/>.
 			   onCurrPageChanged="onCurrPageChanged(event)"
 			   onCursorModeChanged="onCursorModeChanged(event)"
 			   onExternalLinkClicked="onExternalLinkClickedHandler(event)" 
+			   onDocumentPrinted="documentPrintedHandler(event)"
 			   
 			   SwfFile="{SwfFile}" 
 			   Scale="{Scale}" 
