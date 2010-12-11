@@ -23,6 +23,7 @@
 			import com.devaldi.events.CurrentPageChangedEvent;
 			import com.devaldi.events.CursorModeChangedEvent;
 			import com.devaldi.events.DocumentLoadedEvent;
+			import com.devaldi.events.DocumentPrintedEvent;
 			import com.devaldi.events.ExternalLinkClickedEvent;
 			import com.devaldi.events.FitModeChangedEvent;
 			import com.devaldi.events.ScaleChangedEvent;
@@ -259,6 +260,10 @@
 			protected function documentLoadedHandler(event:Event):void{
 				dispatchEvent(event);
 			}	
+			
+			protected function documentPrintedHandler(event:DocumentPrintedEvent):void{
+				dispatchEvent(event);
+			}
 
 			public function Zoom(factor:Number):void{
 				viewer.Zoom(factor);
