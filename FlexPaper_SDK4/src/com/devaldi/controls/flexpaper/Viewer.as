@@ -747,6 +747,9 @@ package com.devaldi.controls.flexpaper
 						}
 					}
 					
+					if(p>numPages)
+						return;
+					
 					if(UsingExtViewMode){
 						if(currPage != CurrExtViewMode.currentPage)
 							dispatchEvent(new CurrentPageChangedEvent(CurrentPageChangedEvent.PAGE_CHANGED,CurrExtViewMode.currentPage));
