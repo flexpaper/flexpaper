@@ -136,7 +136,7 @@ along with FlexPaper.  If not, see <http://www.gnu.org/licenses/>.
 	</mx:Script>
 	<mx:Style source="styles/default.css" />
 	<mx:HBox styleName="toolbarBackground" width="100%" height="26" borderStyle="solid" verticalScrollPolicy="off" horizontalScrollPolicy="off" paddingTop="2" paddingLeft="2" horizontalGap="3">
-		<st:GradientImageButton icon="@Embed('/../assets/print-icon.gif')" styleName="toolbttn" width="20" click="printPaper(event)" toolTip="@Resource(key='Print', bundle='FlexPaper')" visible="{!ReadOnly}" includeInLayout="{!ReadOnly}"  />
+		<st:GradientImageButton icon="@Embed('/../assets/print-icon.gif')" styleName="toolbttn" width="20" click="printPaper(event)" toolTip="@Resource(key='Print', bundle='FlexPaper')" visible="{!ReadOnly}" includeInLayout="{!ReadOnly}" />
 		<mx:Image source="@Embed('/../assets/bar.gif')" width="3" height="21" visible="{!ReadOnly}" includeInLayout="{!ReadOnly}"  />
 		
 		<st:GradientImageButton icon="@Embed('/../assets/singlepage.gif')" styleName="toolbttn" width="20" click="paper1.switchMode('Portrait');" toolTip="@Resource(key='SinglePage', bundle='FlexPaper')" selected="{paper1.ViewMode == ViewModeEnum.PORTRAIT}" tabIndex="2" />
