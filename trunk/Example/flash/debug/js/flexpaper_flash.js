@@ -19,7 +19,8 @@ function getDocViewer(){
  * @param String link
  */
 function onExternalLinkClicked(link){
-	$("#txt_eventlog").val('onExternalLinkClicked:' + link + '\n' + $("#txt_eventlog").val());	
+   // alert("link " + link + " clicked" );
+   window.location.href = link;
 }
 
 /**
@@ -31,7 +32,6 @@ function onExternalLinkClicked(link){
  * @param int total
  */
 function onProgress(loadedBytes,totalBytes){
-	$("#txt_progress").val('onProgress:' + loadedBytes + '/' + totalBytes + '\n');	
 }
 
 /**
@@ -39,7 +39,6 @@ function onProgress(loadedBytes,totalBytes){
  *
  */
 function onDocumentLoading(){
-	$("#txt_eventlog").val('onDocumentLoading' + '\n' + $("#txt_eventlog").val());	
 }
 
 /**
@@ -50,7 +49,6 @@ function onDocumentLoading(){
  * @param int pagenum
  */
 function onCurrentPageChanged(pagenum){
-	$("#txt_eventlog").val('onCurrentPageChanged:' + pagenum + '\n' + $("#txt_eventlog").val());
 }
 
 /**
@@ -61,7 +59,6 @@ function onCurrentPageChanged(pagenum){
  * @param int totalPages
  */
 function onDocumentLoaded(totalPages){
-	$("#txt_eventlog").val('onDocumentLoaded:' + totalPages + '\n' + $("#txt_eventlog").val());
 }
 
 /**
@@ -72,15 +69,4 @@ function onDocumentLoaded(totalPages){
  * @param String errorMessage
  */
 function onDocumentLoadedError(errMessage){
-	$("#txt_eventlog").val('onDocumentLoadedError:' + errMessage + '\n' + $("#txt_eventlog").val());
-}
-
-/**
- * Receives error messages when a document has finished printed
- *
- * @example onDocumentPrinted();
- *
- */
-function onDocumentPrinted(){
-	$("#txt_eventlog").val('onDocumentPrinted\n' + $("#txt_eventlog").val());
 }
