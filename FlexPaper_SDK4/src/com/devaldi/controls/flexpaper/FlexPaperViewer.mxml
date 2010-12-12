@@ -136,8 +136,8 @@ along with FlexPaper.  If not, see <http://www.gnu.org/licenses/>.
 	</mx:Script>
 	<mx:Style source="styles/default.css" />
 	<mx:HBox styleName="toolbarBackground" width="100%" height="26" borderStyle="solid" verticalScrollPolicy="off" horizontalScrollPolicy="off" paddingTop="2" paddingLeft="2" horizontalGap="3">
-		<st:GradientImageButton icon="@Embed('/../assets/print-icon.gif')" styleName="toolbttn" width="20" click="printPaper(event)" toolTip="@Resource(key='Print', bundle='FlexPaper')" />
-		<mx:Image source="@Embed('/../assets/bar.gif')" width="3" height="21" />
+		<st:GradientImageButton icon="@Embed('/../assets/print-icon.gif')" styleName="toolbttn" width="20" click="printPaper(event)" toolTip="@Resource(key='Print', bundle='FlexPaper')" visible="{!ReadOnly}" includeInLayout="{!ReadOnly}" />
+		<mx:Image source="@Embed('/../assets/bar.gif')" width="3" height="21" visible="{!ReadOnly}" includeInLayout="{!ReadOnly}" />
 		
 		<st:GradientImageButton icon="@Embed('/../assets/singlepage.gif')" styleName="toolbttn" width="20" click="paper1.switchMode('Portrait');" toolTip="@Resource(key='SinglePage', bundle='FlexPaper')" selected="{paper1.ViewMode == ViewModeEnum.PORTRAIT}" tabIndex="2" />
 		<st:GradientImageButton icon="@Embed('/../assets/twopage.gif')" styleName="toolbttn" width="20" click="paper1.switchMode('TwoPage');" toolTip="@Resource(key='TwoPage', bundle='FlexPaper')" selected="{paper1.ViewMode == ViewModeEnum.TWOPAGE}"  tabIndex="3" />
@@ -160,9 +160,9 @@ along with FlexPaper.  If not, see <http://www.gnu.org/licenses/>.
 		<st:GradientImageButton icon="@Embed('/../assets/icon-arrow-right.gif')" styleName="toolbttn" toolTip="@Resource(key='NextPage', bundle='FlexPaper')"  width="15" height="20"  click="mvNext();" tabIndex="10" />
 		<mx:Image source="@Embed('/../assets/bar.gif')" width="3" height="21"  />
 		
-		<st:GradientImageButton icon="@Embed('/../assets/textselect.gif')" styleName="toolbttn" toolTip="@Resource(key='TextSelect', bundle='FlexPaper')"  width="20" selected="{paper1.TextSelectEnabled}" click="{paper1.TextSelectEnabled=true}" tabIndex="11" />
-		<st:GradientImageButton icon="@Embed('/../assets/hand2.gif')" styleName="toolbttn" toolTip="@Resource(key='TextDrag', bundle='FlexPaper')"  width="22" selected="{!paper1.TextSelectEnabled}"  click="{paper1.TextSelectEnabled=false}" tabIndex="12" />
-		<mx:Image source="@Embed('/../assets/bar.gif')" width="3" height="21" />
+		<st:GradientImageButton icon="@Embed('/../assets/textselect.gif')" styleName="toolbttn" toolTip="@Resource(key='TextSelect', bundle='FlexPaper')"  width="20" selected="{paper1.TextSelectEnabled}" click="{paper1.TextSelectEnabled=true}" tabIndex="11" visible="{!ReadOnly}" includeInLayout="{!ReadOnly}" />
+		<st:GradientImageButton icon="@Embed('/../assets/hand2.gif')" styleName="toolbttn" toolTip="@Resource(key='TextDrag', bundle='FlexPaper')"  width="22" selected="{!paper1.TextSelectEnabled}"  click="{paper1.TextSelectEnabled=false}" tabIndex="12" visible="{!ReadOnly}" includeInLayout="{!ReadOnly}" />
+		<mx:Image source="@Embed('/../assets/bar.gif')" width="3" height="21" visible="{!ReadOnly}" includeInLayout="{!ReadOnly}" />
 		
 		<st:GradientTextInput fontSize="11" height="20" width="65" id="txtSearch" keyDown="txtSearchKeyDown(event)" enabled="{paper1.ViewMode == ViewModeEnum.PORTRAIT||paper1.ViewMode == ViewModeEnum.TWOPAGE}" toolTip="@Resource(key='Search', bundle='FlexPaper')" tabIndex="13" />
 		<st:GradientImageButton icon="@Embed('/../assets/find.gif')" styleName="toolbttn" width="20" height="20" click="paper1.searchText(txtSearch.text);" toolTip="@Resource(key='Search', bundle='FlexPaper')" tabIndex="14" enabled="{!TrueFullScreenActive}" />
