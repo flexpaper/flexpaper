@@ -41,20 +41,6 @@ The following parameters can be used in FlexPaper
 
  * *ProgressiveLoading* (_Boolean_) Will load and display the document progressively when set to true as opposed to downloading the complete document before displaying the pages. Documents need to be converted to at least Flash version 9 for this to work (-T 9 flag using PDF2SWF)
 
- * *PrintToolsVisible* (_Boolean_) Sets the visibility for the print tool section of the toolbar
-
- * *ViewModeToolsVisible* (_Boolean_) Sets the visibility for the view mode section of the toolbar
-
- * *ZoomToolsVisible* (_Boolean_) Sets the visibility for the zoom section of the toolbar
-
- * *FullScreenVisible* (_Boolean_) Sets the visibility for the full screen section of the toolbar
-
- * *NavToolsVisible* (_Boolean_) Sets the visibility for the navigation section of the toolbar
-
- * *CursorToolsVisible* (_Boolean_) Sets the visibility for the cursor section of the toolbar
-
- * *SearchToolsVisible* (_Boolean_) Sets the visibility for the search section of the toolbar
-
 ----
 
 The parameters are passed using flashvars or by setting properties on the flexpaper component inside flex, depending on your choice of usage. The code block below shows an example of how the parameters can be passed using the pre-compiled flash version
@@ -71,14 +57,6 @@ var flashvars = {
   				  PrintEnabled : false,
   				  FullScreenAsMaxWindow : true,
   				  ProgressiveLoading : true,
-  				  
-  				  PrintToolsVisible : true,
-  				  ViewModeToolsVisible : true,
-  				  ZoomToolsVisible : true,
-  				  FullScreenVisible : true,
-  				  NavToolsVisible : true,
-  				  CursorToolsVisible : true,
-  				  SearchToolsVisible : true,
 
   				  localeChain : "en_US"
 				  };
