@@ -15,19 +15,21 @@
 		 creationComplete="Init()">
 	<mx:Script>
 		<![CDATA[
-			import flash.desktop.Clipboard;
-			import flash.desktop.ClipboardFormats;
-			import mx.managers.PopUpManager;
-			import mx.managers.BrowserManager;
-			import mx.managers.IBrowserManager;
 			import com.devaldi.events.CurrentPageChangedEvent;
 			import com.devaldi.events.CursorModeChangedEvent;
 			import com.devaldi.events.DocumentLoadedEvent;
+			import com.devaldi.events.DocumentPrintedEvent;
 			import com.devaldi.events.ExternalLinkClickedEvent;
 			import com.devaldi.events.FitModeChangedEvent;
-			import com.devaldi.events.DocumentPrintedEvent;
 			import com.devaldi.events.ScaleChangedEvent;
 			import com.devaldi.events.ViewModeChangedEvent;
+			
+			import flash.desktop.Clipboard;
+			import flash.desktop.ClipboardFormats;
+			
+			import mx.managers.BrowserManager;
+			import mx.managers.IBrowserManager;
+			import mx.managers.PopUpManager;
 			
 			[Bindable]
 			public var Scale:Number = 1;
@@ -61,6 +63,9 @@
 			
 			[Bindable]
 			public var StartAtPage:Number = 1;
+
+			[Bindable]
+			public var ReadOnly:Boolean = false;
 			
 			private var _fixedWidth:Number = -1;
 			private var _fixedHeight:Number = -1;
@@ -81,19 +86,22 @@
 				contextMenu = new ContextMenu();
 				contextMenu.hideBuiltInItems();
 
-				this.addEventListener(Event.COPY,copyHandler);
-				contextMenu.clipboardMenu = true;
-				contextMenu.clipboardItems.copy = true;
-				contextMenu.clipboardItems.selectAll = false;
+				if(!ReadOnly){
+					this.addEventListener(Event.COPY,copyHandler);
+					contextMenu.clipboardMenu = true;
+					contextMenu.clipboardItems.copy = true;
+					contextMenu.clipboardItems.selectAll = false;
+				}
 				
 				var cmi_about:ContextMenuItem = new ContextMenuItem(resourceManager.getString("FlexPaper", "About")+' FlexPaper');
 				cmi_about.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, showInfo);
-				
 				contextMenu.customItems.push(cmi_about);
 				
-				var cmi_print:ContextMenuItem = new ContextMenuItem(resourceManager.getString("FlexPaper", "Print") + " ...");
-				cmi_print.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, printPaper);
-				contextMenu.customItems.push(cmi_print);
+				if(!ReadOnly){
+					var cmi_print:ContextMenuItem = new ContextMenuItem(resourceManager.getString("FlexPaper", "Print") + " ...");
+					cmi_print.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, printPaper);
+					contextMenu.customItems.push(cmi_print);
+				}
 			}
 			
 			public function setViewerFocus():void{
@@ -132,10 +140,12 @@
 			}
 			
 			public function printPaper(e:Event):void{
-				prd = new PrintRangeDialog(); 
-				PopUpManager.addPopUp(prd, this, true);
-				PopUpManager.centerPopUp(prd);
-				prd["bttnPrint"].addEventListener("click", printHandler); 
+				if(!ReadOnly){
+					prd = new PrintRangeDialog(); 
+					PopUpManager.addPopUp(prd, this, true);
+					PopUpManager.centerPopUp(prd);
+					prd["bttnPrint"].addEventListener("click", printHandler);
+				}
 			}
 			
 			protected function printHandler(event:Event):void{
@@ -171,7 +181,9 @@
 			}
 			
 			private function copyHandler(e:Event):void{
-				try{Clipboard.generalClipboard.setData(ClipboardFormats.TEXT_FORMAT, viewer.CurrentlySelectedText);}catch (e:*) {}
+				if(!ReadOnly){
+					try{Clipboard.generalClipboard.setData(ClipboardFormats.TEXT_FORMAT, viewer.CurrentlySelectedText);}catch (e:*) {}
+				}
 			}
 			
 			protected function toggleFullScreen():void {
