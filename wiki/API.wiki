@@ -39,3 +39,5 @@ http://flexpaper.googlecode.com/svn/trunk/Example/flash/debug/FlexPaperViewer.ht
 *onCurrentPageChanged* (Number pagenumber) : fired when the currently viewer page has changed 
 
 *onExternalLinkClicked* (String link) : fired when a user clicks a external link. Only works when supplying argument "-s linknameurl" in conversion with PDF2SWF. 
+
+*onDocumentPrinted* : fired when a document has finished printing (sent to the print spooler) 
