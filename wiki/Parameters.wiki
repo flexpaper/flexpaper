@@ -62,43 +62,30 @@ The following parameters can be used in FlexPaper
 The parameters are passed using flashvars or by setting properties on the flexpaper component inside flex, depending on your choice of usage. The code block below shows an example of how the parameters can be passed using the pre-compiled flash version
 
 {{{
-var flashvars = { 
-                  SwfFile :       "Paper.swf",
-				  Scale : 0.6,
-				  ZoomTransition : "easeOut",
-				  ZoomTime : 0.5,
-  				  ZoomInterval : 0.1,
-  				  FitPageOnLoad : false,
-  				  FitWidthOnLoad : false,
-  				  PrintEnabled : false,
-  				  FullScreenAsMaxWindow : true,
-  				  ProgressiveLoading : true,
-  				  MinZoomSize : 0.2,
-  				  MaxZoomSize : 5,
-  				  SearchMatchAll : false,
-  				  InitViewMode : 'Portrait',
+var fp = new FlexPaperViewer(	
+						 'FlexPaperViewer',
+						 'viewerPlaceHolder', { config : {
+						 SwfFile : 'Paper.swf',
+						 Scale : 0.6, 
+						 ZoomTransition : 'easeOut',
+						 ZoomTime : 0.5,
+						 ZoomInterval : 0.2,
+						 FitPageOnLoad : true,
+						 FitWidthOnLoad : false,
+						 PrintEnabled : true,
+						 FullScreenAsMaxWindow : false,
+						 ProgressiveLoading : false,
+						 MinZoomSize : 0.3,
+						 MaxZoomSize : 5,
+						 SearchMatchAll : false,
+						 InitViewMode : 'Portrait',
 						 
-  				  ViewModeToolsVisible : true,
-  				  ZoomToolsVisible : true,
-  				  NavToolsVisible : true,
-  				  CursorToolsVisible : true,
-  				  SearchToolsVisible : true,
-
-  				  localeChain : "en_US"
-				  };
-			 var params = {
-				
-			    }
-            params.quality = "high";
-            params.bgcolor = "#ffffff";
-            params.allowscriptaccess = "sameDomain";
-            params.allowfullscreen = "true";
-            var attributes = {};
-            attributes.id = "FlexPaperViewer";
-            attributes.name = "FlexPaperViewer";
-            swfobject.embedSWF(
-                "FlexPaperViewer.swf", "flashContent", 
-                "600", "500", 
-                swfVersionStr, xiSwfUrlStr, 
-                flashvars, params, attributes);
+						 ViewModeToolsVisible : true,
+						 ZoomToolsVisible : true,
+						 NavToolsVisible : true,
+						 CursorToolsVisible : true,
+						 SearchToolsVisible : true,
+  						
+  						 localeChain: 'en_US'
+						 }});
 }}}
