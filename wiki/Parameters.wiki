@@ -39,6 +39,24 @@ The following parameters can be used in FlexPaper
 
  * *ProgressiveLoading* (_Boolean_) Will load and display the document progressively when set to true as opposed to downloading the complete document before displaying the pages. Documents need to be converted to at least Flash version 9 for this to work (-T 9 flag using PDF2SWF)
 
+ * *MinZoomSize* (_Number_) Sets the minimum zoom size (default 0.3)
+
+ * *MaxZoomSize* (_Number_) Sets the minimum zoom size (default 5)
+
+ * *SearchMatchAll* (_Boolean) When set to true, the viewer highlights all matches when performing searches in a document
+
+ * *InitViewMode* (_String_) Sets the start-up view mode. For example "Portrait" or "TwoPage".
+
+ * *ViewModeToolsVisible* (_Boolean) Shows or hides view modes from the tool bar
+
+ * *ZoomToolsVisible* (_Boolean) Shows or hides zoom tools from the tool bar
+
+ * *NavToolsVisible* (_Boolean) Shows or hides nav tools from the tool bar
+
+ * *CursorToolsVisible* (_Boolean) Shows or hides cursor tools from the tool bar
+
+ * *SearchToolsVisible* (_Boolean) Shows or hides search tools from the tool bar
+
 ----
 
 The parameters are passed using flashvars or by setting properties on the flexpaper component inside flex, depending on your choice of usage. The code block below shows an example of how the parameters can be passed using the pre-compiled flash version
@@ -55,6 +73,16 @@ var flashvars = {
   				  PrintEnabled : false,
   				  FullScreenAsMaxWindow : true,
   				  ProgressiveLoading : true,
+  				  MinZoomSize : 0.2,
+  				  MaxZoomSize : 5,
+  				  SearchMatchAll : false,
+  				  InitViewMode : 'Portrait',
+						 
+  				  ViewModeToolsVisible : true,
+  				  ZoomToolsVisible : true,
+  				  NavToolsVisible : true,
+  				  CursorToolsVisible : true,
+  				  SearchToolsVisible : true,
 
   				  localeChain : "en_US"
 				  };
