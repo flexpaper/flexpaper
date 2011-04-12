@@ -39,7 +39,7 @@ The following parameters can be used in FlexPaper
 
  * *ProgressiveLoading* (_Boolean_) Will load and display the document progressively when set to true as opposed to downloading the complete document before displaying the pages. Documents need to be converted to at least Flash version 9 for this to work (-T 9 flag using PDF2SWF)
 
- * *MinZoomSize* (_Number_) Sets the minimum zoom size (default 0.3)
+ * *MinZoomSize* (_Number_) Sets the minimum zoom size (default 0.2)
 
  * *MaxZoomSize* (_Number_) Sets the minimum zoom size (default 5)
 
