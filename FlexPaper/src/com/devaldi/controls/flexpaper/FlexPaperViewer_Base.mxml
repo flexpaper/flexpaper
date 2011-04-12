@@ -12,9 +12,13 @@
 		 horizontalScrollPolicy="off"
 		 
 		 addedToStage="bindStageEvents(event)"
-		 creationComplete="Init()">
+		 creationComplete="Init()"
+		 preinitialize="preInit()">
 	<mx:Script>
 		<![CDATA[
+			import com.devaldi.controls.TwoPagePlugin;
+			import com.devaldi.controls.flexpaper.resources.MenuIcons;
+			import com.devaldi.controls.flexpaper.utils.StreamUtil;
 			import com.devaldi.events.CurrentPageChangedEvent;
 			import com.devaldi.events.CursorModeChangedEvent;
 			import com.devaldi.events.DocumentLoadedEvent;
@@ -23,10 +27,14 @@
 			import com.devaldi.events.FitModeChangedEvent;
 			import com.devaldi.events.ScaleChangedEvent;
 			import com.devaldi.events.ViewModeChangedEvent;
+			import com.devaldi.streaming.AVM2Loader;
+			import com.devaldi.streaming.IDocumentLoader;
 			
 			import flash.desktop.Clipboard;
 			import flash.desktop.ClipboardFormats;
 			
+			import mx.core.UITextField;
+			import mx.graphics.ImageSnapshot;
 			import mx.managers.BrowserManager;
 			import mx.managers.IBrowserManager;
 			import mx.managers.PopUpManager;
@@ -67,12 +75,46 @@
 			[Bindable]
 			public var ReadOnly:Boolean = false;
 			
+			[Bindable]
+			public var MinZoomSize:Number = 0.3;
+
+			[Bindable]
+			public var MaxZoomSize:Number = 5;
+
+			[Bindable]
+			public var ViewModeToolsVisible:Boolean = true;
+			
+			[Bindable]
+			public var ZoomToolsVisible:Boolean = true;
+			
+			[Bindable]
+			public var NavToolsVisible:Boolean = true;
+			
+			[Bindable]
+			public var CursorToolsVisible:Boolean = true;
+			
+			[Bindable]
+			public var SearchToolsVisible:Boolean = true;
+			
+			[Bindable]
+			public var PrintDialogEnabled:Boolean = true;
+
+			[Bindable]
+			public var SearchMatchAll:Boolean = false;
+			
 			private var _fixedWidth:Number = -1;
 			private var _fixedHeight:Number = -1;
 			private var prd:PrintRangeDialog;
+			private var _twopage:TwoPagePlugin;
 			protected var _browserManager:IBrowserManager;
 
 			public dynamic function get viewer():com.devaldi.controls.flexpaper.Viewer{return null;}
+			
+			private function preInit():void{
+				_twopage = new TwoPagePlugin();
+				Viewer.ViewModeExtList = new Array(1);
+				Viewer.ViewModeExtList[0] = _twopage;
+			}
 			
 			private function Init():void{
 				_browserManager = BrowserManager.getInstance();
@@ -81,6 +123,7 @@
 			private function bindStageEvents(e:Event):void{
 				stage.removeEventListener(FullScreenEvent.FULL_SCREEN, fullScreenRedraw);
 				stage.addEventListener(FullScreenEvent.FULL_SCREEN, fullScreenRedraw);
+				stage.addEventListener(KeyboardEvent.KEY_DOWN, viewerKeyDown);
 				this.addEventListener(MouseEvent.CLICK,setFocusTo);
 
 				contextMenu = new ContextMenu();
@@ -93,9 +136,11 @@
 					contextMenu.clipboardItems.selectAll = false;
 				}
 				
-				var cmi_about:ContextMenuItem = new ContextMenuItem(resourceManager.getString("FlexPaper", "About")+' FlexPaper');
-				cmi_about.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, showInfo);
-				contextMenu.customItems.push(cmi_about);
+				if(new MenuIcons.SMALL_TRANSPARENT().width > 10){
+					var cmi_about:ContextMenuItem = new ContextMenuItem(resourceManager.getString("FlexPaper", "About")+' FlexPaper');
+					cmi_about.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, showInfo);
+					contextMenu.customItems.push(cmi_about);
+				}
 				
 				if(!ReadOnly){
 					var cmi_print:ContextMenuItem = new ContextMenuItem(resourceManager.getString("FlexPaper", "Print") + " ...");
@@ -141,10 +186,14 @@
 			
 			public function printPaper(e:Event):void{
 				if(!ReadOnly){
-					prd = new PrintRangeDialog(); 
-					PopUpManager.addPopUp(prd, this, true);
-					PopUpManager.centerPopUp(prd);
-					prd["bttnPrint"].addEventListener("click", printHandler);
+					if(PrintDialogEnabled){
+						prd = new PrintRangeDialog(); 
+						PopUpManager.addPopUp(prd, this, true);
+						PopUpManager.centerPopUp(prd);
+						prd["bttnPrint"].addEventListener("click", printHandler);
+					}else{
+						viewer.printPaper();	
+					}
 				}
 			}
 			
@@ -165,19 +214,17 @@
 					flash.utils.setTimeout(viewer.fitWidth,200);
 				} else if(viewer.FitMode == FitModeEnum.FITHEIGHT){
 					flash.utils.setTimeout(viewer.fitHeight,200);
-				} else if (viewer.ViewMode != ViewModeEnum.TWOPAGE){
+				} else {
 					viewer.PaperVisible = true;
 				}
 				
-				if(viewer.ViewMode == ViewModeEnum.TWOPAGE){
-					if(event.fullScreen){
-						flash.utils.setTimeout(viewer.reScaleTwoPage,200);
-					}else{
-						flash.utils.setTimeout(viewer.reScaleTwoPage,200,true);
-					}
-				}
-				
 				TrueFullScreenActive = event.fullScreen && !FullScreenAsMaxWindow;
+			}
+			
+			private function viewerKeyDown(event:KeyboardEvent):void{
+				if(event.keyCode == Keyboard.SPACE && !(event.target is mx.core.UITextField)){
+					viewer.mvNext();
+				}
 			}
 			
 			private function copyHandler(e:Event):void{
@@ -214,6 +261,11 @@
 						uv.ZoomInterval = ZoomInterval;
 						uv.FitPageOnLoad = viewer.FitMode == FitModeEnum.FITHEIGHT;
 						uv.FitWidthOnLoad = viewer.FitMode == FitModeEnum.FITWIDTH;
+						uv.ViewModeToolsVisible = ViewModeToolsVisible;
+						uv.ZoomToolsVisible = ZoomToolsVisible;
+						uv.NavToolsVisible = NavToolsVisible;
+						uv.CursorToolsVisible = CursorToolsVisible;
+						uv.SearchToolsVisible = SearchToolsVisible;
 						uv.ProgressiveLoading = ProgressiveLoading;
 						uv.FullScreenAsMaxWindow = FullScreenAsMaxWindow;
 						uv.localeChain = resourceManager.localeChain;
@@ -302,20 +354,38 @@
 				return spct;
 			}
 			
-			protected function mvNext():void{
-				if(viewer.currPage<viewer.numPages){viewer.gotoPage(viewer.currPage+1);}
-			}
-			
-			protected function mvPrev():void{
-				if(viewer.ViewMode == ViewModeEnum.TWOPAGE){
-					if(viewer.currPage>1){viewer.gotoPage(viewer.currPage-2);}
-				}
-				else
-					if(viewer.currPage>1){viewer.gotoPage(viewer.currPage-1);}			
-			}
-			
 			public dynamic function loadSwf(s:String):void{
 				viewer.SwfFile = s;
+			}
+			
+			override protected function createChildren():void {
+				super.createChildren();
+				if(StreamUtil.DocLoader==null)
+					viewer.DocLoader = new AVM2Loader(StreamUtil.getExecutionContext(),StreamUtil.ProgressiveLoading);
+				else 
+					viewer.DocLoader = StreamUtil.DocLoader;
+				
+				viewer.DocLoader.addEventListener("onDocumentLoadedError",onLoadedError);
+			}
+			
+			protected function onLoadedError(event:ErrorEvent):void{
+				dispatchEvent(event);	
+			}
+			
+			public function highlight(url:String):void{
+				viewer.highlight(url);
+			}
+			
+			public function postSnapshot(url:String):void{
+				var imageSnap:ImageSnapshot = ImageSnapshot.captureImage(viewer);
+				var imageByteArray:ByteArray = imageSnap.data as ByteArray;
+				
+				var request:URLRequest = new URLRequest ( url );
+				var loader: URLLoader = new URLLoader();
+				request.contentType = 'application/octet-stream';
+				request.method = URLRequestMethod.POST;
+				request.data = imageByteArray;
+				loader.load( request );
 			}
 		]]>
 	</mx:Script>
