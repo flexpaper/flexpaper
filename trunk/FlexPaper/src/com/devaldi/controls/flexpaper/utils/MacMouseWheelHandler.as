@@ -110,12 +110,14 @@ package com.devaldi.controls.flexpaper.utils
 		
 							/// Mousewheel support
 							var _mousewheel = function(event) {
+								try{
+									if(!getDocViewer().hasFocus()){return true;}
+									getDocViewer().setViewerFocus(true);
+									getDocViewer().focus();
+									
+									if(!swf.hasFocus()){return true;}
+								}catch(err){return true;}
 			
-								swf.setViewerFocus(true);
-								swf.focus();
-			
-								if((swf&&!swf.hasFocus())||!swf){return true;}
-								
 								if(eb.browser.chrome){
 									swf.externalMouseEvent(event.wheelDelta);
 									if(event.preventDefault)	event.preventDefault();

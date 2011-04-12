@@ -45,7 +45,6 @@
     <classEntry path="com.devaldi.controls.flexpaper.IFlexPaperPluginControl"/>
     <classEntry path="com.devaldi.controls.MatrixTransformer"/>
     <classEntry path="com.devaldi.controls.flexpaper.IFlexPaperViewModePlugin"/>
-    <classEntry path="com.devaldi.controls.FlowTwoPage"/>
     <classEntry path="com.devaldi.controls.flexpaper.utils.FullscreenHandler"/>
     <classEntry path="com.devaldi.controls.flexpaper.FlexPaperViewer_Base"/>
   </includeClasses>

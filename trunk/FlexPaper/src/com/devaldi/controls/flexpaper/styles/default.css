@@ -25,7 +25,6 @@
 		skin: ClassReference("mx.skins.ProgrammaticSkin");
 		overSkin:ClassReference("mx.skins.halo.SliderHighlightSkin");
 		downSkin:ClassReference("mx.skins.halo.SliderHighlightSkin");
-		thumbSkin: Embed(source="/../assets/sliderdot.gif");
 	}
 	
 

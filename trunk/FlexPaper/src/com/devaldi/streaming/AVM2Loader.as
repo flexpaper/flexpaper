@@ -15,12 +15,15 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with FlexPaper.  If not, see <http://www.gnu.org/licenses/>.
 
-Inspired by and initially based on the ForcibleLoader class by 
+Inspired by the ForcibleLoader class by 
 BeInteractive! (www.be-interactive.org)
 */
 
 package com.devaldi.streaming
 {
+        import com.devaldi.events.SwfLoadedEvent;
+        
+        import flash.display.DisplayObject;
         import flash.display.Loader;
         import flash.errors.EOFError;
         import flash.events.ErrorEvent;
@@ -47,10 +50,12 @@ package com.devaldi.streaming
 		
 		[Event(name="onDocumentLoadedError", type="flash.events.ErrorEvent")]
 		[Event(name="onLoadersLoaded", type="flash.events.Event")]
-        public class AVM2Loader implements IEventDispatcher
+		[Event(name="onSwfLoaded", type="com.devaldi.events.SwfLoadedEvent")]
+		
+        public class AVM2Loader implements IDocumentLoader
         {
 				private var dispatcher:IEventDispatcher = new EventDispatcher();
-				private var _loader:Loader;
+				private var _loader:Loader = new Loader();
 				private var _stream:URLStream;
 				private var _inputBytes:ByteArray;
 				private var _loaderCtx:LoaderContext;
@@ -63,12 +68,10 @@ package com.devaldi.streaming
 				public var version:uint = 0;
 				private var numframes:int = -1;
 				private var _progressive:Boolean = false;
-				public var LoaderList:Array;
+				private var _loaderList:Array;
 								
-                public function AVM2Loader(loader:Loader, loaderCtx:LoaderContext, progressive:Boolean)
+                public function AVM2Loader(loaderCtx:LoaderContext, progressive:Boolean)
                 {
-                        this.loader = loader;
-                        
                         _loaderCtx = loaderCtx;
                         _progressive = progressive;
 						resetURLStream();
@@ -87,6 +90,10 @@ package com.devaldi.streaming
 							_stream.removeEventListener(ProgressEvent.PROGRESS , streamProgressHandler);
 							_stream.removeEventListener(Event.COMPLETE, streamCompleteHandler);
 						}
+						
+						_loader.unloadAndStop(true);
+						_loader.contentLoaderInfo.removeEventListener(Event.COMPLETE, loaderComplete);
+						_loader = new Loader();
 
 					}
 					
@@ -102,11 +109,28 @@ package com.devaldi.streaming
 					
 					_stream.addEventListener(IOErrorEvent.IO_ERROR, ioErrorHandler);
 					_stream.addEventListener(SecurityErrorEvent.SECURITY_ERROR, securityErrorHandler);
+					_loader.contentLoaderInfo.addEventListener(Event.COMPLETE, loaderComplete);
 				}
+				
+				private function loaderComplete(event:Event):void{
+					dispatchEvent(new SwfLoadedEvent(SwfLoadedEvent.SWFLOADED,event.currentTarget));
+				}
+				
+				public function get LoaderList():Array{
+					return _loaderList;
+				}
+				
+				public function set LoaderList(v:Array):void{
+					_loaderList = v;
+				}				
                 
                 public function get Resigned():Boolean{
                 	return _resigned;
                 }
+
+				public function get DocumentContainer():DisplayObject{
+					return _loader;
+				}
 				
 				public function get InputBytes():ByteArray {
 					return _inputBytes;
@@ -133,6 +157,8 @@ package com.devaldi.streaming
                 
                 public function load(request:URLRequest, loaderCtx:LoaderContext):void
                 {
+					//resetURLStream();
+					
 					_attempts++;					
 					_request = request;
                     _stream.load(request);
@@ -158,9 +184,11 @@ package com.devaldi.streaming
                 private function confirmBytesLoaded():void{
                 	try{
 						_stream.readBytes(_inputBytes,_inputBytes.length);
-	                	_loader.loadBytes(_inputBytes,_loaderCtx);
+						_loader.unloadAndStop(true);
+						_loader.loadBytes(_inputBytes,_loaderCtx);
 					}
 					catch(e:Error){ // on error try again, version 9 of flash player sometimes fails.
+						_loader.unloadAndStop(true);
 						_loader.loadBytes(_inputBytes,_loaderCtx);
 					}
                 }
@@ -185,9 +213,10 @@ package com.devaldi.streaming
 						_bytesPending = 0;
                 		_prevLength = _inputBytes.length;
                 		try{
-							_loader.unload();
+							_loader.unloadAndStop(true);
 							_loader.loadBytes(_inputBytes,_loaderCtx);}
 						catch(e:Error){ // on error try again, version 9 of flash player sometimes fails.
+							_loader.unloadAndStop(true);
 							_loader.loadBytes(_inputBytes,_loaderCtx);
 						}
                 	}
@@ -217,6 +246,7 @@ package com.devaldi.streaming
                                 updateVersion(9,_inputBytes);
                         }
                         
+						loader.unloadAndStop(true);
                         loader.loadBytes(_inputBytes,_loaderCtx);
                 }
                 
@@ -279,6 +309,10 @@ package com.devaldi.streaming
                         
                         return -1;
                 }
+				
+				public function postProcessBytes(bytes:ByteArray):void{
+					flagSWF9Bit(bytes);
+				}
                 
                 public function flagSWF9Bit(bytes:ByteArray):void
                 {
@@ -291,11 +325,20 @@ package com.devaldi.streaming
 							insertFileAttributesTag(bytes);
 						}
                 }
-                
-                public function resignFileAttributesTag(bytes:ByteArray, ldr:Loader):void{
+				
+                public function signFileHeader(bytes:ByteArray, ldr:Loader=null):void{
                 	_resigned=true;
 	                insertFileAttributesTag(bytes);
-					ldr.loadBytes(bytes,_loaderCtx);
+					
+					if(ldr!=null)
+					{
+						ldr.unloadAndStop(true);
+						ldr.loadBytes(bytes,_loaderCtx);
+					}
+					else{
+						_loader.unloadAndStop(true);
+						_loader.loadBytes(bytes,_loaderCtx);
+					}
                 }
                 
                 private function insertFileAttributesTag(bytes:ByteArray):void
@@ -339,7 +382,6 @@ package com.devaldi.streaming
 				public function willTrigger(type:String):Boolean {
 					return dispatcher.willTrigger(type);
 				}				
-				
                 
                 private function ioErrorHandler(event:IOErrorEvent):void
                 {
@@ -354,6 +396,5 @@ package com.devaldi.streaming
 					evt.text = event.text;
 					dispatchEvent(evt);
                 }
-				
         }
 }

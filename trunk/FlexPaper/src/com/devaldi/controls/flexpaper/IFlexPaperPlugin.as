@@ -1,7 +1,6 @@
 package com.devaldi.controls.flexpaper
 {
 	import com.devaldi.streaming.DupImage;
-	
 	import flash.display.MovieClip;
 
 	[Event(name="onPageNavigate", type="flash.events.Event")]
