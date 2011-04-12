@@ -94,7 +94,7 @@ package com.devaldi.controls
 		
 		public function renderSelection(i:int,marker:ShapeMarker):void{
 			var rp:int = (i % 2 == 0)?0:1;
-			if(marker.parent != null && viewer.PageList[rp] !=null){
+			if(marker!=null && marker.parent != null && viewer.PageList[rp] !=null){
 				if(i+1 == viewer.SearchPageIndex && marker.parent != viewer.PageList[rp]){
 					viewer.PageList[rp].addChildAt(marker,viewer.PageList[rp].numChildren);
 				}else if(i+1 == viewer.SearchPageIndex && marker.parent == viewer.PageList[rp]){
