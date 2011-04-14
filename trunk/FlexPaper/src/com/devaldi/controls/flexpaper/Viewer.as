@@ -537,7 +537,7 @@ package com.devaldi.controls.flexpaper
 		}
 		
 		public function Zoom(factor:Number):void{
-			if(factor<0.10 || factor>5 || factor == _scale)
+			if(factor<_minZoomSize || factor>_maxZoomSize || factor == _scale)
 				return;
 			
 			if((!UsingExtViewMode && _viewMode != ViewModeEnum.PORTRAIT) || (UsingExtViewMode && !CurrExtViewMode.doZoom)){return;}
