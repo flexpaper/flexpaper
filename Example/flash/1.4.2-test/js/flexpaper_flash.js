@@ -22,10 +22,7 @@ window.FlexPaperViewer = window.$f = function() {
 			src: arguments[0]+".swf",
 			version: [10, 0],
 			expressInstall: "js/expressinstall.swf",
-				
-			}, 
-	
-	{
+			},{
 			SwfFile : escape(config.SwfFile),
 			Scale : config.Scale, 
 			ZoomTransition : config.ZoomTransition,
