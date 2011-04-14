@@ -1,0 +1,52 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"> 
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">	
+    <head> 
+        <title>FlexPaper</title>         
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" /> 
+        <style type="text/css" media="screen"> 
+			html, body	{ height:100%; }
+			body { margin:0; padding:0; overflow:auto; }   
+			#flashContent { display:none; }
+        </style> 
+		
+		<script type="text/javascript" src="js/flexpaper_flash.js"></script>
+    </head> 
+    <body> 
+    	<div style="position:absolute;left:10px;top:10px;">
+	        <a id="viewerPlaceHolder" style="width:730px;height:480px;display:block"></a>
+	        
+	        <script type="text/javascript"> 
+				var fp = new FlexPaperViewer(	
+						 'FlexPaperViewer',
+						 'viewerPlaceHolder', { config : {
+						 SwfFile : 'Paper.swf',
+						 Scale : 0.6, 
+						 ZoomTransition : 'easeOut',
+						 ZoomTime : 0.5,
+						 ZoomInterval : 0.2,
+						 FitPageOnLoad : true,
+						 FitWidthOnLoad : false,
+						 PrintEnabled : true,
+						 FullScreenAsMaxWindow : false,
+						 ProgressiveLoading : false,
+						 MinZoomSize : 0.3,
+						 MaxZoomSize : 5,
+						 SearchMatchAll : false,
+						 InitViewMode : 'Portrait',
+						 
+						 ViewModeToolsVisible : true,
+						 ZoomToolsVisible : true,
+						 NavToolsVisible : true,
+						 CursorToolsVisible : true,
+						 SearchToolsVisible : true,
+  						
+  						 localeChain: 'en_US'
+						 }});
+	        </script>
+	        
+	        <div id="errNoDocument" style="padding-top:10px;">
+	        	Can't see the document? Running FlexPaper from your local directory? Make sure you have added FlexPaper as trusted. You can do that at <a href="http://www.macromedia.com/support/documentation/en/flashplayer/help/settings_manager04a.html#119065">Adobe's website</a>.  
+	        </div>   
+        </div>
+   </body> 
+</html> 
