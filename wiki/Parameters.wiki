@@ -72,7 +72,6 @@ var fp = new FlexPaperViewer(
 		ZoomInterval : 0.2,
 		FitPageOnLoad : true,
 		FitWidthOnLoad : false,
-		PrintEnabled : true,
 		FullScreenAsMaxWindow : false,
 		ProgressiveLoading : false,
 		MinZoomSize : 0.3,
