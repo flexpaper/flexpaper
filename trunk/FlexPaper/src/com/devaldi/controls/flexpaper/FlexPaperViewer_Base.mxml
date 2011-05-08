@@ -102,6 +102,9 @@
 			[Bindable]
 			public var SearchMatchAll:Boolean = false;
 			
+			[Bindable]
+			public var BitmapBasedRendering:Boolean = false;
+			
 			private var _fixedWidth:Number = -1;
 			private var _fixedHeight:Number = -1;
 			private var prd:PrintRangeDialog;
@@ -112,8 +115,11 @@
 			
 			private function preInit():void{
 				_twopage = new TwoPagePlugin();
-				Viewer.ViewModeExtList = new Array(1);
-				Viewer.ViewModeExtList[0] = _twopage;
+				
+				if(Viewer.ViewModeExtList==null)
+					Viewer.ViewModeExtList = new Array();
+				
+				Viewer.ViewModeExtList[Viewer.ViewModeExtList.length] = _twopage;
 			}
 			
 			private function Init():void{
@@ -321,6 +327,10 @@
 				dispatchEvent(event);
 			}
 			
+			protected function pageLoadingEventHandler(event:Event):void{
+				dispatchEvent(event);
+			}
+			
 			protected function documentPrintedHandler(event:DocumentPrintedEvent):void{
 				dispatchEvent(event);
 			}
@@ -328,6 +338,10 @@
 			protected function documentLoadedHandler(event:Event):void{
 				dispatchEvent(event);
 			}	
+			
+			protected function pageLoadedEventHandler(event:Event):void{
+				dispatchEvent(event);
+			}
 
 			public function Zoom(factor:Number):void{
 				viewer.Zoom(factor);
@@ -360,6 +374,10 @@
 			
 			override protected function createChildren():void {
 				super.createChildren();
+				
+				if(viewer==null)
+					return;
+				
 				if(StreamUtil.DocLoader==null)
 					viewer.DocLoader = new AVM2Loader(StreamUtil.getExecutionContext(),StreamUtil.ProgressiveLoading);
 				else 

@@ -18,6 +18,9 @@ along with FlexPaper.  If not, see <http://www.gnu.org/licenses/>.
 
 package com.devaldi.controls.flexpaper.utils
 {
+	import com.devaldi.streaming.IGenericDocument;
+	import com.devaldi.streaming.SwfDocument;
+	
 	import flash.display.MovieClip;
 	
 	public class TextMapUtil
@@ -30,7 +33,7 @@ package com.devaldi.controls.flexpaper.utils
 			langMap[idx] = new Array(3); langMap[idx][0] = word;langMap[idx][1] = replacement;langMap[idx][2] = len;  
 		}
 		
-		public static function initLangMap(mc:MovieClip):void{
+		public static function initLangMap(mc:IGenericDocument):void{
 			if(totalFragments.length == 0){
 				for(var i:int=0;i<mc.totalFrames;i++){
 					mc.gotoAndStop(i+1);
@@ -126,7 +129,7 @@ package com.devaldi.controls.flexpaper.utils
 			return -1;
 		}
 		
-		public static function checkUnicodeIntegrity(s:String, search:String=null, mc:MovieClip=null):String{
+		public static function checkUnicodeIntegrity(s:String, search:String=null, mc:IGenericDocument=null):String{
 			TextMapUtil.initLangMap(mc);
 
 			var lmi:int = -1;

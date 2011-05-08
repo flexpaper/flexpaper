@@ -32,10 +32,13 @@ along with FlexPaper.  If not, see <http://www.gnu.org/licenses/>.
 		[Event(name="onDocumentLoading", type="flash.events.Event")]
 		[Event(name="onExternalLinkClicked", type="com.devaldi.events.ExternalLinkClickedEvent")]
 		[Event(name="onDocumentPrinted", type="com.devaldi.events.DocumentPrintedEvent")]
+		[Event(name="onPageLoaded", type="com.devaldi.events.PageLoadedEvent")]
+		[Event(name="onPageLoading", type="com.devaldi.events.PageLoadingEvent")]
 	</mx:Metadata>
 	<mx:Script>
 		<![CDATA[
 			import com.devaldi.controls.flexpaper.Viewer;
+			import com.devaldi.controls.flexpaper.resources.MenuIcons;
 			import com.devaldi.controls.flexpaper.utils.MacMouseWheelHandler;
 			import com.devaldi.events.CurrentPageChangedEvent;
 			import com.devaldi.events.CursorModeChangedEvent;
@@ -52,7 +55,6 @@ along with FlexPaper.  If not, see <http://www.gnu.org/licenses/>.
 			import mx.controls.sliderClasses.Slider;
 			import mx.events.SliderEvent;
 			import mx.managers.PopUpManager;
-			import com.devaldi.controls.flexpaper.resources.MenuIcons;
 			
 			private var _sliderUserChange:Boolean = false;
 			
@@ -83,6 +85,16 @@ along with FlexPaper.  If not, see <http://www.gnu.org/licenses/>.
 				super.documentLoadedHandler(event);
 			}
 			
+			protected override function pageLoadedEventHandler(event:Event):void{
+				spin1.visible = false;
+				lblProgress.visible = false;
+				spin1.stop();
+				bttnInfo.visible = true;
+				
+				if(StartAtPage!=1&&!isNaN(StartAtPage)){paper1.gotoPage(StartAtPage);}
+				super.pageLoadedEventHandler(event);
+			}
+			
 			private function logoClickedEventHandler(event:Event):void{
 				showInfo(event);			
 			}
@@ -91,6 +103,10 @@ along with FlexPaper.  If not, see <http://www.gnu.org/licenses/>.
 				spin1.start();
 				spin1.visible = true;
 				super.papersLoadingHandler(event);
+			}
+			
+			protected override function pageLoadingEventHandler(event:Event):void{
+				super.pageLoadingEventHandler(event);
 			}
 						
 			private function sliderChange(event:SliderEvent):void 
@@ -195,6 +211,8 @@ along with FlexPaper.  If not, see <http://www.gnu.org/licenses/>.
 			   onCursorModeChanged="onCursorModeChanged(event)"
 			   onExternalLinkClicked="onExternalLinkClickedHandler(event)" 
 			   onDocumentPrinted="documentPrintedHandler(event)"
+			   onPageLoaded="pageLoadedEventHandler(event)"
+			   onPageLoading="pageLoadingEventHandler(event)"
 			   
 			   SwfFile="{SwfFile}" 
 			   Scale="{Scale}" 
@@ -208,6 +226,7 @@ along with FlexPaper.  If not, see <http://www.gnu.org/licenses/>.
 			   MaxZoomSize="{MaxZoomSize}"
 			   SearchMatchAll="{SearchMatchAll}"
 			   
+			    
 			   addedToStage="MacMouseWheelHandler.init(stage)" 
 			   height="100%" width="100%" borderStyle="solid"  tabIndex="0" />							
 </fp:FlexPaperViewer_Base>

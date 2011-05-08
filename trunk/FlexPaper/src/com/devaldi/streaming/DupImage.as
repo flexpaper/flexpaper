@@ -40,7 +40,7 @@ package com.devaldi.streaming
 		public var doAddDropShadow:Boolean = true;
 		public var doAddGlowFilter:Boolean = false;
 		public var glowFilterColor:uint = 0x000000;
-		public static var paperSource:MovieClip; 
+		public static var paperSource:DisplayObject; 
 		
 		public function DupImage(){}
 		

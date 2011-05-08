@@ -21,5 +21,7 @@ package com.devaldi.streaming
 		function set InputBytes(b:ByteArray):void;
 		function get Resigned():Boolean;
 		function get stream():URLStream;	
+		function get PagesSplit():Boolean;
+		function set PagesSplit(b:Boolean):void;
 	}
 }
