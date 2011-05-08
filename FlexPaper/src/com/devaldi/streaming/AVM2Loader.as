@@ -69,7 +69,8 @@ package com.devaldi.streaming
 				private var numframes:int = -1;
 				private var _progressive:Boolean = false;
 				private var _loaderList:Array;
-								
+				private var _pagesSplit:Boolean = false;
+				
                 public function AVM2Loader(loaderCtx:LoaderContext, progressive:Boolean)
                 {
                         _loaderCtx = loaderCtx;
@@ -114,6 +115,14 @@ package com.devaldi.streaming
 				
 				private function loaderComplete(event:Event):void{
 					dispatchEvent(new SwfLoadedEvent(SwfLoadedEvent.SWFLOADED,event.currentTarget));
+				}
+				
+				public function get PagesSplit():Boolean{
+					return _pagesSplit;
+				}
+				
+				public function set PagesSplit(b:Boolean):void{
+					_pagesSplit = b;
 				}
 				
 				public function get LoaderList():Array{

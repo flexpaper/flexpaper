@@ -47,6 +47,7 @@
     <classEntry path="com.devaldi.controls.flexpaper.IFlexPaperViewModePlugin"/>
     <classEntry path="com.devaldi.controls.flexpaper.utils.FullscreenHandler"/>
     <classEntry path="com.devaldi.controls.flexpaper.FlexPaperViewer_Base"/>
+    <classEntry path="com.devaldi.events.PageLoadedEvent"/>
   </includeClasses>
   <includeResources/>
   <namespaceManifests/>

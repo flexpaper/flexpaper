@@ -24,5 +24,7 @@ package com.devaldi.streaming
 	{
 		public var loaded:Boolean = false;
 		public var loadingFrames:int = 0;
+		public var pageStartIndex:int = 0;
+		public var loading:Boolean = false;
 	}
 }
