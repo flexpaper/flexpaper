@@ -81,14 +81,14 @@ package com.devaldi.controls
 			else
 				viewer.DisplayContainer.getChildAt(1).visible = true;
 			
-			if(!viewer.BusyLoading && viewer.DocLoader.LoaderList!=null && viewer.DocLoader.LoaderList.length>0){
+			if(((!viewer.BusyLoading||viewer.DocLoader.PagesSplit)&&(!viewer.DocLoader.LoaderList[uloaderidx].loading)) && viewer.DocLoader.LoaderList!=null && viewer.DocLoader.LoaderList.length>0){
 				if(	viewer.libMC!=null&&
 					(viewer.numPagesLoaded>=viewer.PageList[i].dupIndex || viewer.DocLoader.PagesSplit) && 
 					(viewer.DocLoader.LoaderList[uloaderidx] != null) && 
 					(viewer.DocLoader.LoaderList[uloaderidx].content==null) ||
 					(viewer.DocLoader.LoaderList[uloaderidx].content!=null&&viewer.DocLoader.PagesSplit && viewer.DocLoader.LoaderList[uloaderidx].pageStartIndex != i+1 && !viewer.DocLoader.LoaderList[uloaderidx].loading) ||
 					(viewer.DocLoader.LoaderList[uloaderidx].content!=null&&(viewer.DocLoader.LoaderList[uloaderidx].content.framesLoaded<viewer.PageList[i].dupIndex && !viewer.DocLoader.PagesSplit))){
-					
+					viewer.PageList[i].resetPage(viewer.libMC.width,viewer.libMC.height,Number(viewer.Scale),true);
 					viewer.BusyLoading = true;
 					
 					if(!viewer.DocLoader.PagesSplit){
@@ -97,7 +97,6 @@ package com.devaldi.controls
 					}else{
 						viewer.dispatchEvent(new PageLoadingEvent(PageLoadingEvent.PAGE_LOADING,i+1));
 						try{
-							viewer.resetPage(rp,true);
 							viewer.DocLoader.LoaderList[uloaderidx].unloadAndStop(true);
 							viewer.DocLoader.LoaderList[uloaderidx].loaded = false;
 							viewer.DocLoader.LoaderList[uloaderidx].loading = true;

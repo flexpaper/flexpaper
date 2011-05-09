@@ -18,6 +18,9 @@ along with FlexPaper.  If not, see <http://www.gnu.org/licenses/>.
 
 package com.devaldi.streaming
 {
+	import com.devaldi.controls.Spinner;
+	import com.devaldi.controls.flexpaper.resources.MenuIcons;
+	
 	import flash.display.Bitmap;
 	import flash.display.BitmapData;
 	import flash.display.DisplayObject;
@@ -41,6 +44,8 @@ package com.devaldi.streaming
 		public var doAddGlowFilter:Boolean = false;
 		public var glowFilterColor:uint = 0x000000;
 		public static var paperSource:DisplayObject; 
+		private var _blankScale:Number = -1;
+		private var _skinImgl:Bitmap = new MenuIcons.LOGO_SMALL();
 		
 		public function DupImage(){}
 		
@@ -135,6 +140,16 @@ package com.devaldi.streaming
 			return super.getChildAt(0);
 		}
 		
+		override public function addChildAt(child:DisplayObject,index:int):DisplayObject{
+			_blankScale == -1;
+			
+			return super.addChildAt(child,index);
+		}
+		
+		public function addBlankChildAt(child:DisplayObject,index:int):DisplayObject{
+			return super.addChildAt(child,index);
+		}
+		
 		override protected function updateDisplayList(w:Number, h:Number):void {
 			if(w>0&&h>0){
 			try{
@@ -159,5 +174,37 @@ package com.devaldi.streaming
 		{
 			return scaleX>0? unscaledHeight * this.scaleX:height;
 		}		
+		
+		public function resetPage(width:Number,height:Number,scale:Number,showSpinner:Boolean=false):void{
+			if(_blankScale == scale && !(_blankScale > 0 && showSpinner && numChildren == 1))
+				return;
+			
+			if(!(_blankScale > 0 && showSpinner && numChildren == 1)){
+				removeAllChildren();
+				
+				var dup:Bitmap = new Bitmap();
+				dup.bitmapData = _skinImgl.bitmapData;
+				dup.smoothing = true;
+				dup.x = width/2 - 80;
+				dup.y = height/2 - 50;
+				addBlankChildAt(dup,numChildren);
+				scaleX = scaleY = scale;
+			}
+			
+			if(showSpinner){
+				var sp:Spinner = new Spinner(50,50);
+				sp.x = width/2-25;
+				sp.y = height/2-125;
+				sp.setStyle("spinnerType","gradientcircle");
+				sp.setStyle("spinnerThickness","7");
+				sp.styleName = "gradientlines";
+				sp.start();
+				addBlankChildAt(sp,numChildren);
+				scaleX = scaleY = scale;
+			}	
+		
+			
+			_blankScale = scale;
+		}
 	}
 }
