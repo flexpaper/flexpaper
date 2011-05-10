@@ -176,8 +176,8 @@ package com.devaldi.streaming
 		}		
 		
 		public function resetPage(width:Number,height:Number,scale:Number,showSpinner:Boolean=false):void{
-			if(_blankScale == scale && !(_blankScale > 0 && showSpinner && numChildren == 1))
-				return;
+			//if(_blankScale == scale && !(_blankScale > 0 && showSpinner && numChildren == 1))
+			//	return;
 			
 			if(!(_blankScale > 0 && showSpinner && numChildren == 1)){
 				removeAllChildren();
@@ -187,8 +187,8 @@ package com.devaldi.streaming
 				dup.smoothing = true;
 				dup.x = width/2 - 80;
 				dup.y = height/2 - 50;
-				addBlankChildAt(dup,numChildren);
 				scaleX = scaleY = scale;
+				addBlankChildAt(dup,numChildren);
 			}
 			
 			if(showSpinner){
@@ -199,8 +199,8 @@ package com.devaldi.streaming
 				sp.setStyle("spinnerThickness","7");
 				sp.styleName = "gradientlines";
 				sp.start();
-				addBlankChildAt(sp,numChildren);
 				scaleX = scaleY = scale;
+				addBlankChildAt(sp,numChildren);
 			}	
 		
 			

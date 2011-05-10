@@ -955,7 +955,7 @@ package com.devaldi.controls.flexpaper
 											
 											//_pageList[i].addChildAt(_docLoader.LoaderList[uloaderidx],_pageList[i].numChildren);
 											_pageList[i].addChild(_docLoader.LoaderList[uloaderidx]);
-											_pageList[i].scaleX = _pageList[i].scaleY = _scale;
+											//_pageList[i].scaleX = _pageList[i].scaleY = _scale;
 											_pageList[i].loadedIndex = _pageList[i].dupIndex; 
 										}	
 									}
@@ -1044,7 +1044,12 @@ package com.devaldi.controls.flexpaper
 					}else{
 						if(_pageList[i].numChildren>0 || _pageList[i].source != null){
 							_pageList[i].source = null;
-							_pageList[i].resetPage(_libMC.width,_libMC.height,_scale);//_pageList[i].removeAllChildren();
+							
+							if(_tweencount == 0)
+								_pageList[i].resetPage(_libMC.width,_libMC.height,_scale);
+							else
+								_pageList[i].removeAllChildren();
+								
 							_pageList[i].loadedIndex = -1;
 							
 							//resetToLoading(i);
