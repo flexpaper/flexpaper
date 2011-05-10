@@ -176,8 +176,8 @@ package com.devaldi.streaming
 		}		
 		
 		public function resetPage(width:Number,height:Number,scale:Number,showSpinner:Boolean=false):void{
-			//if(_blankScale == scale && !(_blankScale > 0 && showSpinner && numChildren == 1))
-			//	return;
+			if(_blankScale == scale && !showSpinner)
+				return;
 			
 			if(!(_blankScale > 0 && showSpinner && numChildren == 1)){
 				removeAllChildren();
@@ -191,7 +191,7 @@ package com.devaldi.streaming
 				addBlankChildAt(dup,numChildren);
 			}
 			
-			if(showSpinner){
+			if(showSpinner && numChildren < 2){
 				var sp:Spinner = new Spinner(50,50);
 				sp.x = width/2-25;
 				sp.y = height/2-125;

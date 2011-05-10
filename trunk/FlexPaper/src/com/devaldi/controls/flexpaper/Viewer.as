@@ -882,7 +882,7 @@ package com.devaldi.controls.flexpaper
 						dispatchEvent(new CurrentPageChangedEvent(CurrentPageChangedEvent.PAGE_CHANGED,p));
 					}
 					
-					if(checkIsVisible(i)){
+					if(_libMC!=null&&checkIsVisible(i)){
 						if(_pageList[i].numChildren<4){
 							if(ViewMode == ViewModeEnum.PORTRAIT){
 								
@@ -894,7 +894,7 @@ package com.devaldi.controls.flexpaper
 								
 								if(!_docLoader.PagesSplit){
 									if(!_bbusyloading && _docLoader.LoaderList!=null && _docLoader.LoaderList.length>0){
-										if(_libMC!=null&&numPagesLoaded>=_pageList[i].dupIndex && _docLoader.LoaderList[uloaderidx] != null && _docLoader.LoaderList[uloaderidx].content==null||(_docLoader.LoaderList[uloaderidx].content!=null&&_docLoader.LoaderList[uloaderidx].content.framesLoaded<_pageList[i].dupIndex)){
+										if(numPagesLoaded>=_pageList[i].dupIndex && _docLoader.LoaderList[uloaderidx] != null && _docLoader.LoaderList[uloaderidx].content==null||(_docLoader.LoaderList[uloaderidx].content!=null&&_docLoader.LoaderList[uloaderidx].content.framesLoaded<_pageList[i].dupIndex)){
 											_bbusyloading = true;
 											_docLoader.LoaderList[uloaderidx].unloadAndStop(true);
 											_docLoader.LoaderList[uloaderidx].loadBytes(_inputBytes,StreamUtil.getExecutionContext());
@@ -902,8 +902,7 @@ package com.devaldi.controls.flexpaper
 										}
 									}
 									
-									if((i<2||_pageList[i].numChildren==0||(_pageList[i]!=null&&_docLoader.LoaderList[uloaderidx]!=null&&_docLoader.LoaderList[uloaderidx].content!=null&&_docLoader.LoaderList[uloaderidx].content.currentFrame!=_pageList[i].dupIndex))
-										&& _docLoader.LoaderList[uloaderidx] != null && _docLoader.LoaderList[uloaderidx].content != null){
+									if((i<2||_pageList[i].numChildren==0||(_pageList[i]!=null&&_docLoader.LoaderList[uloaderidx]!=null&&_docLoader.LoaderList[uloaderidx].content!=null&&_docLoader.LoaderList[uloaderidx].content.currentFrame!=_pageList[i].dupIndex)) && _docLoader.LoaderList[uloaderidx] != null && _docLoader.LoaderList[uloaderidx].content != null){
 										if(numPagesLoaded >= _pageList[i].dupIndex){
 											_docLoader.LoaderList[uloaderidx].content.gotoAndStop(_pageList[i].dupIndex);
 											_pageList[i].addChild(_docLoader.LoaderList[uloaderidx]);
@@ -922,11 +921,8 @@ package com.devaldi.controls.flexpaper
 								
 								if(_docLoader.PagesSplit){
 									if(!_bbusyloading && _docLoader.LoaderList!=null && _docLoader.LoaderList.length>0){
-										if(_libMC!=null && _docLoader.LoaderList[uloaderidx] != null && _docLoader.LoaderList[uloaderidx].pageStartIndex != _pageList[i].dupIndex
-											&& !_loadTimer.running && !_docLoader.LoaderList[uloaderidx].loading){
-											
+										if(_docLoader.LoaderList[uloaderidx] != null && _docLoader.LoaderList[uloaderidx].pageStartIndex != _pageList[i].dupIndex && !_loadTimer.running && !_docLoader.LoaderList[uloaderidx].loading){
 											dispatchEvent(new PageLoadingEvent(PageLoadingEvent.PAGE_LOADING,_pageList[i].dupIndex));
-											
 											try{
 												_pageList[i].resetPage(_libMC.width,_libMC.height,_scale,true);
 												_docLoader.LoaderList[uloaderidx].unloadAndStop(true);
@@ -934,28 +930,19 @@ package com.devaldi.controls.flexpaper
 												_docLoader.LoaderList[uloaderidx].loading = true;
 												_docLoader.LoaderList[uloaderidx].load(new URLRequest(getSwfFilePerPage(_swfFile,_pageList[i].dupIndex)),StreamUtil.getExecutionContext());
 												_docLoader.LoaderList[uloaderidx].pageStartIndex = _pageList[i].dupIndex;
-											}catch(err:IOErrorEvent){
-												
-											}
+											}catch(err:IOErrorEvent){}
 											
 											repaint();
 											
-										}/* else if(_loadTimer.running && _docLoader.LoaderList[uloaderidx].pageStartIndex != _pageList[i].dupIndex){
-											dispatchEvent(new Event("onDocumentLoading"));
-										} */
+										}
 									}
 									
-									if((_pageList[i].numChildren==0||(_pageList[i]!=null&&_docLoader.LoaderList[uloaderidx]!=null&&_docLoader.LoaderList[uloaderidx].content!=null))
-										&& _docLoader.LoaderList[uloaderidx] != null && _docLoader.LoaderList[uloaderidx].content != null && _docLoader.LoaderList[uloaderidx].loaded 
-										&& _docLoader.LoaderList[uloaderidx].pageStartIndex == _pageList[i].dupIndex){
-										
+									if((_pageList[i].numChildren==0||(_pageList[i]!=null&&_docLoader.LoaderList[uloaderidx]!=null&&_docLoader.LoaderList[uloaderidx].content!=null)) && _docLoader.LoaderList[uloaderidx] != null && _docLoader.LoaderList[uloaderidx].content != null && _docLoader.LoaderList[uloaderidx].loaded && _docLoader.LoaderList[uloaderidx].pageStartIndex == _pageList[i].dupIndex){
 										if(numPagesLoaded >= _pageList[i].dupIndex||true){
 											if(_docLoader.LoaderList[uloaderidx].parent != null)
 												_docLoader.LoaderList[uloaderidx].parent.removeChild(_docLoader.LoaderList[uloaderidx]);
 											
-											//_pageList[i].addChildAt(_docLoader.LoaderList[uloaderidx],_pageList[i].numChildren);
 											_pageList[i].addChild(_docLoader.LoaderList[uloaderidx]);
-											//_pageList[i].scaleX = _pageList[i].scaleY = _scale;
 											_pageList[i].loadedIndex = _pageList[i].dupIndex; 
 										}	
 									}
@@ -970,27 +957,21 @@ package com.devaldi.controls.flexpaper
 									_thumbData.draw(_libMC.getDocument(),new Matrix(_scale, 0, 0, _scale),null,null,null,true);
 								}else{
 									
-									if(!_bbusyloading && !_loadTimer.running && _docLoader.LoaderList!=null && _docLoader.LoaderList.length>0 && 
-										!_docLoader.LoaderList[uloaderidx].loading ){
-										dispatchEvent(new PageLoadingEvent(PageLoadingEvent.PAGE_LOADING,_pageList[i].dupIndex));
-										
-										try{
-											_pageList[i].resetPage(_libMC.width,_libMC.height,_scale,true);
-											_docLoader.LoaderList[uloaderidx].unloadAndStop(true);
-											_docLoader.LoaderList[uloaderidx].loaded = false;
-											_docLoader.LoaderList[uloaderidx].loading = true;
-											_docLoader.LoaderList[uloaderidx].load(new URLRequest(getSwfFilePerPage(_swfFile,_pageList[i].dupIndex)),StreamUtil.getExecutionContext());
-											_docLoader.LoaderList[uloaderidx].pageStartIndex = _pageList[i].dupIndex;
-										}catch(err:IOErrorEvent){
+									if(!_bbusyloading && !_loadTimer.running && _docLoader.LoaderList!=null && _docLoader.LoaderList.length>0 && !_docLoader.LoaderList[uloaderidx].loading){
+											dispatchEvent(new PageLoadingEvent(PageLoadingEvent.PAGE_LOADING,_pageList[i].dupIndex));
 											
+											try{
+												_pageList[i].resetPage(_libMC.width,_libMC.height,_scale,true);
+												_docLoader.LoaderList[uloaderidx].loaded = false;
+												_docLoader.LoaderList[uloaderidx].loading = true;
+												_docLoader.LoaderList[uloaderidx].load(new URLRequest(getSwfFilePerPage(_swfFile,_pageList[i].dupIndex)),StreamUtil.getExecutionContext());
+												_docLoader.LoaderList[uloaderidx].pageStartIndex = _pageList[i].dupIndex;
+											}catch(err:IOErrorEvent){}
+											
+											repaint();
 										}
-										
-										repaint();
-									}
 									
-									if(_docLoader.LoaderList[uloaderidx].pageStartIndex == _pageList[i].dupIndex && _pageList[i].loadedIndex != _pageList[i].dupIndex &&
-										_docLoader.LoaderList[uloaderidx].content!=null){
-										
+									if(_docLoader.LoaderList[uloaderidx].pageStartIndex == _pageList[i].dupIndex && _pageList[i].loadedIndex != _pageList[i].dupIndex && _docLoader.LoaderList[uloaderidx].content!=null){
 										_thumbData = new BitmapData(_docLoader.LoaderList[uloaderidx].width*_scale, _docLoader.LoaderList[uloaderidx].height*_scale, false, 0xFFFFFF);
 										_thumb = new Bitmap(_thumbData);
 										_pageList[i].source = _thumb;
@@ -1051,15 +1032,13 @@ package com.devaldi.controls.flexpaper
 								_pageList[i].removeAllChildren();
 								
 							_pageList[i].loadedIndex = -1;
-							
-							//resetToLoading(i);
 						}					
 					}
 				}
 			}			
 		}
 		
-		private function padString(_str:String, _n:Number, _pStr:String)
+		private function padString(_str:String, _n:Number, _pStr:String):String
 		{
 			var _rtn:String = _str;
 			if ((_pStr == null) || (_pStr.length < 1))
