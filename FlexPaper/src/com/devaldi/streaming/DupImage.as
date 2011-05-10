@@ -44,10 +44,22 @@ package com.devaldi.streaming
 		public var doAddGlowFilter:Boolean = false;
 		public var glowFilterColor:uint = 0x000000;
 		public static var paperSource:DisplayObject; 
-		private var _blankScale:Number = -1;
 		private var _skinImgl:Bitmap = new MenuIcons.LOGO_SMALL();
+		private var loadImg:Bitmap;
+		private var loadSpinner:Spinner;
 		
 		public function DupImage(){}
+		
+		public function init():void{
+			loadImg = new Bitmap();
+			loadImg.bitmapData = _skinImgl.bitmapData;
+			loadImg.smoothing = true;
+			
+			loadSpinner = new Spinner(50,50);
+			loadSpinner.setStyle("spinnerType","gradientcircle");
+			loadSpinner.setStyle("spinnerThickness","7");
+			loadSpinner.styleName = "gradientlines";
+		}
 		
 		public function get paperRotation():Number {
 			return _paperRotation;
@@ -141,8 +153,6 @@ package com.devaldi.streaming
 		}
 		
 		override public function addChildAt(child:DisplayObject,index:int):DisplayObject{
-			_blankScale == -1;
-			
 			return super.addChildAt(child,index);
 		}
 		
@@ -176,35 +186,25 @@ package com.devaldi.streaming
 		}		
 		
 		public function resetPage(width:Number,height:Number,scale:Number,showSpinner:Boolean=false):void{
-			if(_blankScale == scale && !showSpinner)
-				return;
 			
-			if(!(_blankScale > 0 && showSpinner && numChildren == 1)){
+			if(loadImg.parent != this)
+			{
 				removeAllChildren();
 				
-				var dup:Bitmap = new Bitmap();
-				dup.bitmapData = _skinImgl.bitmapData;
-				dup.smoothing = true;
-				dup.x = width/2 - 80;
-				dup.y = height/2 - 50;
+				loadImg.x = width/2 - 80;
+				loadImg.y = height/2 - 50;
 				scaleX = scaleY = scale;
-				addBlankChildAt(dup,numChildren);
+				addBlankChildAt(loadImg,numChildren);
 			}
 			
-			if(showSpinner && numChildren < 2){
-				var sp:Spinner = new Spinner(50,50);
-				sp.x = width/2-25;
-				sp.y = height/2-125;
-				sp.setStyle("spinnerType","gradientcircle");
-				sp.setStyle("spinnerThickness","7");
-				sp.styleName = "gradientlines";
-				sp.start();
+			if(loadSpinner.parent != this && showSpinner){
+				loadSpinner.x = width/2-25;
+				loadSpinner.y = height/2-125;
+				loadSpinner.start();
 				scaleX = scaleY = scale;
-				addBlankChildAt(sp,numChildren);
+				addBlankChildAt(loadSpinner,numChildren);
 			}	
-		
 			
-			_blankScale = scale;
 		}
 	}
 }

@@ -1844,6 +1844,7 @@ package com.devaldi.controls.flexpaper
 			di.dupIndex = index;
 			di.width = w;
 			di.height = h;
+			di.init();
 			//di.mouseChildren = false;
 			di.addEventListener(MouseEvent.MOUSE_OVER,dupImageMoverHandler,false,0,true);
 			di.addEventListener(MouseEvent.MOUSE_OUT,dupImageMoutHandler,false,0,true);
