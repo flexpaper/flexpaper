@@ -46,6 +46,9 @@
 			public var SwfFile:String = "";
 			
 			[Bindable]
+			public var SearchServiceUrl:String = "";
+			
+			[Bindable]
 			public var ZoomTransition:String = "easeOut";
 			
 			[Bindable]
@@ -350,6 +353,14 @@
 			public function searchText(text:String):void{
 				viewer.searchText(text);				
 			}		
+			
+			public function prevSearchMatch():void{
+				viewer.prevSearchMatch();
+			}
+				
+			public function nextSearchMatch(text:String):void{
+				viewer.nextSearchMatch(text);
+			}
 			
 			public function switchMode(mode:String=null):void{
 				viewer.switchMode(mode);
