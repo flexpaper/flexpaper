@@ -82,6 +82,7 @@ package com.devaldi.controls.flexpaper
 	import mx.containers.Canvas;
 	import mx.containers.HBox;
 	import mx.containers.VBox;
+	import mx.controls.Alert;
 	import mx.controls.Image;
 	import mx.core.Container;
 	import mx.core.SpriteAsset;
@@ -89,6 +90,8 @@ package com.devaldi.controls.flexpaper
 	import mx.events.FlexEvent;
 	import mx.events.IndexChangedEvent;
 	import mx.managers.CursorManager;
+	import mx.resources.ResourceManager;
+	import mx.rpc.events.FaultEvent;
 	import mx.rpc.events.ResultEvent;
 	import mx.rpc.http.HTTPService;
 	
@@ -154,6 +157,9 @@ package com.devaldi.controls.flexpaper
 		private var _minZoomSize:Number = 0.3;
 		private var _maxZoomSize:Number = 5;
 		private var _searchMatchAll:Boolean = false;
+		private var _searchServiceUrl:String = "";
+		private var _performSearchOnPageLoad:Boolean = false;
+		private var _pendingSearchPage:int = -1;
 		private var _skinImg:Bitmap = new MenuIcons.SMALL_TRANSPARENT();
 		private var _skinImgc:Bitmap = new MenuIcons.SMALL_TRANSPARENT_COLOR();
 		private var _skinImgDo:Image;
@@ -218,7 +224,6 @@ package com.devaldi.controls.flexpaper
 		
 		public function set ViewMode(s:String):void {
 			if(s!=_viewMode){
-				
 				for each (var vme:IFlexPaperViewModePlugin in ViewModeExtList){
 					if(s == vme.Name){
 						_currentExtViewMode = vme;
@@ -397,11 +402,23 @@ package com.devaldi.controls.flexpaper
 
 		[Bindable]
 		public function get SearchMatchAll():Boolean {
-			return _searchMatchAll;
+			if(SearchServiceUrl!=null && SearchServiceUrl.length>0)
+				return false;
+			else
+				return _searchMatchAll;
 		}	
 		
 		public function set SearchMatchAll(b1:Boolean):void {
 			_searchMatchAll = b1;
+		}
+		
+		[Bindable]
+		public function get SearchServiceUrl():String {
+			return _searchServiceUrl;
+		}	
+		
+		public function set SearchServiceUrl(s1:String):void {
+			_searchServiceUrl = s1;
 		}
 		
 		public function get FitWidthOnLoad():Boolean {
@@ -441,7 +458,7 @@ package com.devaldi.controls.flexpaper
 				else
 					_adjGotoPage = 0;
 				
-				repositionPapers();
+				repaint();
 			}
 		}
 		
@@ -492,7 +509,7 @@ package com.devaldi.controls.flexpaper
 			var padding:int = parseInt(map.substr(map.indexOf(",")+1,map.indexOf("]")-2));
 			fileName = TextMapUtil.StringReplaceAll(fileName,map,padString(page.toString(),padding,"0"));
 
-			return fileName;
+			return encodeURI(fileName);
 		}
 		
 		public function set SwfFile(s:String):void {
@@ -554,7 +571,7 @@ package com.devaldi.controls.flexpaper
 					_docLoader.load(new URLRequest(getSwfFilePerPage(_swfFile,1)),StreamUtil.getExecutionContext()); //new URLRequest(decodeURI(_swfFile))
 				}
 				else if(_swfFile.length > 0 && !pagesSplit)
-					_docLoader.load(new URLRequest(decodeURI(_swfFile)),StreamUtil.getExecutionContext());
+					_docLoader.load(new URLRequest(_swfFile),StreamUtil.getExecutionContext());
 
 				_paperContainer.verticalScrollPosition = 0;
 				createDisplayContainer();
@@ -781,7 +798,12 @@ package com.devaldi.controls.flexpaper
 				_frameLoadCount = numPages;
 				_bbusyloading = false;
 				_displayContainer.visible = true;
-				repositionPapers();
+				repaint();
+				
+				if(_performSearchOnPageLoad && _pendingSearchPage == event.target.loader.pageStartIndex){
+					searchTextByService(prevSearchText)
+					_performSearchOnPageLoad = false;
+				}
 				
 				if(!bFound){
 					dispatchEvent(new PageLoadedEvent(PageLoadedEvent.PAGE_LOADED,event.target.loader.pageStartIndex));
@@ -1652,6 +1674,7 @@ package com.devaldi.controls.flexpaper
 		private var prevSearchText:String = "";
 		private var prevYsave:Number=-1;
 		private var _markList:Array;
+		private var prevSearchIndexList:Array;
 		
 		public function get SearchPageIndex():int {
 			return searchPageIndex;
@@ -1661,8 +1684,72 @@ package com.devaldi.controls.flexpaper
 			searchPageIndex = s; 
 		}	
 		
+		private var _searchExtracts:Array;
+		
+		public function searchTextByService(text:String):void{
+			if(prevSearchText != text){
+				_searchExtracts = new Array(numPages);
+				searchPageIndex = -1;
+				prevSearchText = text;
+				searchIndex = -1;
+				prevSearchIndexList = new Array();
+			}
+			
+			if(searchPageIndex == -1){
+				searchPageIndex = currPage;
+			}
+			
+			if(_searchExtracts[searchPageIndex-1] == null){
+				var serve:HTTPService = new HTTPService();
+				serve.method = "GET";
+				serve.url = TextMapUtil.StringReplaceAll(SearchServiceUrl,"[page]",searchPageIndex.toString());
+				serve.resultFormat = "text";
+				serve.addEventListener("result",searchByServiceResult);
+				serve.addEventListener(FaultEvent.FAULT,searchByServiceFault);
+				serve.send();
+			}else{ // perform actual search
+				trace("impl. search");
+			}
+		}
+		
+		private function searchByServiceResult(evt:ResultEvent):void {
+			var textExtract:String = evt.result.toString();
+			_searchExtracts[searchPageIndex-1] = textExtract;
+			
+			searchIndex = textExtract.toLowerCase().indexOf(adjustSearchTerm(prevSearchText),(searchIndex==-1?0:searchIndex));
+			
+			if(searchIndex > 0){ // found a new match, reposition to this page and perform highlight on load
+				
+				if(searchPageIndex!=currPage)
+					gotoPage(searchPageIndex);
+				else{
+					searchTextByService(prevSearchText);
+				}
+				
+				//searchIndex = searchIndex + prevSearchText.length;
+				_performSearchOnPageLoad=true;
+			}else{
+				if(searchPageIndex+1<=numPages){
+					searchPageIndex++;
+					searchIndex = -1;
+					
+					searchTextByService(prevSearchText);
+				}else{
+					dispatchEvent(new Event("onNoMoreSearchResults"));
+					searchPageIndex = 1;
+				}
+			}
+		}
+		
+		private function searchByServiceFault(evt:FaultEvent):void{
+			dispatchEvent(new Event("onNoMoreSearchResults"));
+		}
+		
 		public function searchText(text:String, clearmarklist:Boolean=true):void{
 			if(text==null){return;}
+			
+			if(SearchServiceUrl!=null&&SearchServiceUrl.length>0)
+				return searchTextByService(text);
 			
 			var tri:Array;
 			if(text.length==0){return;}
@@ -1670,9 +1757,9 @@ package com.devaldi.controls.flexpaper
 			
 			if(prevSearchText != text){
 				searchIndex = -1;
-				//searchPageIndex = -1;
+				prevSearchIndexList = new Array();
 				prevSearchText = text;
-				
+
 				if(SearchMatchAll){
 					var spi:int = 1;
 					var si:int = -1;
@@ -1701,7 +1788,9 @@ package com.devaldi.controls.flexpaper
 					while((spi -1) < _libMC.framesLoaded){
 						_libMC.gotoAndStop(spi);
 						snap = _libMC.textSnapshot;
-						si = snap.findText((si==-1?0:si),text,false);
+						si = snap.findText((si==-1?0:si),adjustSearchTerm(text),false);
+						//si = snap.getText(0,snap.charCount).toLowerCase().indexOf(text,(si==-1?0:si));
+						//si = searchString(snap.getText(0,snap.charCount),text,si);
 						
 						if(si>0){
 							var sm:ShapeMarker = new ShapeMarker();
@@ -1734,6 +1823,11 @@ package com.devaldi.controls.flexpaper
 			if(searchPageIndex == -1){
 				searchPageIndex = currPage;
 			}else{
+				var sio:Object = new Object();
+				sio.searchIndex = searchIndex;
+				sio.searchPageIndex = searchPageIndex; 
+				
+				prevSearchIndexList.push(sio);
 				searchIndex = searchIndex + text.length;
 			}
 			
@@ -1741,8 +1835,10 @@ package com.devaldi.controls.flexpaper
 			
 			while((searchPageIndex -1) < numPagesLoaded){
 				snap = _libMC.textSnapshot;
-				searchIndex = snap.findText((searchIndex==-1?0:searchIndex),text,false);
+				searchIndex = snap.findText((searchIndex==-1?0:searchIndex),adjustSearchTerm(text),false);
 				//searchIndex = TextMapUtil.checkUnicodeIntegrity(snap.getText(0,snap.charCount),text,_libMC).toLowerCase().indexOf(text,(searchIndex==-1?0:searchIndex));
+				//searchIndex = snap.getText(0,snap.charCount).toLowerCase().indexOf(text,(searchIndex==-1?0:searchIndex));
+				//searchIndex = searchString(snap.getText(0,snap.charCount),text,searchIndex);
 				
 				if(searchIndex > 0){ // found a new match
 					_selectionMarker = new ShapeMarker();
@@ -1772,6 +1868,48 @@ package com.devaldi.controls.flexpaper
 				dispatchEvent(new Event("onNoMoreSearchResults"));
 				searchPageIndex = 1;
 			}
+		}
+		
+		public function nextSearchMatch(s:String):void{
+			if(s!=prevSearchText){
+				searchText(s);
+			}else{
+				searchIndex = searchIndex + prevSearchText.length;
+				searchText(prevSearchText);
+			}
+		}
+		
+		public function prevSearchMatch():void{
+			if(prevSearchText!=null&&prevSearchText.length>0){
+				prevSearchIndexList.pop();
+				
+				var sio:Object = prevSearchIndexList.pop();
+				if(sio != null){
+					searchIndex = sio.searchIndex  - 1; 
+					searchPageIndex = sio.searchPageIndex;
+					searchText(prevSearchText);
+				}else{
+					searchIndex = 0;
+					searchPageIndex = 1; 
+					searchText(prevSearchText);
+				}
+			}
+		}
+		
+		private function adjustSearchTerm(searchtxt:String):String{
+			if(ResourceManager.getInstance().localeChain[0] == 'he_IL'){
+				searchtxt = reverseString(searchtxt);
+			}	
+			
+			return searchtxt;
+		}
+		
+		private function reverseString(string:String):String
+		{
+			var reversed:String = new String();
+			for(var i:int = string.length -1; i >= 0; i--)
+				reversed += string.charAt(i);
+			return reversed;
 		}
 		
 		public function highlight(url:String):void{
