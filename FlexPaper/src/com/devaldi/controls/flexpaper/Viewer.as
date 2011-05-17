@@ -458,7 +458,7 @@ package com.devaldi.controls.flexpaper
 				else
 					_adjGotoPage = 0;
 				
-				repaint();
+				repositionPapers();
 			}
 		}
 		
@@ -800,11 +800,6 @@ package com.devaldi.controls.flexpaper
 				_displayContainer.visible = true;
 				repaint();
 				
-				if(_performSearchOnPageLoad && _pendingSearchPage == event.target.loader.pageStartIndex){
-					searchTextByService(prevSearchText)
-					_performSearchOnPageLoad = false;
-				}
-				
 				if(!bFound){
 					dispatchEvent(new PageLoadedEvent(PageLoadedEvent.PAGE_LOADED,event.target.loader.pageStartIndex));
 					
@@ -966,6 +961,11 @@ package com.devaldi.controls.flexpaper
 											
 											_pageList[i].addChild(_docLoader.LoaderList[uloaderidx]);
 											_pageList[i].loadedIndex = _pageList[i].dupIndex; 
+											
+											if(_performSearchOnPageLoad && _pendingSearchPage == _pageList[i].dupIndex){
+												_performSearchOnPageLoad = false;
+												searchTextByService(prevSearchText)
+											}
 										}	
 									}
 								}
@@ -1695,6 +1695,8 @@ package com.devaldi.controls.flexpaper
 				prevSearchIndexList = new Array();
 			}
 			
+			if(_selectionMarker!=null && _selectionMarker.parent != null){_selectionMarker.parent.removeChild(_selectionMarker);}
+			
 			if(searchPageIndex == -1){
 				searchPageIndex = currPage;
 			}
@@ -1708,7 +1710,57 @@ package com.devaldi.controls.flexpaper
 				serve.addEventListener(FaultEvent.FAULT,searchByServiceFault);
 				serve.send();
 			}else{ // perform actual search
-				trace("impl. search");
+				if(_searchExtracts[searchPageIndex-1].toLowerCase().indexOf(text,(searchIndex==-1?0:searchIndex)) > 0){
+					if(searchPageIndex!=currPage){
+						_performSearchOnPageLoad=true;
+						_pendingSearchPage = searchPageIndex;
+						gotoPage(searchPageIndex);
+					}
+					else{
+						snap = _pageList[searchPageIndex-1].textSnapshot;
+						searchIndex = snap.findText((searchIndex==-1?0:searchIndex),adjustSearchTerm(text),false);
+						var tri:Array;
+						
+						if(searchIndex > 0){ // found a new match
+							_selectionMarker = new ShapeMarker();
+							_selectionMarker.graphics.beginFill(0x0095f7,0.3);
+							
+							tri = snap.getTextRunInfo(searchIndex,searchIndex+text.length-1);
+							if(tri.length>0){
+								prevYsave = tri[0].matrix_ty;
+								drawCurrentSelection(0x0095f7,_selectionMarker,tri);
+							}
+							
+							if(prevYsave>0){
+								_selectionMarker.graphics.endFill();
+								_adjGotoPage = (ViewMode==ViewModeEnum.PORTRAIT)?(prevYsave) * _scale - 50:0;
+								gotoPage(searchPageIndex);
+							}
+							
+							searchIndex = searchIndex + text.length;
+						}else{
+							if(searchPageIndex+1<=numPages){
+								searchPageIndex++;
+								searchIndex = -1;
+								
+								searchTextByService(prevSearchText);
+							}else{
+								dispatchEvent(new Event("onNoMoreSearchResults"));
+								searchPageIndex = 1;
+							}	
+						}
+					}
+				}else{
+					if(searchPageIndex+1<=numPages){
+						searchPageIndex++;
+						searchIndex = -1;
+						
+						searchTextByService(prevSearchText);
+					}else{
+						dispatchEvent(new Event("onNoMoreSearchResults"));
+						searchPageIndex = 1;
+					}
+				}
 			}
 		}
 		
@@ -1716,29 +1768,7 @@ package com.devaldi.controls.flexpaper
 			var textExtract:String = evt.result.toString();
 			_searchExtracts[searchPageIndex-1] = textExtract;
 			
-			searchIndex = textExtract.toLowerCase().indexOf(adjustSearchTerm(prevSearchText),(searchIndex==-1?0:searchIndex));
-			
-			if(searchIndex > 0){ // found a new match, reposition to this page and perform highlight on load
-				
-				if(searchPageIndex!=currPage)
-					gotoPage(searchPageIndex);
-				else{
-					searchTextByService(prevSearchText);
-				}
-				
-				//searchIndex = searchIndex + prevSearchText.length;
-				_performSearchOnPageLoad=true;
-			}else{
-				if(searchPageIndex+1<=numPages){
-					searchPageIndex++;
-					searchIndex = -1;
-					
-					searchTextByService(prevSearchText);
-				}else{
-					dispatchEvent(new Event("onNoMoreSearchResults"));
-					searchPageIndex = 1;
-				}
-			}
+			searchTextByService(prevSearchText);
 		}
 		
 		private function searchByServiceFault(evt:FaultEvent):void{
