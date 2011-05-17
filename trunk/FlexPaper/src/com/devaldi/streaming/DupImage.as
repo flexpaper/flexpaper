@@ -28,6 +28,7 @@ package com.devaldi.streaming
 	import flash.events.MouseEvent;
 	import flash.filters.DropShadowFilter;
 	import flash.filters.GlowFilter;
+	import flash.text.TextSnapshot;
 	import flash.utils.setTimeout;
 	
 	import mx.controls.Image;
@@ -73,6 +74,13 @@ package com.devaldi.streaming
 			}
 			
 			_paperRotation = n;
+		}
+
+		override public function get textSnapshot():TextSnapshot{
+			if(getChildAt(0) is DupLoader && (getChildAt(0) as DupLoader).content!=null && (getChildAt(0) as DupLoader).content is MovieClip){
+				return ((getChildAt(0) as DupLoader).content as MovieClip).textSnapshot;
+			}else
+				return super.textSnapshot;
 		}
 		
 		override public function set source(value:Object):void{
