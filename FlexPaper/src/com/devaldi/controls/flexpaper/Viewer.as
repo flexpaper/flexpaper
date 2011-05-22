@@ -421,7 +421,7 @@ package com.devaldi.controls.flexpaper
 		}	
 		
 		public function set SearchServiceUrl(s1:String):void {
-			_searchServiceUrl = s1;
+			_searchServiceUrl = encodeURI(unescape(s1));
 		}
 		
 		public function get FitWidthOnLoad():Boolean {
@@ -517,6 +517,7 @@ package com.devaldi.controls.flexpaper
 		
 		public function set SwfFile(s:String):void {
 			var pagesSplit:Boolean = false;
+			s = unescape(s);
 			
 			if(s.length!=0){
 				
@@ -1714,14 +1715,18 @@ package com.devaldi.controls.flexpaper
 			
 			if(_searchExtracts[searchPageIndex-1] == null){
 				var serve:HTTPService = new HTTPService();
+				var url = SearchServiceUrl;
+				url = TextMapUtil.StringReplaceAll(url,"[page]",searchPageIndex.toString())
+				url = TextMapUtil.StringReplaceAll(url,"[searchterm]",text)
+					
 				serve.method = "GET";
-				serve.url = TextMapUtil.StringReplaceAll(SearchServiceUrl,"[page]",searchPageIndex.toString());
+				serve.url = url;
 				serve.resultFormat = "text";
 				serve.addEventListener("result",searchByServiceResult);
 				serve.addEventListener(FaultEvent.FAULT,searchByServiceFault);
 				serve.send();
 			}else{ // perform actual search
-				if(_searchExtracts[searchPageIndex-1].toLowerCase().indexOf(text,(searchIndex==-1?0:searchIndex)) > 0){
+				if(Number(_searchExtracts[searchPageIndex-1]) >= 0){
 					if(searchPageIndex!=currPage){
 						_performSearchOnPageLoad=true;
 						_pendingSearchPage = searchPageIndex;
@@ -1789,7 +1794,7 @@ package com.devaldi.controls.flexpaper
 		public function searchText(text:String, clearmarklist:Boolean=true):void{
 			if(text==null){return;}
 			
-			if(SearchServiceUrl!=null&&SearchServiceUrl.length>0)
+			if(_docLoader.PagesSplit&&SearchServiceUrl!=null&&SearchServiceUrl.length>0)
 				return searchTextByService(text);
 			
 			var tri:Array;
