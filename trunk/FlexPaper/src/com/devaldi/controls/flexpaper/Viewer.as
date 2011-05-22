@@ -32,6 +32,7 @@ package com.devaldi.controls.flexpaper
 	import com.devaldi.events.CursorModeChangedEvent;
 	import com.devaldi.events.DocumentLoadedEvent;
 	import com.devaldi.events.DocumentPrintedEvent;
+	import com.devaldi.events.ErrorLoadingPageEvent;
 	import com.devaldi.events.ExternalLinkClickedEvent;
 	import com.devaldi.events.FitModeChangedEvent;
 	import com.devaldi.events.PageLoadedEvent;
@@ -94,6 +95,7 @@ package com.devaldi.controls.flexpaper
 	import mx.rpc.events.FaultEvent;
 	import mx.rpc.events.ResultEvent;
 	import mx.rpc.http.HTTPService;
+	import mx.managers.PopUpManager;
 	
 	[Event(name="onDocumentLoaded", type="com.devaldi.events.DocumentLoadedEvent")]
 	[Event(name="onPageLoaded", type="com.devaldi.events.PageLoadedEvent")]
@@ -111,6 +113,7 @@ package com.devaldi.controls.flexpaper
 	[Event(name="onLogoClicked", type="flash.events.Event")]
 	[Event(name="onSelectionCreated", type="com.devaldi.events.SelectionCreatedEvent")]
 	[Event(name="onDocumentPrinted", type="com.devaldi.events.DocumentPrintedEvent")]
+	[Event(name="onErrorLoadingPage", type="com.devaldi.events.ErrorLoadingPageEvent")]
 	
 	public class Viewer extends Canvas
 	{
@@ -1457,7 +1460,8 @@ package com.devaldi.controls.flexpaper
 					}
 					
 					if(_docLoader.LoaderList[i].contentLoaderInfo!=null){
-						_docLoader.LoaderList[i].contentLoaderInfo.removeEventListener(Event.COMPLETE, bytesLoaded);	
+						_docLoader.LoaderList[i].contentLoaderInfo.removeEventListener(Event.COMPLETE, bytesLoaded);
+						_docLoader.LoaderList[i].contentLoaderInfo.removeEventListener(IOErrorEvent.IO_ERROR,docLoaderIOErrorListener);
 					}
 					
 					_docLoader.LoaderList[i].removeEventListener(Event.ENTER_FRAME,onframeenter);
@@ -1646,10 +1650,17 @@ package com.devaldi.controls.flexpaper
 				for(var li:int=0;li<_docLoader.LoaderList.length;li++){
 					_docLoader.LoaderList[li] = new DupLoader();
 					_docLoader.LoaderList[li].contentLoaderInfo.addEventListener(Event.COMPLETE, bytesLoaded,false,0,true);
+					_docLoader.LoaderList[li].contentLoaderInfo.addEventListener(IOErrorEvent.IO_ERROR,docLoaderIOErrorListener);
 					_docLoader.LoaderList[li].addEventListener(Event.ENTER_FRAME,onframeenter,false,0,true);
 				}
 			}			
 		}		
+		
+		private function docLoaderIOErrorListener(e:IOErrorEvent):void{
+			if(_docLoader!=null&&_docLoader.PagesSplit){
+				dispatchEvent(new ErrorLoadingPageEvent(ErrorLoadingPageEvent.ERROR_LOADING_PAGE,e.target.pageStartIndex));		
+			}
+		}
 		
 		private function getCalculatedHeight(obj:DisplayObject):Number{
 			var pHeight:Number = 0;
@@ -2032,13 +2043,22 @@ package com.devaldi.controls.flexpaper
 			if(!TextSelectEnabled){return;}
 			if(_selectionMarker!=null&&_selectionMarker.parent!=null){_selectionMarker.parent.removeChild(_selectionMarker);_selectionMarker=null;}
 			
-			try{if(!(event.target.content is MovieClip)){return;}}catch (e:*) {return;}
+			try{
+				if(!(event.target.content is MovieClip)){
+					if(!(event.target is MovieClip)){
+						return;
+					}else{
+						_selectionMc = (event.target as MovieClip);
+					}
+				}else{
+					_selectionMc = (event.target.content as MovieClip);
+				}
+			}catch (e:*) {return;}
 			
 			_currentlySelectedText = "";
 			_firstHitIndex = -1;
 			_lastHitIndex = -1;
 			_currentSelectionPage = -1;
-			_selectionMc = (event.target.content as MovieClip);
 			snap = _selectionMc.textSnapshot;
 			
 			systemManager.addEventListener(
@@ -2337,8 +2357,83 @@ package com.devaldi.controls.flexpaper
 					CurrExtViewMode.addChild(pi,_pageList[pi]);
 			}
 		}
+	
+		private var _splitpj:PrintJob;
+		private var _splitpjoptions:PrintJobOptions = new PrintJobOptions();
+		private var _splitpjloading:Boolean=false;
+		private var _splitpjprinted:int = 0;
+		private var _splitpageNumList:Array;
+		
+		private function printSplitPaper(start:Boolean=false,range:String=""):void{
+			if(start){
+				_splitpj = new PrintJob();
+				_loaderptr = new Loader();
+				_loaderptr.contentLoaderInfo.addEventListener(Event.COMPLETE, printSplitPaperLoaded,false,0,true);
+				
+				if(range.length>0){
+					if(range == "Current"){
+						_splitpageNumList = new Array();
+						_splitpageNumList[currPage] = true;
+					}
+					else{
+						_splitpageNumList = range.split(",");
+						for(var i:int=0;i<_splitpageNumList.length;i++){
+							if(_splitpageNumList[i].toString().indexOf("-")>-1){
+								var rs:int = Number(_splitpageNumList[i].toString().substr(0,_splitpageNumList[i].toString().indexOf("-")));
+								var re:int = Number(_splitpageNumList[i].toString().substr(_splitpageNumList[i].toString().indexOf("-")+1));
+								for(var irs:int=rs;irs<re+1;irs++){
+									_splitpageNumList[irs] = true;
+								}
+							}else{
+								_splitpageNumList[int(Number(_splitpageNumList[i].toString()))] = true;
+							}
+						}
+					}
+				}
+				
+				_splitpj.start();
+			}
+			
+			while(_splitpjprinted<numPages){
+				if(!_splitpjloading){
+						if(_splitpageNumList==null || (_splitpageNumList!=null && _splitpageNumList[_splitpjprinted+1] != null)){
+							_splitpjloading = true;
+							_loaderptr.load(new URLRequest(getSwfFilePerPage(_swfFile,_splitpjprinted+1)),StreamUtil.getExecutionContext());
+							return;
+						}else
+							_splitpjprinted++;
+				}else{
+					setTimeout( printSplitPaper ,200);	
+					return;
+				}
+			}
+			
+			_splitpj.send();
+		}
+		
+		private function printSplitPaperLoaded(event:Event):void{
+			var pageToPrint:MovieClip = event.target.content as MovieClip;
+			
+			if((_splitpj.pageHeight/pageToPrint.height) < 1 && (_splitpj.pageHeight/pageToPrint.height) < (_splitpj.pageWidth/pageToPrint.width))
+				pageToPrint.scaleX = pageToPrint.scaleY = (_splitpj.pageHeight/pageToPrint.height);
+			else if((_splitpj.pageWidth/pageToPrint.width) < 1)
+				pageToPrint.scaleX = pageToPrint.scaleY = (_splitpj.pageWidth/pageToPrint.width);
+			
+			if((_swfContainer.getChildAt(0) as UIComponent).numChildren>0)
+				(_swfContainer.getChildAt(0) as UIComponent).removeChildAt(0);
+			
+			(_swfContainer.getChildAt(0) as UIComponent).addChild(pageToPrint);
+			
+			_splitpj.addPage(_swfContainer,null,_splitpjoptions);
+			_splitpjloading = false;
+			_splitpjprinted++;
+			printSplitPaper();
+		}
 		
 		public function printPaper():void{
+			if(_docLoader.PagesSplit)
+				return printSplitPaper(true);
+				
 			if(_libMC.parent is DupImage){(_swfContainer.getChildAt(0) as UIComponent).addChild(_libMC.getDocument());}
 			_libMC.alpha = 1;
 			
@@ -2375,6 +2470,9 @@ package com.devaldi.controls.flexpaper
 		}
 		
 		public function printPaperRange(range:String):void{
+			if(_docLoader.PagesSplit)
+				return printSplitPaper(true,range);
+			
 			if(_libMC.parent is DupImage){(_swfContainer.getChildAt(0) as UIComponent).addChild(_libMC.getDocument());}
 			_libMC.alpha = 1;
 			
