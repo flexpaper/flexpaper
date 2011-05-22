@@ -34,6 +34,7 @@ along with FlexPaper.  If not, see <http://www.gnu.org/licenses/>.
 		[Event(name="onDocumentPrinted", type="com.devaldi.events.DocumentPrintedEvent")]
 		[Event(name="onPageLoaded", type="com.devaldi.events.PageLoadedEvent")]
 		[Event(name="onPageLoading", type="com.devaldi.events.PageLoadingEvent")]
+		[Event(name="onErrorLoadingPage", type="com.devaldi.events.ErrorLoadingPageEvent")]
 	</mx:Metadata>
 	<mx:Script>
 		<![CDATA[
@@ -227,6 +228,7 @@ along with FlexPaper.  If not, see <http://www.gnu.org/licenses/>.
 			   onDocumentPrinted="documentPrintedHandler(event)"
 			   onPageLoaded="pageLoadedEventHandler(event)"
 			   onPageLoading="pageLoadingEventHandler(event)"
+			   onErrorLoadingPage="errorLoadingPageEventHandler(event)"
 			   
 			   SwfFile="{SwfFile}" 
 			   Scale="{Scale}" 
