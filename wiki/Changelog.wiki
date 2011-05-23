@@ -16,7 +16,7 @@ Two new API methods added: prevSearchMatch() and nextSearchMatch() to be used to
  * Improved ability for Google to find documents for indexing
  * New method for taking a snapshot of the viewer and posting this snapshot to a given url (useful for creating thumbnails)
  * Improved two-page mode allowing zooming in and out with a click
-* Various issues corrected
+ * Various issues corrected
 
 *12 Dec 2010* (Version 1.4.1) (build/revision 450)
  * Beta build for Adobe Flex SDK 4 added
