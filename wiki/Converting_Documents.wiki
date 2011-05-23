@@ -1,17 +1,3 @@
-There is a range of available converters, both commercial and free. The following example shows the recommended settings using the open source converter "PDF2SWF" which can be found here: http://www.swftools.org/
+Please see the following page for the latest documentation on converting/publishing your documents:
 
-Converting your documents using PDF2SWF is fairly straight forward. Documents are preferrably converted using the command line executable. The following example shows the currently recommended setting for converting your document:
-
-*C:\SWFTools\pdf2swf.exe Paper.pdf -o Paper.swf -f -T 9 -t -s storeallcharacters*
-
-The last 4 parameters specifies that:
- * *-f* : Fonts should be embedded, improves searchability in the document
- * *-T 9* : Sets the target flash version to 9, improves stability
- * *-t* : Inserts a stop between each frame, improves stability
- * *-s storeallcharacters* : Stores all character information about the texts in the document, improves searchability 
-
-*Optional Parameters*
- * *-G* : Makes the document smaller and faster to render
- * *-s subpixels=1.5* : Adjusts image resolution in the document. Should be used in cases where the document contains lots of large images. The value (1.5) can be experimented with to archive desired quality.  
-
-Please see http://wiki.swftools.org/index.php/Pdf2swf for a complete list of PDF2SWF arguments and their explanations.
+http://flexpaper.devaldi.com/docs_converting.jsp
