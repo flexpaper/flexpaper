@@ -92,8 +92,11 @@ package com.devaldi.streaming
 							_stream.removeEventListener(Event.COMPLETE, streamCompleteHandler);
 						}
 						
+						_stream.removeEventListener(IOErrorEvent.IO_ERROR, ioErrorHandler);
+						
 						_loader.unloadAndStop(true);
 						_loader.contentLoaderInfo.removeEventListener(Event.COMPLETE, loaderComplete);
+						_loader.contentLoaderInfo.removeEventListener(IOErrorEvent.IO_ERROR, ioErrorHandler);
 						_loader = new Loader();
 
 					}
@@ -111,6 +114,7 @@ package com.devaldi.streaming
 					_stream.addEventListener(IOErrorEvent.IO_ERROR, ioErrorHandler);
 					_stream.addEventListener(SecurityErrorEvent.SECURITY_ERROR, securityErrorHandler);
 					_loader.contentLoaderInfo.addEventListener(Event.COMPLETE, loaderComplete);
+					_loader.contentLoaderInfo.addEventListener(IOErrorEvent.IO_ERROR, ioErrorHandler);
 				}
 				
 				private function loaderComplete(event:Event):void{

@@ -1713,7 +1713,7 @@ package com.devaldi.controls.flexpaper
 				searchPageIndex = currPage;
 			}
 			
-			if(_searchExtracts[searchPageIndex-1] == null){
+			if(_searchExtracts[searchPageIndex-1] == null && searchPageIndex!=currPage){
 				var serve:HTTPService = new HTTPService();
 				var url = SearchServiceUrl;
 				url = TextMapUtil.StringReplaceAll(url,"[page]",searchPageIndex.toString())
@@ -1727,7 +1727,7 @@ package com.devaldi.controls.flexpaper
 				serve.addEventListener(FaultEvent.FAULT,searchByServiceFault);
 				serve.send();
 			}else{ // perform actual search
-				if(_searchExtracts[searchPageIndex-1].length>0 && Number(_searchExtracts[searchPageIndex-1]) >= 0){
+				if((_searchExtracts[searchPageIndex-1]!=null && _searchExtracts[searchPageIndex-1].length>0 && Number(_searchExtracts[searchPageIndex-1]) >= 0) || searchPageIndex==currPage){
 					if(searchPageIndex!=currPage){
 						_performSearchOnPageLoad=true;
 						_pendingSearchPage = searchPageIndex;
