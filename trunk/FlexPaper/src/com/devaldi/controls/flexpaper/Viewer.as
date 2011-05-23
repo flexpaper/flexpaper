@@ -1357,7 +1357,7 @@ package com.devaldi.controls.flexpaper
 		private function swfComplete(event:SwfLoadedEvent):void{
 			if(!ProgressiveLoading){
 				try{
-					if(event.swfObject.content != null && event.swfObject.content is MovieClip)
+					if(event.swfObject.content != null && (event.swfObject.content is MovieClip || event.swfObject.content is Bitmap))
 						_libMC = new SwfDocument(event.swfObject.content as DisplayObject);
 					DupImage.paperSource = _libMC.getDocument();
 				}catch(e:Error){
