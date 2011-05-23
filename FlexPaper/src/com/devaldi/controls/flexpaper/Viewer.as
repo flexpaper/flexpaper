@@ -421,7 +421,7 @@ package com.devaldi.controls.flexpaper
 		}	
 		
 		public function set SearchServiceUrl(s1:String):void {
-			_searchServiceUrl = encodeURI(unescape(s1));
+			_searchServiceUrl = unescape(s1);
 		}
 		
 		public function get FitWidthOnLoad():Boolean {
@@ -1718,7 +1718,8 @@ package com.devaldi.controls.flexpaper
 				var url = SearchServiceUrl;
 				url = TextMapUtil.StringReplaceAll(url,"[page]",searchPageIndex.toString())
 				url = TextMapUtil.StringReplaceAll(url,"[searchterm]",text)
-					
+				url = encodeURI(url);
+				
 				serve.method = "GET";
 				serve.url = url;
 				serve.resultFormat = "text";
@@ -1726,7 +1727,7 @@ package com.devaldi.controls.flexpaper
 				serve.addEventListener(FaultEvent.FAULT,searchByServiceFault);
 				serve.send();
 			}else{ // perform actual search
-				if(Number(_searchExtracts[searchPageIndex-1]) >= 0){
+				if(_searchExtracts[searchPageIndex-1].length>0 && Number(_searchExtracts[searchPageIndex-1]) >= 0){
 					if(searchPageIndex!=currPage){
 						_performSearchOnPageLoad=true;
 						_pendingSearchPage = searchPageIndex;
