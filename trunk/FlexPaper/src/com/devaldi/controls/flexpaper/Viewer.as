@@ -1795,12 +1795,13 @@ package com.devaldi.controls.flexpaper
 		public function searchText(text:String, clearmarklist:Boolean=true):void{
 			if(text==null){return;}
 			
+			if(text.length==0){return;}
+			text = text.toLowerCase();
+			
 			if(_docLoader.PagesSplit&&SearchServiceUrl!=null&&SearchServiceUrl.length>0)
 				return searchTextByService(text);
 			
 			var tri:Array;
-			if(text.length==0){return;}
-			text = text.toLowerCase();
 			
 			if(prevSearchText != text){
 				searchIndex = -1;
