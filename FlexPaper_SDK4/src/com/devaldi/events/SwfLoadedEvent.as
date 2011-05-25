@@ -18,24 +18,22 @@ along with FlexPaper.  If not, see <http://www.gnu.org/licenses/>.
 
 package com.devaldi.events
 {
-	import com.devaldi.controls.flexpaper.FitModeEnum;
-	
 	import flash.events.Event;
 	
-	public class FitModeChangedEvent extends Event
+	public class SwfLoadedEvent extends Event
 	{
-		public static const FITMODE_CHANGED:String = "onFitModeChanged";
-		public var fitMode:String;
+		public static const SWFLOADED:String = "onSwfLoadedEvent";
+		public var swfObject:Object;
 		
-		public function FitModeChangedEvent(type:String,fitmode:String)
-		{
+		public function SwfLoadedEvent(type:String,target:Object){
 			super(type);
-			fitMode = fitmode;
+			swfObject=target;
 		}
 		
 		// Override the inherited clone() method.
 		override public function clone():Event {
-			return new FitModeChangedEvent(type, fitMode);
+			return new SwfLoadedEvent(type, swfObject);
 		}
+		
 	}
 }

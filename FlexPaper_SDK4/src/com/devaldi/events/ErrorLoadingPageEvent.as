@@ -15,22 +15,25 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with FlexPaper.  If not, see <http://www.gnu.org/licenses/>.	
 */
-
 package com.devaldi.events
 {
 	import flash.events.Event;
 	
-	public class DocumentPrintedEvent extends Event
+	public class ErrorLoadingPageEvent extends Event
 	{
-		public static const DOCUMENT_PRINTED:String = "onDocumentPrinted";
+		public static const ERROR_LOADING_PAGE:String = "onErrorLoadingPage";
 		
-		public function DocumentPrintedEvent(type:String){
+		public var pageNumber:Number;
+		
+		public function ErrorLoadingPageEvent(type:String,p:Number){
 			super(type);
+			pageNumber=p;
 		}
 		
 		// Override the inherited clone() method.
 		override public function clone():Event {
-			return new DocumentPrintedEvent(type);
+			return new ErrorLoadingPageEvent(type, pageNumber);
 		}
+		
 	}
 }
