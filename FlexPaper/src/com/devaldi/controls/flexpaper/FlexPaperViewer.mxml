@@ -207,7 +207,7 @@ along with FlexPaper.  If not, see <http://www.gnu.org/licenses/>.
 		<mx:Image source="{MenuIcons.BAR}" width="3" height="21" visible="{SearchToolsVisible}" includeInLayout="{SearchToolsVisible}" />
 		
 		<mx:Canvas width="100%" id="cnv_info" horizontalScrollPolicy="off" verticalScrollPolicy="off" height="100%">
-			<st:GradientImageButton id="bttnInfo" left="{cnv_info.width-21}" visible="false" icon="{MenuIcons.SMALL_GRAY}" styleName="toolbttn" width="20" height="20" click="showInfo(event);" toolTip="@Resource(key='About', bundle='FlexPaper')" />
+			<st:GradientImageButton id="bttnInfo" left="{cnv_info.width-21}" visible="false" icon="{MenuIcons.SMALL_GRAY}" styleName="toolbttn" width="20" height="20" click="showInfo(event);" toolTip="@Resource(key='About', bundle='FlexPaper')" addedToStage="{new MenuIcons.SMALL_TRANSPARENT().width > 10}" />
 			<st:GradientLabel id="lblProgress" left="{cnv_info.width-26}" textAlign="center" y="4" fontSize="8" height="19" width="32" text="" tabIndex="0"/>
 			<ct:Spinner id="spin1" left="{cnv_info.width-22}" styleName="gradientlines" y="-1" startImmediately="false" spinnerType="gradientcircle" width="22" height="22" />
 		</mx:Canvas>
