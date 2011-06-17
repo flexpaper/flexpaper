@@ -458,12 +458,20 @@ package com.devaldi.controls.flexpaper
 			}
 		}
 		
-		public function mvNext():void{
-			if(currPage<numPages){gotoPage(currPage+1);}
+		public function mvNext(extmode:Boolean=true):void{
+			if(UsingExtViewMode && extmode)
+				CurrExtViewMode.mvNext();
+			else
+				if(currPage<numPages){gotoPage(currPage+1);}
 		}
 		
-		public function mvPrev():void{
-			if(currPage>1){gotoPage(currPage-1);}
+		public function mvPrev(extmode:Boolean=true):void{
+			if(UsingExtViewMode && extmode)
+				CurrExtViewMode.mvPrev();
+			else
+			{
+				if(currPage>1){gotoPage(currPage-1);}
+			}
 		}
 		
 		public function switchMode(mode:String=null):void{
