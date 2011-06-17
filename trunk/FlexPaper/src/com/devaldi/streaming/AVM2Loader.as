@@ -121,11 +121,11 @@ package com.devaldi.streaming
 					dispatchEvent(new SwfLoadedEvent(SwfLoadedEvent.SWFLOADED,event.currentTarget));
 				}
 				
-				public function get PagesSplit():Boolean{
+				public function get IsSplit():Boolean{
 					return _pagesSplit;
 				}
 				
-				public function set PagesSplit(b:Boolean):void{
+				public function set IsSplit(b:Boolean):void{
 					_pagesSplit = b;
 				}
 				
@@ -167,6 +167,12 @@ package com.devaldi.streaming
                 {
                         _loader = value;
                 }
+				
+				public function loadFromBytes(bytes:ByteArray):void{
+					_inputBytes = bytes;
+					
+					confirmBytesLoaded();
+				}
                 
                 public function load(request:URLRequest, loaderCtx:LoaderContext):void
                 {

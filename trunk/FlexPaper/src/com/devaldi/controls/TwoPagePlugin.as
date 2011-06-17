@@ -81,17 +81,17 @@ package com.devaldi.controls
 			else
 				viewer.DisplayContainer.getChildAt(1).visible = true;
 			
-			if(((!viewer.BusyLoading||viewer.DocLoader.PagesSplit)&&(!viewer.DocLoader.LoaderList[uloaderidx].loading)) && viewer.DocLoader.LoaderList!=null && viewer.DocLoader.LoaderList.length>0){
+			if(((!viewer.BusyLoading||viewer.DocLoader.IsSplit)&&(!viewer.DocLoader.LoaderList[uloaderidx].loading)) && viewer.DocLoader.LoaderList!=null && viewer.DocLoader.LoaderList.length>0){
 				if(	viewer.libMC!=null&&
-					(viewer.numPagesLoaded>=viewer.PageList[i].dupIndex || viewer.DocLoader.PagesSplit) && 
+					(viewer.numPagesLoaded>=viewer.PageList[i].dupIndex || viewer.DocLoader.IsSplit) && 
 					(viewer.DocLoader.LoaderList[uloaderidx] != null) && 
 					(viewer.DocLoader.LoaderList[uloaderidx].content==null) ||
-					(viewer.DocLoader.LoaderList[uloaderidx].content!=null&&viewer.DocLoader.PagesSplit && viewer.DocLoader.LoaderList[uloaderidx].pageStartIndex != i+1 && !viewer.DocLoader.LoaderList[uloaderidx].loading) ||
-					(viewer.DocLoader.LoaderList[uloaderidx].content!=null&&(viewer.DocLoader.LoaderList[uloaderidx].content.framesLoaded<viewer.PageList[i].dupIndex && !viewer.DocLoader.PagesSplit))){
+					(viewer.DocLoader.LoaderList[uloaderidx].content!=null&&viewer.DocLoader.IsSplit && viewer.DocLoader.LoaderList[uloaderidx].pageStartIndex != i+1 && !viewer.DocLoader.LoaderList[uloaderidx].loading) ||
+					(viewer.DocLoader.LoaderList[uloaderidx].content!=null&&(viewer.DocLoader.LoaderList[uloaderidx].content.framesLoaded<viewer.PageList[i].dupIndex && !viewer.DocLoader.IsSplit))){
 					viewer.PageList[i].resetPage(viewer.libMC.width,viewer.libMC.height,Number(viewer.Scale),true);
 					viewer.BusyLoading = true;
 					
-					if(!viewer.DocLoader.PagesSplit){
+					if(!viewer.DocLoader.IsSplit){
 						viewer.DocLoader.LoaderList[uloaderidx].loadBytes(viewer.DocLoader.InputBytes,StreamUtil.getExecutionContext());
 						flash.utils.setTimeout(viewer.repositionPapers,200);
 					}else{
@@ -112,7 +112,7 @@ package com.devaldi.controls
 			}
 			
 			if(viewer.PageList[rp]!=null && viewer.DocLoader.LoaderList[uloaderidx]!=null && viewer.DocLoader.LoaderList[uloaderidx].content!=null){
-				if(!viewer.DocLoader.PagesSplit)
+				if(!viewer.DocLoader.IsSplit)
 					viewer.DocLoader.LoaderList[uloaderidx].content.gotoAndStop(i+1);
 				else
 					viewer.PageList[rp].scaleX = viewer.PageList[rp].scaleY = Number(viewer.Scale);	
