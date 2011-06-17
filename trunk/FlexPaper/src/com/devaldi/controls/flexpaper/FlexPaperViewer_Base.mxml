@@ -172,11 +172,11 @@
 			}
 
 			public function nextPage():void{
-				return viewer.gotoPage(viewer.currPage+1);
+				viewer.mvNext();
 			}		
 			
 			public function prevPage():void{
-				return viewer.gotoPage(viewer.currPage-1);
+				return viewer.mvPrev();
 			}
 			
 			public function get PluginList():Array{

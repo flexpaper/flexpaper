@@ -774,7 +774,7 @@ package com.devaldi.controls.flexpaper
 		private function onframeenter(event:Event):void{
 			if(!_dupImageClicked){return;}
 			
-			if(_docLoader!=null && _docLoader.IsSplit) //todo:links not fixed yet for split up approach
+			if(_docLoader!=null && _docLoader.IsSplit) 
 				return;
 			
 			if(event.target.content != null){
