@@ -137,6 +137,7 @@ package com.devaldi.controls.flexpaper
 		private var _dupImageClicked:Boolean = false;
 		private var _docLoader:IDocumentLoader;
 		private var _progressiveLoading:Boolean = false;
+		private var _encodeURI:Boolean = true;
 		private var _repaintTimer:Timer;
 		private var _loadTimer:Timer;
 		private var _frameLoadCount:int = 0;
@@ -271,6 +272,15 @@ package com.devaldi.controls.flexpaper
 		[Bindable]
 		public function get ProgressiveLoading():Boolean {
 			return _progressiveLoading;
+		}	
+		
+		public function set EncodeURI(b1:Boolean):void {
+			_encodeURI = b1;
+		}
+		
+		[Bindable]
+		public function get EncodeURI():Boolean {
+			return _encodeURI;
 		}	
 		
 		public function set TextSelectEnabled(b1:Boolean):void {
@@ -554,7 +564,9 @@ package com.devaldi.controls.flexpaper
 		
 		public function set SwfFile(s:String):void {
 			var pagesSplit:Boolean = false;
-			s = unescape(s);
+			
+			if(EncodeURI)
+				s = unescape(s);
 			
 			if(s.length!=0){
 				
@@ -580,8 +592,12 @@ package com.devaldi.controls.flexpaper
 				_swfFileChanged = true;
 				_frameLoadCount = 0;
 
-				if(!pagesSplit)
-					_swfFile = encodeURI(s);
+				if(!pagesSplit){
+					if(EncodeURI)
+						_swfFile = encodeURI(s);
+					else
+						_swfFile = s;
+				}
 				else
 					_swfFile = s;
 

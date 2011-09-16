@@ -35,12 +35,12 @@
 			import flash.desktop.Clipboard;
 			import flash.desktop.ClipboardFormats;
 			
+			import mx.controls.Alert;
 			import mx.core.UITextField;
 			import mx.graphics.ImageSnapshot;
 			import mx.managers.BrowserManager;
 			import mx.managers.IBrowserManager;
 			import mx.managers.PopUpManager;
-			import mx.controls.Alert;
 			
 			[Bindable]
 			public var Scale:Number = 1;
@@ -111,6 +111,9 @@
 			[Bindable]
 			public var BitmapBasedRendering:Boolean = false;
 
+			[Bindable]
+			public var EncodeURI:Boolean = true;
+			
 			public static var Key:String = "";
 			
 			private var _fixedWidth:Number = -1;
