@@ -41,5 +41,7 @@ package com.devaldi.streaming
 		function get stream():URLStream;	
 		function get IsSplit():Boolean;
 		function set IsSplit(b:Boolean):void;
+		function get ShouldPreStream():Boolean;
+		function touch(b:ByteArray):void;
 	}
 }

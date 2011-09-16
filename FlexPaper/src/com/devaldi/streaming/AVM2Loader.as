@@ -157,6 +157,10 @@ package com.devaldi.streaming
                 {
                         return _stream;
                 }
+				
+				public function get ShouldPreStream():Boolean{
+					return false;
+				}
                 
                 public function get loader():Loader
                 {
@@ -186,6 +190,10 @@ package com.devaldi.streaming
 					// wait with this one.. seems a bit dodgy
 					//flash.utils.setTimeout(retry,7000);
                 }
+				
+				public function touch(b:ByteArray):void{
+					
+				}
 				
 				private function retry():void{
 					if(_attempts<4 && _doretry){

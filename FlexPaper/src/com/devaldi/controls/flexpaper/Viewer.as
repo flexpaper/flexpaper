@@ -1179,8 +1179,6 @@ package com.devaldi.controls.flexpaper
 		}		
 		
 		public function createDisplayContainer():void{
-			
-			
 			if(_skinImgDo != null && _skinImgDo.parent == this){
 				removeChild(_skinImgDo);
 				_skinImgDo.removeEventListener(MouseEvent.MOUSE_OVER,skinMouseOver);
@@ -1696,6 +1694,7 @@ package com.devaldi.controls.flexpaper
 		
 		private function createLoaderList():void
 		{
+			DupLoader.parentLoader = _docLoader;
 			_docLoader.LoaderList = new Array(Math.round(getCalculatedHeight(_paperContainer)/(_libMC.height*_minZoomSize))+(_docLoader.IsSplit)?5:1);
 				
 			if(UsingExtViewMode && CurrExtViewMode.loaderListLength > _docLoader.LoaderList.length)	
@@ -1707,13 +1706,17 @@ package com.devaldi.controls.flexpaper
 					_docLoader.LoaderList[li].contentLoaderInfo.addEventListener(Event.COMPLETE, bytesLoaded,false,0,true);
 					_docLoader.LoaderList[li].contentLoaderInfo.addEventListener(IOErrorEvent.IO_ERROR,docLoaderIOErrorListener);
 					_docLoader.LoaderList[li].addEventListener(Event.ENTER_FRAME,onframeenter,false,0,true);
+					
+					if(DupLoader.parentLoader.ShouldPreStream){
+						_docLoader.LoaderList[li].resetURLStream();	
+					}
 				}
 			}			
 		}		
 		
 		private function docLoaderIOErrorListener(e:IOErrorEvent):void{
 			if(_docLoader!=null&&_docLoader.IsSplit){
-				dispatchEvent(new ErrorLoadingPageEvent(ErrorLoadingPageEvent.ERROR_LOADING_PAGE,e.target.pageStartIndex));		
+				dispatchEvent(new ErrorLoadingPageEvent(ErrorLoadingPageEvent.ERROR_LOADING_PAGE,-1/*e.target.pageStartIndex*/));		
 			}
 		}
 		

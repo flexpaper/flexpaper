@@ -81,7 +81,7 @@ along with FlexPaper.  If not, see <http://www.gnu.org/licenses/>.
 				spin1.visible = false;
 				lblProgress.visible = false;
 				spin1.stop();
-				bttnInfo.visible = true;
+				bttnInfo.visible = (new MenuIcons.SMALL_TRANSPARENT().width > 10);
 				
 				if(StartAtPage!=1&&!isNaN(StartAtPage)){paper1.gotoPage(StartAtPage);}
 				super.documentLoadedHandler(event);
@@ -91,7 +91,7 @@ along with FlexPaper.  If not, see <http://www.gnu.org/licenses/>.
 				spin1.visible = false;
 				lblProgress.visible = false;
 				spin1.stop();
-				bttnInfo.visible = true;
+				bttnInfo.visible = (new MenuIcons.SMALL_TRANSPARENT().width > 10);
 				
 				if(StartAtPage!=1&&!isNaN(StartAtPage)){paper1.gotoPage(StartAtPage);}
 				super.pageLoadedEventHandler(event);
