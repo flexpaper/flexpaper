@@ -242,7 +242,8 @@ along with FlexPaper.  If not, see <http://www.gnu.org/licenses/>.
 			   MaxZoomSize="{MaxZoomSize}"
 			   SearchMatchAll="{SearchMatchAll}"
 			   SearchServiceUrl="{SearchServiceUrl}"
-			    
+			   EncodeURI="{EncodeURI}"
+			   
 			   addedToStage="MacMouseWheelHandler.init(stage)" 
 			   height="100%" width="100%" borderStyle="solid"  tabIndex="0" />							
 </fp:FlexPaperViewer_Base>
