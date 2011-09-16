@@ -283,6 +283,7 @@
 						uv.ProgressiveLoading = ProgressiveLoading;
 						uv.FullScreenAsMaxWindow = FullScreenAsMaxWindow;
 						uv.localeChain = resourceManager.localeChain;
+						uv.key = Key;
 						ur.data = uv;
 						navigateToURL(ur,"FlexPaperFullScreen");
 					}
