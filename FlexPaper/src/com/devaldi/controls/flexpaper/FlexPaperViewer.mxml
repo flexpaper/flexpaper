@@ -83,7 +83,7 @@ along with FlexPaper.  If not, see <http://www.gnu.org/licenses/>.
 				spin1.stop();
 				bttnInfo.visible = (new MenuIcons.SMALL_TRANSPARENT().width > 10);
 				
-				if(StartAtPage!=1&&!isNaN(StartAtPage)){paper1.gotoPage(StartAtPage);}
+				if(StartAtPage!=1&&!isNaN(StartAtPage)&&StartAtPage>0){paper1.gotoPage(StartAtPage);StartAtPage=-1;}
 				super.documentLoadedHandler(event);
 			}
 			
@@ -93,7 +93,6 @@ along with FlexPaper.  If not, see <http://www.gnu.org/licenses/>.
 				spin1.stop();
 				bttnInfo.visible = (new MenuIcons.SMALL_TRANSPARENT().width > 10);
 				
-				if(StartAtPage!=1&&!isNaN(StartAtPage)){paper1.gotoPage(StartAtPage);}
 				super.pageLoadedEventHandler(event);
 			}
 			
