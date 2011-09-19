@@ -36,6 +36,7 @@
 			import flash.desktop.ClipboardFormats;
 			
 			import mx.controls.Alert;
+			import mx.core.Application;
 			import mx.core.UITextField;
 			import mx.graphics.ImageSnapshot;
 			import mx.managers.BrowserManager;
@@ -115,6 +116,7 @@
 			public var EncodeURI:Boolean = true;
 			
 			public static var Key:String = "";
+			public static var loaderURL:String = "";
 			
 			private var _fixedWidth:Number = -1;
 			private var _fixedHeight:Number = -1;
@@ -288,7 +290,7 @@
 						uv.localeChain = resourceManager.localeChain;
 						uv.key = Key;
 						ur.data = uv;
-						navigateToURL(ur,"FlexPaperFullScreen");
+						navigateToURL(ur,"_top");
 					}
 				} catch (err:SecurityError) {
 					
@@ -409,7 +411,7 @@
 				_browserManager = BrowserManager.getInstance();
 				
 				try{
-					if(LicenseKey.validate(_browserManager.url,VersionHandler.version(),Key,true)){
+					if(LicenseKey.validate(loaderURL,VersionHandler.version(),Key,true)){
 					
 						if(StreamUtil.DocLoader==null)
 							viewer.DocLoader = new AVM2Loader(StreamUtil.getExecutionContext(),StreamUtil.ProgressiveLoading);
