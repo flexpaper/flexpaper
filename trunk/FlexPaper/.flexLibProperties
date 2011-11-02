@@ -49,6 +49,7 @@
     <classEntry path="com.devaldi.controls.flexpaper.FlexPaperViewer_Base"/>
     <classEntry path="com.devaldi.events.PageLoadedEvent"/>
     <classEntry path="com.devaldi.controls.flexpaper.utils.VersionHandler"/>
+    <classEntry path="com.devaldi.controls.SinglePagePlugin"/>
   </includeClasses>
   <includeResources/>
   <namespaceManifests/>

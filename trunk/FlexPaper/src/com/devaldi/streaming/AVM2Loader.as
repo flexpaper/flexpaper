@@ -413,14 +413,26 @@ package com.devaldi.streaming
                 private function ioErrorHandler(event:IOErrorEvent):void
                 {
 					var evt:ErrorEvent = new ErrorEvent("onDocumentLoadedError");
-					evt.text = event.text;
-                	dispatchEvent(evt);
+					if(_inputBytes.length<1000){
+						if(_inputBytes.toString().indexOf("Error:")>=0){
+							evt.text = _inputBytes.toString();
+						}
+					}else
+						evt.text = event.text;
+					
+					dispatchEvent(evt);
                 }
                 
                 private function securityErrorHandler(event:SecurityErrorEvent):void
                 {
 					var evt:ErrorEvent = new ErrorEvent("onDocumentLoadedError");
-					evt.text = event.text;
+					if(_inputBytes.length<1000){
+						if(_inputBytes.toString().indexOf("Error:")>=0){
+							evt.text = _inputBytes.toString();
+						}
+					}else
+						evt.text = event.text;
+					
 					dispatchEvent(evt);
                 }
         }
