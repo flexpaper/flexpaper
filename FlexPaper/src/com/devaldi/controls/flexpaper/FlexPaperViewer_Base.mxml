@@ -15,6 +15,7 @@
 		 preinitialize="preInit()">
 	<mx:Script>
 		<![CDATA[
+			import com.devaldi.controls.SinglePagePlugin;
 			import com.devaldi.controls.TwoPagePlugin;
 			import com.devaldi.controls.flexpaper.resources.LicenseKey;
 			import com.devaldi.controls.flexpaper.resources.MenuIcons;
@@ -111,7 +112,13 @@
 			
 			[Bindable]
 			public var BitmapBasedRendering:Boolean = false;
+			
+			[Bindable]
+			public var AutoAdjustPrintSize:Boolean = true;
 
+			[Bindable]
+			public var PrintPaperAsBitmap:Boolean = false;
+			
 			[Bindable]
 			public var EncodeURI:Boolean = true;
 			
@@ -122,17 +129,20 @@
 			private var _fixedHeight:Number = -1;
 			private var prd:PrintRangeDialog;
 			private var _twopage:TwoPagePlugin;
+			private var _singlepage:SinglePagePlugin;
 			protected var _browserManager:IBrowserManager;
 
 			public dynamic function get viewer():com.devaldi.controls.flexpaper.Viewer{return null;}
 			
 			private function preInit():void{
 				_twopage = new TwoPagePlugin();
+				_singlepage = new SinglePagePlugin();
 				
 				if(Viewer.ViewModeExtList==null)
 					Viewer.ViewModeExtList = new Array();
 				
 				Viewer.ViewModeExtList[Viewer.ViewModeExtList.length] = _twopage;
+				Viewer.ViewModeExtList[Viewer.ViewModeExtList.length] = _singlepage;
 			}
 			
 			private function bindStageEvents(e:Event):void{
@@ -214,6 +224,10 @@
 						viewer.printPaper();	
 					}
 				}
+			}
+			
+			public function printPaperRange(range:String):void{
+				viewer.printPaperRange(range);
 			}
 			
 			protected function printHandler(event:Event):void{
