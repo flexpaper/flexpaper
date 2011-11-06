@@ -231,11 +231,15 @@
 			}
 			
 			protected function printHandler(event:Event):void{
-				if(prd.PrintRange != "" && prd.validated){
-					viewer.printPaperRange(prd.PrintRange);
-				}else if(prd.validated){
-					viewer.printPaper();
-				}
+				
+				flash.utils.setTimeout(function():void{
+					if(prd.PrintRange != "" && prd.validated){
+						viewer.printPaperRange(prd.PrintRange);
+					}else if(prd.validated){
+						viewer.printPaper();
+					}
+				},1000);
+				
 			}
 			
 			private function fullScreenRedraw(event:FullScreenEvent):void{

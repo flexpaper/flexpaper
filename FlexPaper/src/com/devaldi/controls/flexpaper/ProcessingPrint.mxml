@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:TitleWindow xmlns:mx="http://www.adobe.com/2006/mxml" layout="absolute" width="260" height="70" title="Processing Print">
+	<mx:Label text="" x="6" y="6" width="224" id="ProcessingLabel"/>
+</mx:TitleWindow>

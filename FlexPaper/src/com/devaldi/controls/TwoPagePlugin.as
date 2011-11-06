@@ -203,6 +203,8 @@ package com.devaldi.controls
 		}
 		
 		public function handleMouseDown(event:MouseEvent):void{
+			if(viewer.TextSelectEnabled){return;}
+			
 			if(Number(viewer.Scale) <= viewer.getFitHeightFactor()){
 				viewer.Zoom(viewer.MaxZoomSize/3);
 			}else{
