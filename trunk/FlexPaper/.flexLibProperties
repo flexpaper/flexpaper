@@ -50,6 +50,7 @@
     <classEntry path="com.devaldi.events.PageLoadedEvent"/>
     <classEntry path="com.devaldi.controls.flexpaper.utils.VersionHandler"/>
     <classEntry path="com.devaldi.controls.SinglePagePlugin"/>
+    <classEntry path="com.devaldi.controls.flexpaper.ProcessingPrint"/>
   </includeClasses>
   <includeResources/>
   <namespaceManifests/>

@@ -2519,6 +2519,7 @@ package com.devaldi.controls.flexpaper
 				}
 			}
 			
+			dispatchEvent(new DocumentPrintedEvent(DocumentPrintedEvent.DOCUMENT_PRINTED));
 			_splitpj.send();
 		}
 		
@@ -2558,12 +2559,6 @@ package com.devaldi.controls.flexpaper
 					
 				//}
 				
-				if(AutoAdjustPrintSize){
-					if((pj.pageHeight/_libMC.height) < 1 && (pj.pageHeight/_libMC.height) < (pj.pageWidth/_libMC.width))
-						_libMC.scaleX = _libMC.scaleY = (pj.pageHeight/_libMC.height);
-					else if((pj.pageWidth/_libMC.width) < 1)
-						_libMC.scaleX = _libMC.scaleY = (pj.pageWidth/_libMC.width);
-				}
 				var options:PrintJobOptions = new PrintJobOptions();
 				options.printAsBitmap = PrintPaperAsBitmap;
 				
@@ -2571,6 +2566,14 @@ package com.devaldi.controls.flexpaper
 				_libMC.gotoAndStop(i+1);
 				
 				while(_libMC.totalFrames > _libMC.currentFrame){
+					if(AutoAdjustPrintSize){
+						if((pj.pageHeight/_libMC.height) < 1 && (pj.pageHeight/_libMC.height) < (pj.pageWidth/_libMC.width))
+							_libMC.scaleX = _libMC.scaleY = (pj.pageHeight/_libMC.height);
+						
+						if((pj.pageWidth/_libMC.width) < 1)
+							_libMC.scaleX = _libMC.scaleY = (pj.pageWidth/_libMC.width);
+					}
+					
 					if(_libMC.currentFrame==i+1){
 						
 						if(_pluginList!=null){
@@ -2594,11 +2597,11 @@ package com.devaldi.controls.flexpaper
 				
 				pj.addPage(_swfContainer,null,options);
 				pj.send();
+				dispatchEvent(new DocumentPrintedEvent(DocumentPrintedEvent.DOCUMENT_PRINTED));
 			}
 			
 			_libMC.scaleX = _libMC.scaleY = 1;
 			_libMC.alpha = 0;
-			dispatchEvent(new DocumentPrintedEvent(DocumentPrintedEvent.DOCUMENT_PRINTED));
 			repositionPapers();
 		}
 		
@@ -2658,26 +2661,27 @@ package com.devaldi.controls.flexpaper
 			if(pj.start()){
 				_libMC.stop();
 				
-				if(AutoAdjustPrintSize){
-					if((pj.pageHeight/_libMC.height) < 1 && (pj.pageHeight/_libMC.height) < (pj.pageWidth/_libMC.width))
-						_libMC.scaleX = _libMC.scaleY = (pj.pageHeight/_libMC.height);
-					else if((pj.pageWidth/_libMC.width) < 1)
-						_libMC.scaleX = _libMC.scaleY = (pj.pageWidth/_libMC.width);
-				}
-				
 				var i:int=0;
 				_libMC.gotoAndStop(i+1);
 				while(_libMC.totalFrames > _libMC.currentFrame){
+
+					if(AutoAdjustPrintSize){
+						if((pj.pageHeight/_libMC.height) < 1 && (pj.pageHeight/_libMC.height) < (pj.pageWidth/_libMC.width))
+							_libMC.scaleX = _libMC.scaleY = (pj.pageHeight/_libMC.height);
+						else if((pj.pageWidth/_libMC.width) < 1)
+							_libMC.scaleX = _libMC.scaleY = (pj.pageWidth/_libMC.width);
+					}
+
 					if(_libMC.currentFrame==i+1){
 						if(pageNumList[i+1] != null){
 							
 							if(_pluginList!=null){
-								for(var ci=1;ci<_swfContainer.numChildren;ci++){
+								for(var ci:int=1;ci<_swfContainer.numChildren;ci++){
 									if(_swfContainer.getChildAt(ci) is UIComponent)
 										_swfContainer.removeChildAt(ci);
 								}
 								
-								for(var pl=0;pl<_pluginList.length;pl++){
+								for(var pl:int=0;pl<_pluginList.length;pl++){
 									_pluginList[pl].drawSelf(i,_swfContainer,(pj.pageHeight/_libMC.height));
 									_swfContainer.invalidateDisplayList();
 								}
@@ -2697,12 +2701,12 @@ package com.devaldi.controls.flexpaper
 				}
 				
 				pj.send();
+				dispatchEvent(new DocumentPrintedEvent(DocumentPrintedEvent.DOCUMENT_PRINTED));
 			}
 			
 			_libMC.scaleX = _libMC.scaleY = 1;
 			_libMC.alpha = 0;
 			repositionPapers();
-			dispatchEvent(new DocumentPrintedEvent(DocumentPrintedEvent.DOCUMENT_PRINTED));
 		}
 		
 		private function addGlowFilter(img:Image):void{
