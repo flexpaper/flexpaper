@@ -1653,6 +1653,8 @@ package com.devaldi.controls.flexpaper
 		}
 		
 		public function addInLoadedPages(recreate:Boolean = false):void{
+			if(_libMC==null){return;}
+			
 			if(recreate){
 				_displayContainer.removeAllChildren(); deletePageList();
 			}
@@ -1689,7 +1691,7 @@ package com.devaldi.controls.flexpaper
 		}	
 		
 		public function reCreateAllPages():void{
-			if(!_swfLoaded){return;}
+			if(!_swfLoaded || _libMC == null){return;}
 			
 			_displayContainer.visible = false;
 			_displayContainer.removeAllChildren();
