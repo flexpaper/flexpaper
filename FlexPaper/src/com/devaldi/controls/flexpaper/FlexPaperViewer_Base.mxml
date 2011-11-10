@@ -111,9 +111,6 @@
 			public var SearchMatchAll:Boolean = false;
 			
 			[Bindable]
-			public var BitmapBasedRendering:Boolean = false;
-			
-			[Bindable]
 			public var AutoAdjustPrintSize:Boolean = true;
 
 			[Bindable]
