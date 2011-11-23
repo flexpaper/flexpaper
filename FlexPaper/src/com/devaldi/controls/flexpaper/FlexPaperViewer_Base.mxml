@@ -417,6 +417,32 @@
 				viewer.loadFromBytes(b);
 			}
 			
+			private function getUrlParamaters():Dictionary
+			{
+				var urlParams:Dictionary = new Dictionary();
+				
+				if (ExternalInterface.available)
+				{
+					var fullUrl:String = ExternalInterface.call('eval', 'document.location.href');
+					var paramStr:String = fullUrl.split('?')[1];
+					if (paramStr != null)
+					{
+						var params:Array = paramStr.split('&');
+						for (var i:int=0; i < params.length; i++)
+						{
+							var kv:Array = params[i].split('=');
+							urlParams[kv[0]] = kv[1];
+						}
+					}
+				}
+				else
+				{
+					urlParams = Application.application.parameters;
+				}
+				
+				return urlParams;
+			}
+			
 			override protected function createChildren():void {
 				super.createChildren();
 				
@@ -426,6 +452,10 @@
 				_browserManager = BrowserManager.getInstance();
 				
 				try{
+					if(Key == null || (Key!=null && Key.length == 0)){
+						Key = getUrlParamaters()["key"];
+					}
+					
 					if(LicenseKey.validate(loaderURL,VersionHandler.version(),Key,true)){
 					
 						if(StreamUtil.DocLoader==null)
