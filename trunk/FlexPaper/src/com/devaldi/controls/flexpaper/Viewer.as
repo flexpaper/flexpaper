@@ -510,7 +510,7 @@ package com.devaldi.controls.flexpaper
 				else if(ViewMode == ViewModeEnum.TILE){_scale = _pscale; ViewMode = ViewModeEnum.PORTRAIT;}
 			}else{
 				if(ViewMode == mode && ViewMode != ViewModeEnum.PORTRAIT){
-					ViewMode = ViewModeEnum.PORTRAIT;
+					ViewMode = Viewer.InitViewMode;
 				}
 				else
 					ViewMode = mode;				
@@ -2526,7 +2526,7 @@ package com.devaldi.controls.flexpaper
 		}
 		
 		private function printSplitPaperLoaded(event:Event):void{
-			var pageToPrint:MovieClip = event.target.content as MovieClip;
+			var pageToPrint:* = event.target.content;
 			
 			if((_splitpj.pageHeight/pageToPrint.height) < 1 && (_splitpj.pageHeight/pageToPrint.height) < (_splitpj.pageWidth/pageToPrint.width))
 				pageToPrint.scaleX = pageToPrint.scaleY = (_splitpj.pageHeight/pageToPrint.height);
