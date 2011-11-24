@@ -2393,11 +2393,15 @@ package com.devaldi.controls.flexpaper
 				_selectionMarker.PageIndex = _currentSelectionPage;
 				drawCurrentSelection(_selectionColor,_selectionMarker,_tri);
 				snap.setSelected(_firstHitIndex,_lastHitIndex,false);
-				_pageList[_currentSelectionPage-1].addChildAt(_selectionMarker,_pageList[_selectionMc.currentFrame-1].numChildren);
+
+				if(UsingExtViewMode){
+					CurrExtViewMode.renderSelection(_currentSelectionPage-1,_selectionMarker);
+				}else{
+					_pageList[_currentSelectionPage-1].addChildAt(_selectionMarker,_pageList[_selectionMc.currentFrame-1].numChildren);
+				}
 			}
 			
 			dispatchEvent(new SelectionCreatedEvent(SelectionCreatedEvent.SELECTION_CREATED,_currentlySelectedText));
-			
 			_selectionMc = null;
 		}
 		
