@@ -611,7 +611,7 @@ package com.devaldi.controls.flexpaper
 				
 				_swfFileChanged = true;
 				_frameLoadCount = 0;
-				_currPage = 1;
+				_currPage = 0;
 				
 				if(!pagesSplit){
 					if(EncodeURI)
@@ -1469,7 +1469,6 @@ package com.devaldi.controls.flexpaper
 				_libMC.getDocument().cacheAsBitmap = true;
 				_libMC.getDocument().opaqueBackground = 0xFFFFFF;
 				reCreateAllPages();
-				
 				_bbusyloading = false;
 				repositionPapers();
 				//dispatchEvent(new DocumentLoadedEvent(DocumentLoadedEvent.DOCUMENT_LOADED,numPages));
