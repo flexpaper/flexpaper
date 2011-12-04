@@ -293,6 +293,12 @@
 						uv.ZoomTransition = ZoomTransition;
 						uv.ZoomTime = ZoomTime;
 						uv.ZoomInterval = ZoomInterval;
+						uv.MinZoomSize = MinZoomSize;
+						uv.EncodeURI = EncodeURI;
+						uv.AutoAdjustPrintSize = AutoAdjustPrintSize;
+						uv.PrintPaperAsBitmap = PrintPaperAsBitmap;
+						uv.MaxZoomSize = MaxZoomSize;
+						uv.SearchMatchAll = SearchMatchAll;
 						uv.FitPageOnLoad = viewer.FitMode == FitModeEnum.FITHEIGHT;
 						uv.FitWidthOnLoad = viewer.FitMode == FitModeEnum.FITWIDTH;
 						uv.ViewModeToolsVisible = ViewModeToolsVisible;
@@ -453,7 +459,7 @@
 				
 				try{
 					if(Key == null || (Key!=null && Key.length == 0)){
-						Key = getUrlParamaters()["key"];
+						try{Key = getUrlParamaters()["key"];}catch(e:*){}
 					}
 					
 					if(LicenseKey.validate(loaderURL,VersionHandler.version(),Key,true)){
