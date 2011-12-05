@@ -2485,6 +2485,8 @@ package com.devaldi.controls.flexpaper
 				_splitpj = new PrintJob();
 				_loaderptr = new Loader();
 				_loaderptr.contentLoaderInfo.addEventListener(Event.COMPLETE, printSplitPaperLoaded,false,0,true);
+				_splitpjprinted = 0;
+				_splitpjloading = false;
 				
 				if(range.length>0){
 					if(range == "Current"){
