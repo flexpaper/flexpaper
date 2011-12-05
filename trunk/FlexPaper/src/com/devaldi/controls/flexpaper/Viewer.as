@@ -2580,26 +2580,16 @@ package com.devaldi.controls.flexpaper
 					}
 					
 					if(_libMC.currentFrame==i+1){
-						
-						if(_pluginList!=null){
-							for(var ci:int=1;ci<_swfContainer.numChildren;ci++){
-								if(_swfContainer.getChildAt(ci) is UIComponent)
-									_swfContainer.removeChildAt(ci);
-							}
-							
-							for(var pl:int=0;pl<_pluginList.length;pl++){
-								_pluginList[pl].drawSelf(i,_swfContainer,(pj.pageHeight/_libMC.height));
-							}
-						}
-						
+						preparePluginsForPrint(pj,i);
 						pj.addPage(_swfContainer,null,options);
 						
 						i++;
 					}
 					
-					_libMC.gotoAndStop(_libMC.currentFrame+1);
+					_libMC.nextFrame();
 				}
 				
+				preparePluginsForPrint(pj,i);
 				pj.addPage(_swfContainer,null,options);
 				pj.send();
 				dispatchEvent(new DocumentPrintedEvent(DocumentPrintedEvent.DOCUMENT_PRINTED));
@@ -2608,6 +2598,19 @@ package com.devaldi.controls.flexpaper
 			_libMC.scaleX = _libMC.scaleY = 1;
 			_libMC.alpha = 0;
 			repositionPapers();
+		}
+		
+		private function preparePluginsForPrint(pj:PrintJob, pageNumber:int):void{
+			if(_pluginList!=null){
+				for(var ci:int=1;ci<_swfContainer.numChildren;ci++){
+					if(_swfContainer.getChildAt(ci) is UIComponent)
+						_swfContainer.removeChildAt(ci);
+				}
+				
+				for(var pl:int=0;pl<_pluginList.length;pl++){
+					_pluginList[pl].drawSelf(pageNumber,_swfContainer,(pj.pageHeight/_libMC.height));
+				}
+			}
 		}
 		
 		private function preparePrintBitmap(pageIndex:int):DupImage{
@@ -2680,18 +2683,7 @@ package com.devaldi.controls.flexpaper
 					if(_libMC.currentFrame==i+1){
 						if(pageNumList[i+1] != null){
 							
-							if(_pluginList!=null){
-								for(var ci:int=1;ci<_swfContainer.numChildren;ci++){
-									if(_swfContainer.getChildAt(ci) is UIComponent)
-										_swfContainer.removeChildAt(ci);
-								}
-								
-								for(var pl:int=0;pl<_pluginList.length;pl++){
-									_pluginList[pl].drawSelf(i,_swfContainer,(pj.pageHeight/_libMC.height));
-									_swfContainer.invalidateDisplayList();
-								}
-							}
-							
+							preparePluginsForPrint(pj,i);
 							pj.addPage(_swfContainer,null,options);
 						}
 						
@@ -2702,6 +2694,7 @@ package com.devaldi.controls.flexpaper
 				}
 				
 				if(pageNumList[_libMC.totalFrames] != null){
+					preparePluginsForPrint(pj,i);
 					pj.addPage(_swfContainer,null,options);
 				}
 				
