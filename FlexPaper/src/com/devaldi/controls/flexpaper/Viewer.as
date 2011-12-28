@@ -85,6 +85,7 @@ package com.devaldi.controls.flexpaper
 	import mx.core.UIComponent;
 	import mx.events.FlexEvent;
 	import mx.managers.CursorManager;
+	import mx.managers.PopUpManager;
 	import mx.resources.ResourceManager;
 	import mx.rpc.events.FaultEvent;
 	import mx.rpc.events.ResultEvent;
@@ -2479,79 +2480,120 @@ package com.devaldi.controls.flexpaper
 		private var _splitpjloading:Boolean=false;
 		private var _splitpjprinted:int = 0;
 		private var _splitpageNumList:Array;
+		private var _pp:ProcessingPrint;
+		private var _splitpjPrecaching:Boolean=false;
+		private var _splitpjrange:String="";
+		private var _splitpjPrecacheFinalized:Boolean=false;
 		
-		private function printSplitPaper(start:Boolean=false,range:String=""):void{
+		private function printSplitPaper(start:Boolean=false,range:String="",precache:Boolean=false):void{
+			if(_splitpjPrecacheFinalized&&precache){return;}
+			
+			_splitpjPrecaching = precache;
+			_splitpjrange = range;
+			if(_splitpjPrecaching){_splitpjPrecacheFinalized=false;}
+			
 			if(start){
-				_splitpj = new PrintJob();
-				_loaderptr = new Loader();
-				_loaderptr.contentLoaderInfo.addEventListener(Event.COMPLETE, printSplitPaperLoaded,false,0,true);
-				_splitpjprinted = 0;
-				_splitpjloading = false;
-				
-				if(range.length>0){
-					if(range == "Current"){
-						_splitpageNumList = new Array();
-						_splitpageNumList[currPage] = true;
-					}
+				_pp = new ProcessingPrint();
+				_splitpjPrecacheFinalized=false;
+				PopUpManager.addPopUp(_pp, this, true);
+				PopUpManager.centerPopUp(_pp);
+			}
+			
+			flash.utils.setTimeout(function():void{
+				if(start){
+					
+					if(precache)
+						_pp.ProcessingLabel.text = "Please wait.. precaching pages";
 					else{
-						_splitpageNumList = range.split(",");
-						for(var i:int=0;i<_splitpageNumList.length;i++){
-							if(_splitpageNumList[i].toString().indexOf("-")>-1){
-								var rs:int = Number(_splitpageNumList[i].toString().substr(0,_splitpageNumList[i].toString().indexOf("-")));
-								var re:int = Number(_splitpageNumList[i].toString().substr(_splitpageNumList[i].toString().indexOf("-")+1));
-								for(var irs:int=rs;irs<re+1;irs++){
-									_splitpageNumList[irs] = true;
+						_pp.ProcessingLabel.text = "Setting up print";
+						_splitpj = new PrintJob();
+					}
+					
+					_loaderptr = new Loader();
+					_loaderptr.contentLoaderInfo.addEventListener(Event.COMPLETE, printSplitPaperLoaded,false,0,true);
+					_splitpjprinted = 0;
+					_splitpjloading = false;
+					
+					if(range.length>0){
+						if(range == "Current"){
+							_splitpageNumList = new Array();
+							_splitpageNumList[currPage] = true;
+						}
+						else{
+							_splitpageNumList = range.split(",");
+							for(var i:int=0;i<_splitpageNumList.length;i++){
+								if(_splitpageNumList[i].toString().indexOf("-")>-1){
+									var rs:int = Number(_splitpageNumList[i].toString().substr(0,_splitpageNumList[i].toString().indexOf("-")));
+									var re:int = Number(_splitpageNumList[i].toString().substr(_splitpageNumList[i].toString().indexOf("-")+1));
+									for(var irs:int=rs;irs<re+1;irs++){
+										_splitpageNumList[irs] = true;
+									}
+								}else{
+									_splitpageNumList[int(Number(_splitpageNumList[i].toString()))] = true;
 								}
-							}else{
-								_splitpageNumList[int(Number(_splitpageNumList[i].toString()))] = true;
 							}
 						}
 					}
+					
+					if(!precache)
+						_splitpj.start();
+					
+					if(!_splitpjPrecaching)
+						_pp.ProcessingLabel.text = "Please wait..";
 				}
 				
-				_splitpj.start();
-			}
-			
-			while(_splitpjprinted<numPages){
-				if(!_splitpjloading){
-						if(_splitpageNumList==null || (_splitpageNumList!=null && _splitpageNumList[_splitpjprinted+1] != null)){
-							_splitpjloading = true;
-							_loaderptr.load(new URLRequest(getSwfFilePerPage(_swfFile,_splitpjprinted+1)),StreamUtil.getExecutionContext());
-							return;
-						}else
-							_splitpjprinted++;
-				}else{
-					setTimeout( printSplitPaper ,200);	
-					return;
+				while(_splitpjprinted<numPages){
+					if(!_splitpjloading){
+							if(_splitpageNumList==null || (_splitpageNumList!=null && _splitpageNumList[_splitpjprinted+1] != null)){
+								_splitpjloading = true;
+								_loaderptr.load(new URLRequest(getSwfFilePerPage(_swfFile,_splitpjprinted+1)),StreamUtil.getExecutionContext());
+								return;
+							}else
+								_splitpjprinted++;
+					}else{
+						setTimeout( function():void{printSplitPaper(false,_splitpjrange,_splitpjPrecaching)},100);	
+						return;
+					}
 				}
-			}
-			
-			dispatchEvent(new DocumentPrintedEvent(DocumentPrintedEvent.DOCUMENT_PRINTED));
-			_splitpj.send();
+
+				PopUpManager.removePopUp(_pp);
+				
+				if(!_splitpjPrecaching){
+					dispatchEvent(new DocumentPrintedEvent(DocumentPrintedEvent.DOCUMENT_PRINTED));
+					_splitpj.send();
+				}else{
+					_splitpjPrecacheFinalized=true;
+					printSplitPaper(true,_splitpjrange,false);
+				}
+				
+			},100);	
 		}
 		
 		private function printSplitPaperLoaded(event:Event):void{
-			var pageToPrint:* = event.target.content;
+			if(!_splitpjPrecaching){
 			
-			if((_splitpj.pageHeight/pageToPrint.height) < 1 && (_splitpj.pageHeight/pageToPrint.height) < (_splitpj.pageWidth/pageToPrint.width))
-				pageToPrint.scaleX = pageToPrint.scaleY = (_splitpj.pageHeight/pageToPrint.height);
-			else if((_splitpj.pageWidth/pageToPrint.width) < 1)
-				pageToPrint.scaleX = pageToPrint.scaleY = (_splitpj.pageWidth/pageToPrint.width);
+				var pageToPrint:* = event.target.content;
 			
-			if((_swfContainer.getChildAt(0) as UIComponent).numChildren>0)
-				(_swfContainer.getChildAt(0) as UIComponent).removeChildAt(0);
+				if((_splitpj.pageHeight/pageToPrint.height) < 1 && (_splitpj.pageHeight/pageToPrint.height) < (_splitpj.pageWidth/pageToPrint.width))
+					pageToPrint.scaleX = pageToPrint.scaleY = (_splitpj.pageHeight/pageToPrint.height);
+				else if((_splitpj.pageWidth/pageToPrint.width) < 1)
+					pageToPrint.scaleX = pageToPrint.scaleY = (_splitpj.pageWidth/pageToPrint.width);
+				
+				if((_swfContainer.getChildAt(0) as UIComponent).numChildren>0)
+					(_swfContainer.getChildAt(0) as UIComponent).removeChildAt(0);
+				
+				(_swfContainer.getChildAt(0) as UIComponent).addChild(pageToPrint);
+				_splitpj.addPage(_swfContainer,null,_splitpjoptions);
+			}
 			
-			(_swfContainer.getChildAt(0) as UIComponent).addChild(pageToPrint);
-			
-			_splitpj.addPage(_swfContainer,null,_splitpjoptions);
 			_splitpjloading = false;
 			_splitpjprinted++;
-			printSplitPaper();
+			printSplitPaper(false,_splitpjrange,_splitpjPrecaching);
 		}
 		
 		public function printPaper():void{
 			if(_docLoader.IsSplit)
-				return printSplitPaper(true);
+				return printSplitPaper(true,"",true);
 				
 			if(_libMC.parent is DupImage){(_swfContainer.getChildAt(0) as UIComponent).addChild(_libMC.getDocument());}
 			_libMC.alpha = 1;
@@ -2639,7 +2681,7 @@ package com.devaldi.controls.flexpaper
 		
 		public function printPaperRange(range:String):void{
 			if(_docLoader.IsSplit)
-				return printSplitPaper(true,range);
+				return printSplitPaper(true,range,true);
 			
 			if(_libMC.parent is DupImage){(_swfContainer.getChildAt(0) as UIComponent).addChild(_libMC.getDocument());}
 			_libMC.alpha = 1;
