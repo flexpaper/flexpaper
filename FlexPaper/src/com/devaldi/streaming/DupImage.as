@@ -80,7 +80,7 @@ package com.devaldi.streaming
 			}
 			
 			var dl:DupLoader = getDupLoader();
-			var mc:MovieClip = dl.content as MovieClip;
+			var mc:DisplayObject = dl.content as DisplayObject;
 			
 			if(dl!=null && mc!=null){
 				var m1:Matrix = mc.transform.matrix;
@@ -106,6 +106,40 @@ package com.devaldi.streaming
 				if(Math.round(mc.rotation+n) == 0){
 					m1.tx = 0;
 					m1.ty = 0;
+				}
+				
+				
+				for(var i:int=0;i<numChildren;i++){
+					var child = getChildAt(i);
+					if(child!=dl){
+						var m2:Matrix = child.transform.matrix;
+						
+						m2.rotate(degreesToRadians(n));
+						//m2.concat(this.transform.matrix);
+						
+						if(Math.round(mc.rotation+n) == 90){
+							m2.tx = mc.height;
+							m2.ty = 0;
+						}
+						
+						if(Math.round(mc.rotation+n) == 180){
+							m2.tx = mc.height;
+							m2.ty = mc.width;
+						}
+						
+						if(Math.round(mc.rotation+n) == 270){
+							m2.ty = mc.width;
+							m2.tx = 0;
+						}
+						
+						if(Math.round(mc.rotation+n) == 0){
+							m2.tx = 0;
+							m2.ty = 0;
+						}
+						
+						child.transform.matrix = m2;
+						child.scaleX = child.scaleY = 1;
+					}
 				}
 				
 				_paperRotation = Math.round(mc.rotation+n);
