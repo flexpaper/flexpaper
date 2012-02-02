@@ -28,6 +28,7 @@ package com.devaldi.streaming
 	import flash.events.MouseEvent;
 	import flash.filters.DropShadowFilter;
 	import flash.filters.GlowFilter;
+	import flash.geom.Matrix;
 	import flash.text.TextSnapshot;
 	import flash.utils.setTimeout;
 	
@@ -51,6 +52,8 @@ package com.devaldi.streaming
 		private var _skinImgl:Bitmap = new MenuIcons.LOGO_SMALL();
 		private var loadImg:Bitmap;
 		private var loadSpinner:Spinner;
+		public var DrawBackground:Boolean = true;
+		private var _rotationMatrix:Matrix;
 		
 		public function DupImage(){}
 		
@@ -76,7 +79,54 @@ package com.devaldi.streaming
 				height = w;
 			}
 			
-			_paperRotation = n;
+			var dl:DupLoader = getDupLoader();
+			var mc:MovieClip = dl.content as MovieClip;
+			
+			if(dl!=null && mc!=null){
+				var m1:Matrix = mc.transform.matrix;
+				
+				m1.rotate(degreesToRadians(n));
+				m1.concat(this.transform.matrix);
+				
+				if(Math.round(mc.rotation+n) == 90){
+					m1.tx = mc.height;
+					m1.ty = 0;
+				}
+				
+				if(Math.round(mc.rotation+n) == 180){
+					m1.tx = mc.height;
+					m1.ty = mc.width;
+				}
+				
+				if(Math.round(mc.rotation+n) == 270){
+					m1.ty = mc.width;
+					m1.tx = 0;
+				}
+				
+				if(Math.round(mc.rotation+n) == 0){
+					m1.tx = 0;
+					m1.ty = 0;
+				}
+				
+				_paperRotation = Math.round(mc.rotation+n);
+				
+				mc.transform.matrix = _rotationMatrix = m1;	
+				mc.scaleX = mc.scaleY = 1;
+			}
+		}
+		
+		private function degreesToRadians(degrees:Number):Number {
+			var radians:Number = degrees * (Math.PI / 180);
+			return radians;
+		}
+		
+		private function getDupLoader():DupLoader{
+			for(var i:int=0;i<this.numChildren;i++){
+				if(this.getChildAt(i) is DupLoader)
+					return this.getChildAt(i) as DupLoader;
+			}
+			
+			return null;
 		}
 
 		override public function get textSnapshot():TextSnapshot{
@@ -106,6 +156,27 @@ package com.devaldi.streaming
 			}else{
 				if(!hasEventListener(MouseEvent.ROLL_OVER))
 					addEventListener(MouseEvent.ROLL_OVER,dupImageMoverHandler,false,0,true);
+			}
+			
+			checkRotation(source);
+		}
+		
+		private function checkRotation(o:Object):void{
+			if(o==null){return;}
+			
+			if(_paperRotation!=0 && o is DupLoader && (o as DupLoader).content !=null){
+				
+				var rot:Number = Math.round(((o as DupLoader).content as MovieClip).rotation);
+				var prot:Number = _paperRotation;
+				if(rot==-90){rot = 270;}
+				
+				if(rot!=_paperRotation){
+					var mc:MovieClip = ((o as DupLoader).content as MovieClip);
+					mc.transform.matrix = _rotationMatrix;
+					mc.scaleX = mc.scaleY = 1;
+				}
+			}else if(_paperRotation==0 && o is DupLoader && (o as DupLoader).content !=null && ((o as DupLoader).content as MovieClip).rotation != 0){
+				paperRotation = ((o as DupLoader).content as MovieClip).rotation * -1;
 			}
 		}
 		
@@ -168,11 +239,17 @@ package com.devaldi.streaming
 			while(numChildren >= 2)
 				delete(removeChildAt(1));
 			
+			checkRotation(child);
+			
 			return super.getChildAt(0);
 		}
 		
 		override public function addChildAt(child:DisplayObject,index:int):DisplayObject{
-			return super.addChildAt(child,index);
+			super.addChildAt(child,index);
+			
+			checkRotation(child);
+			
+			return super.getChildAt(index);
 		}
 		
 		public function addBlankChildAt(child:DisplayObject,index:int):DisplayObject{
@@ -183,7 +260,7 @@ package com.devaldi.streaming
 			if(w>0&&h>0){
 			try{
 
-			if(_paperRotation!=90||_paperRotation==180){
+			if(((_paperRotation!=90 && _paperRotation!=270)||_paperRotation==180) && DrawBackground){
 				graphics.beginFill(0xffffff,1);
 				graphics.drawRect(0,0,w,h);
 			}else{
