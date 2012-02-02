@@ -671,7 +671,7 @@ package com.devaldi.controls.flexpaper
 			return _currentlySelectedText;
 		}
 		
-		public function Zoom(factor:Number):void{
+		public function Zoom(factor:Number, fnOnUpdate:Function=null):void{
 			if(factor<_minZoomSize || factor>_maxZoomSize || factor == _scale)
 				return;
 			
@@ -685,7 +685,11 @@ package com.devaldi.controls.flexpaper
 			for(var i:int=0;i<_displayContainer.numChildren;i++){
 				_target = _displayContainer.getChildAt(i);
 				_target.filters = null;
-				Tweener.addTween(_target, {scaleX: factor, scaleY: factor, time: _zoomtime, transition: _zoomtransition, onComplete: tweenComplete});
+				
+				if(fnOnUpdate!=null)
+					Tweener.addTween(_target, {scaleX: factor, scaleY: factor, time: _zoomtime, transition: _zoomtransition, onUpdate: fnOnUpdate, onComplete: tweenComplete});
+				else
+					Tweener.addTween(_target, {scaleX: factor, scaleY: factor, time: _zoomtime, transition: _zoomtransition, onComplete: tweenComplete});
 			}
 			
 			FitMode = FitModeEnum.FITNONE;
@@ -694,10 +698,13 @@ package com.devaldi.controls.flexpaper
 			dispatchEvent(new ScaleChangedEvent(ScaleChangedEvent.SCALE_CHANGED,_scale));
 		}
 		
-		// rotate not finished.
 		public function rotate():void{
-			var counter:int=0;
-			//Tweener.addTween(_displayContainer.getChildAt(currPage-1), {x:_displayContainer.getChildAt(currPage-1).parent.width/2+_displayContainer.getChildAt(currPage-1).height/2, y:((_displayContainer.getChildAt(currPage-1).height/2)-_displayContainer.getChildAt(currPage-1).width/2),rotation:90, time: 0.3, transition: 'easenone', onComplete: tweenComplete});
+			(_displayContainer.getChildAt(currPage-1) as DupImage).paperRotation = 90;
+		}
+		
+		private function degreesToRadians(degrees:Number):Number {
+			var radians:Number = degrees * (Math.PI / 180);
+			return radians;
 		}
 		
 		public function getFitWidthFactor():Number{
@@ -1685,6 +1692,8 @@ package com.devaldi.controls.flexpaper
 				
 				//if(_fitWidthOnLoad){_scale = getFitWidthFactor();}
 				//if(_fitPageOnLoad){_scale = getFitHeightFactor();}
+				
+				if(_docLoader.LoaderList.length>0 && UsingExtViewMode){CurrExtViewMode.initOnLoading();}
 			}	
 			
 			flash.utils.setTimeout(repositionPapers,500);
