@@ -80,6 +80,7 @@ package com.devaldi.streaming
 			}
 			
 			var dl:DupLoader = getDupLoader();
+			if(dl==null){return;}
 			var mc:DisplayObject = dl.content as DisplayObject;
 			
 			if(dl!=null && mc!=null){
