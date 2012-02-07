@@ -51,6 +51,7 @@
     <classEntry path="com.devaldi.controls.flexpaper.utils.VersionHandler"/>
     <classEntry path="com.devaldi.controls.SinglePagePlugin"/>
     <classEntry path="com.devaldi.controls.flexpaper.ProcessingPrint"/>
+    <classEntry path="com.devaldi.streaming.ITextSelectableDisplayObject"/>
   </includeClasses>
   <includeResources/>
   <namespaceManifests/>

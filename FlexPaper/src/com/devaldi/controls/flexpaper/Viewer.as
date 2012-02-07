@@ -45,6 +45,7 @@ package com.devaldi.controls.flexpaper
 	import com.devaldi.streaming.DupLoader;
 	import com.devaldi.streaming.IDocumentLoader;
 	import com.devaldi.streaming.IGenericDocument;
+	import com.devaldi.streaming.ITextSelectableDisplayObject;
 	import com.devaldi.streaming.SwfDocument;
 	
 	import flash.display.AVM1Movie;
@@ -699,7 +700,10 @@ package com.devaldi.controls.flexpaper
 		}
 		
 		public function rotate():void{
-			(_displayContainer.getChildAt(currPage-1) as DupImage).paperRotation = 90;
+			var rotatenum:int = getVisibleMidPage();
+			if(rotatenum<_pageList.length-1){rotatenum = rotatenum - 1;}
+			
+			(_displayContainer.getChildAt(rotatenum) as DupImage).paperRotation = 90;
 		}
 		
 		private function degreesToRadians(degrees:Number):Number {
@@ -1201,6 +1205,27 @@ package com.devaldi.controls.flexpaper
 				
 		public function repaint():void{
 			_repaintTimer.reset();_repaintTimer.start();
+		}
+		
+		private function getVisibleMidPage():Number{
+			var lowPageNum:int = -1;
+			var highPageNum:int = -1;
+			
+			for(var i:int=0;i<_pageList.length;i++){
+				if(lowPageNum==-1 && checkIsVisible(i)){
+					lowPageNum = i;
+				}
+				
+				if(lowPageNum!=-1 && checkIsVisible(i)){
+					highPageNum = i;
+				}
+			}	
+			
+			var retval:Number = Math.round(lowPageNum + (highPageNum - lowPageNum) / 2);
+			if(retval<0){retval=0;}
+			if(retval>_pageList.length-1){retval=_pageList.length-1;}
+			
+			return retval;
 		}
 		
 		private function checkIsVisible(pageIndex:int):Boolean{
@@ -2131,7 +2156,7 @@ package com.devaldi.controls.flexpaper
 			}catch (e:*) {}
 		}
 		
-		private function createPaper(index:int, w:Number, h:Number):void {
+		public function createPaper(index:int, w:Number, h:Number):DupImage {
 			var di:DupImage = new DupImage(); 
 			di.scaleX = di.scaleY = _scale;
 			di.dupIndex = index;
@@ -2153,6 +2178,7 @@ package com.devaldi.controls.flexpaper
 			
 			_pageList[index-1] = di;
 			_pageList[index-1].resetPage(w,h,_scale);
+			return di;
 		}	
 		
 		private function textSelectorMouseDownHandler(event:MouseEvent):void{
@@ -2160,7 +2186,10 @@ package com.devaldi.controls.flexpaper
 			if(_selectionMarker!=null&&_selectionMarker.parent!=null){_selectionMarker.parent.removeChild(_selectionMarker);_selectionMarker=null;}
 			
 			try{
-				if(!(event.target.content is MovieClip)){
+				if(event.target is ITextSelectableDisplayObject){
+					_selectionMc = (event.target as ITextSelectableDisplayObject).getMovieClip(); 
+				}
+				else if(!(event.target.content is MovieClip)){
 					if(!(event.target is MovieClip)){
 						return;
 					}else{
@@ -2241,7 +2270,7 @@ package com.devaldi.controls.flexpaper
 			var hitIndex:int = snap.hitTestTextNearPos(event.target.parent.mouseX,event.target.parent.mouseY,10)+((_firstHitIndex==-1)?0:1);
 			
 			if(hitIndex==_lastHitIndex||hitIndex<0){return;}
-			if(!(event.target is DupLoader)){return;}
+			if(!(event.target is DupLoader) && !(event.target is ITextSelectableDisplayObject)){return;}
 			
 			if(_firstHitIndex==-1){_firstHitIndex=hitIndex;}
 			
