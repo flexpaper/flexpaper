@@ -701,7 +701,7 @@ package com.devaldi.controls.flexpaper
 		
 		public function rotate():void{
 			var rotatenum:int = getVisibleMidPage();
-			if(rotatenum<_pageList.length-1){rotatenum = rotatenum - 1;}
+			if(rotatenum<_pageList.length-1&&_pageList.length>2){rotatenum = rotatenum - 1;}
 			
 			(_displayContainer.getChildAt(rotatenum) as DupImage).paperRotation = 90;
 		}
@@ -1221,11 +1221,15 @@ package com.devaldi.controls.flexpaper
 				}
 			}	
 			
-			var retval:Number = Math.round(lowPageNum + (highPageNum - lowPageNum) / 2);
-			if(retval<0){retval=0;}
-			if(retval>_pageList.length-1){retval=_pageList.length-1;}
-			
-			return retval;
+			if(highPageNum - lowPageNum == 1 && _pageList.length<3){
+				return lowPageNum;
+			}else{
+				var retval:Number = Math.round(lowPageNum + (highPageNum - lowPageNum) / 2);
+				if(retval<0){retval=0;}
+				if(retval>_pageList.length-1){retval=_pageList.length-1;}
+				
+				return retval;
+			}
 		}
 		
 		private function checkIsVisible(pageIndex:int):Boolean{
