@@ -235,18 +235,26 @@ package com.devaldi.controls.flexpaper
 				_paperContainer.x = (s==ViewModeEnum.PORTRAIT||s==ViewModeEnum.TILE)?2.5:0;
 				
 				_viewMode = s;
-				if(_initialized && _swfLoaded){createDisplayContainer();if(this._progressiveLoading){this.addInLoadedPages(true);}else{reCreateAllPages();}_displayContainer.visible = true;}
-				FitMode = FitModeEnum.FITNONE;
-			
-				if(UsingExtViewMode){
+				
+				if(CurrExtViewMode!=null){
 					CurrExtViewMode.setViewMode(s);
 					_viewMode = s;
-				}					
+				}	
+				
+				reInitialize();
+				FitMode = FitModeEnum.FITNONE;
+				
+				if(_currPage>1 && (s=="Portrait" || s=="TwoPage")){gotoPage(_currPage);repaint();flash.utils.setTimeout(function():void{_paperContainer.visible = true},300);}
+				else{_paperContainer.visible = true;}
 				
 				dispatchEvent(new ViewModeChangedEvent(ViewModeChangedEvent.VIEWMODE_CHANGED,_viewMode));
 				dispatchEvent(new ScaleChangedEvent(ScaleChangedEvent.SCALE_CHANGED,_scale));
 				dispatchEvent(new FitModeChangedEvent(FitModeChangedEvent.FITMODE_CHANGED,_fitMode));
 			}
+		}
+		
+		public function reInitialize():void{
+			if(_initialized && _swfLoaded){createDisplayContainer(false);createLoaderList();if(this._progressiveLoading){this.addInLoadedPages(true);}else{reCreateAllPages();}_displayContainer.visible = true;}
 		}
 		
 		public function set FitMode(s:String):void {
@@ -305,6 +313,24 @@ package com.devaldi.controls.flexpaper
 		public function get CursorsEnabled():Boolean {
 			return _cursorsEnabled;
 		}	
+		
+		[Bindable]
+		public function get PerformSearchOnPageLoad():Boolean {
+			return _performSearchOnPageLoad;
+		}	
+		
+		public function set PerformSearchOnPageLoad(b:Boolean):void {
+			_performSearchOnPageLoad = b;
+		}
+		
+		[Bindable]
+		public function get PendingSearchPage():Number {
+			return _pendingSearchPage;
+		}	
+		
+		public function set PendingSearchPage(n:Number):void {
+			_pendingSearchPage = n;
+		}
 		
 		public function set CursorsEnabled(b:Boolean):void {
 			_cursorsEnabled = b;
@@ -465,7 +491,7 @@ package com.devaldi.controls.flexpaper
 			_fitPageOnLoad = b2;
 		}			
 		
-		public function gotoPage(p:Number, adjGotoPage:int=0):void{
+		public function gotoPage(p:Number, adjGotoPage:int=0,interactive:Boolean=false):void{
 			if(adjGotoPage!=0){_adjGotoPage=adjGotoPage;}
 			
 			if(p<1 || p-1 >_pageList.length)
@@ -476,7 +502,7 @@ package com.devaldi.controls.flexpaper
 				}
 				
 				if(UsingExtViewMode)
-					CurrExtViewMode.gotoPage(p,adjGotoPage);	
+					CurrExtViewMode.gotoPage(p,adjGotoPage,interactive);	
 				
 				// retry if y is not set
 				if(!UsingExtViewMode && p>1 && _pageList[p-1].y ==0)
@@ -672,7 +698,7 @@ package com.devaldi.controls.flexpaper
 			return _currentlySelectedText;
 		}
 		
-		public function Zoom(factor:Number, fnOnUpdate:Function=null):void{
+		public function Zoom(factor:Number, fnOnUpdate:Function=null, fnComplete:Function=null):void{
 			if(factor<_minZoomSize || factor>_maxZoomSize || factor == _scale)
 				return;
 			
@@ -683,14 +709,17 @@ package com.devaldi.controls.flexpaper
 			
 			_tweencount = _displayContainer.numChildren;
 			
+			var fnc:Function = onZoomComplete;
+			if(fnComplete != null){fnc = fnComplete;}
+				
 			for(var i:int=0;i<_displayContainer.numChildren;i++){
 				_target = _displayContainer.getChildAt(i);
 				_target.filters = null;
 				
 				if(fnOnUpdate!=null)
-					Tweener.addTween(_target, {scaleX: factor, scaleY: factor, time: _zoomtime, transition: _zoomtransition, onUpdate: fnOnUpdate, onComplete: tweenComplete});
+					Tweener.addTween(_target, {scaleX: factor, scaleY: factor, time: _zoomtime, transition: _zoomtransition, onUpdate: fnOnUpdate, onComplete: fnComplete});
 				else
-					Tweener.addTween(_target, {scaleX: factor, scaleY: factor, time: _zoomtime, transition: _zoomtransition, onComplete: tweenComplete});
+					Tweener.addTween(_target, {scaleX: factor, scaleY: factor, time: _zoomtime, transition: _zoomtransition, onComplete: onZoomComplete});
 			}
 			
 			FitMode = FitModeEnum.FITNONE;
@@ -733,7 +762,7 @@ package com.devaldi.controls.flexpaper
 			for(var i:int=0;i<_displayContainer.numChildren;i++){
 				_target = _displayContainer.getChildAt(i);
 				_target.filters = null;
-				Tweener.addTween(_target, {scaleX:factor, scaleY:factor,time: 0, transition: 'easenone', onComplete: tweenComplete});
+				Tweener.addTween(_target, {scaleX:factor, scaleY:factor,time: 0, transition: 'easenone', onComplete: onZoomComplete});
 			}
 			
 			FitMode = FitModeEnum.FITWIDTH;
@@ -757,7 +786,7 @@ package com.devaldi.controls.flexpaper
 			for(var i:int=0;i<_displayContainer.numChildren;i++){
 				_target = _displayContainer.getChildAt(i);
 				_target.filters = null;
-				Tweener.addTween(_target, {scaleX:factor, scaleY:factor,time: 0, transition: 'easenone', onComplete: tweenComplete});
+				Tweener.addTween(_target, {scaleX:factor, scaleY:factor,time: 0, transition: 'easenone', onComplete: onZoomComplete});
 			}			
 			
 			FitMode = FitModeEnum.FITHEIGHT;
@@ -766,7 +795,7 @@ package com.devaldi.controls.flexpaper
 			return factor > 0;
 		}
 		
-		private function tweenComplete():void{
+		public function onZoomComplete():void{
 			_tweencount--;
 			
 			if(_tweencount==0){
@@ -896,9 +925,9 @@ package com.devaldi.controls.flexpaper
 				_bbusyloading = false;
 				_displayContainer.visible = true;
 
+				dispatchEvent(new PageLoadedEvent(PageLoadedEvent.PAGE_LOADED,event.target.loader.pageStartIndex));
+				
 				if(!bFound){
-					dispatchEvent(new PageLoadedEvent(PageLoadedEvent.PAGE_LOADED,event.target.loader.pageStartIndex));
-					
 					if(_fitPageOnLoad&&((_paperContainer.height / _libMC.height)>0)){FitMode = FitModeEnum.FITHEIGHT;_fitPageOnLoad=false;_scrollToPage=1;_pscale=_scale;}
 					if(_fitWidthOnLoad&&((_paperContainer.width / _libMC.width)>0)){FitMode = FitModeEnum.FITWIDTH;_fitWidthOnLoad=false;_scrollToPage=1;_pscale=_scale;}
 				}
@@ -944,6 +973,7 @@ package com.devaldi.controls.flexpaper
 				var uloaderidx:int=0;
 				var p:int=-1;
 				var pl:int=0;
+				var pp:int=-1;
 				
 				for(var i:int=0;i<_pageList.length;i++){
 					if(ViewMode == ViewModeEnum.TILE){
@@ -995,7 +1025,7 @@ package com.devaldi.controls.flexpaper
 					
 					if(UsingExtViewMode){
 						if(currPage != CurrExtViewMode.currentPage)
-							dispatchEvent(new CurrentPageChangedEvent(CurrentPageChangedEvent.PAGE_CHANGED,CurrExtViewMode.currentPage));
+							dispatchEvent(new CurrentPageChangedEvent(CurrentPageChangedEvent.PAGE_CHANGED,CurrExtViewMode.currentPage,currPage));
 						
 						p = CurrExtViewMode.currentPage;
 						currPage = p;
@@ -1003,7 +1033,8 @@ package com.devaldi.controls.flexpaper
 					
 					if(p>0&&p!=_currPage){
 						currPage = p;
-						dispatchEvent(new CurrentPageChangedEvent(CurrentPageChangedEvent.PAGE_CHANGED,p));
+						pp = currPage;
+						dispatchEvent(new CurrentPageChangedEvent(CurrentPageChangedEvent.PAGE_CHANGED,p,pp));
 					}
 					
 					if(_libMC!=null&&checkIsVisible(i)){
@@ -1109,7 +1140,7 @@ package com.devaldi.controls.flexpaper
 									}
 								}
 								
-								if(_pluginList!=null){
+								if(_pluginList!=null && _viewMode != ViewModeEnum.TILE){
 									for(pl=0;pl<_pluginList.length;pl++){
 										_pluginList[pl].drawSelf(i,_thumbData,_scale);
 									}
@@ -1119,6 +1150,11 @@ package com.devaldi.controls.flexpaper
 						
 						if(UsingExtViewMode){
 							CurrExtViewMode.renderPage(i);
+							
+							//if((_performSearchOnPageLoad && _pendingSearchPage == _pageList[i].dupIndex)||(SearchMatchAll && prevSearchText.length>0)){
+							//	_performSearchOnPageLoad = false;
+								//searchTextByService(prevSearchText)
+							//}
 							
 							if(_selectionMarker!=null)
 								CurrExtViewMode.renderSelection(i,_selectionMarker);
@@ -1162,7 +1198,13 @@ package com.devaldi.controls.flexpaper
 					if(_viewMode != ViewModeEnum.TILE){
 						if(_pluginList!=null){
 							for(pl=0;pl<_pluginList.length;pl++){
-								_pluginList[pl].drawSelf(i,_pageList[i],_scale);
+								if(_currentExtViewMode!=null && _currentExtViewMode.Name == "TwoPage"){
+									if(checkIsVisible(i)){
+										_pluginList[pl].drawSelf(i,(i % 2 == 0)?_pageList[0]:_pageList[1],_scale);
+									}
+								}else{
+									_pluginList[pl].drawSelf(i,_pageList[i],_scale);
+								}
 							}
 						}
 					}
@@ -1255,7 +1297,7 @@ package com.devaldi.controls.flexpaper
 			return false;
 		}		
 		
-		public function createDisplayContainer():void{
+		public function createDisplayContainer(immidiateVisibility:Boolean=true):void{
 			if(_skinImgDo != null && _skinImgDo.parent == this){
 				removeChild(_skinImgDo);
 				_skinImgDo.removeEventListener(MouseEvent.MOUSE_OVER,skinMouseOver);
@@ -1288,6 +1330,7 @@ package com.devaldi.controls.flexpaper
 			}
 			
 			_paperContainer = new ZoomCanvas();
+			_paperContainer.visible = immidiateVisibility;
 			_paperContainer.percentHeight = 100;
 			_paperContainer.percentWidth = 100;
 			_paperContainer.addEventListener(FlexEvent.UPDATE_COMPLETE,updComplete,false,0,true);
@@ -1332,7 +1375,10 @@ package com.devaldi.controls.flexpaper
 			_displayContainer.verticalScrollPolicy = "off";
 			_displayContainer.horizontalScrollPolicy = "off";	
 			_displayContainer.setStyle("verticalAlign", "center");
-			_displayContainer.percentHeight = 100;
+			
+			if(!UsingExtViewMode)
+				_displayContainer.percentHeight = 100;
+			
 			_displayContainer.percentWidth = (ViewMode==ViewModeEnum.PORTRAIT)?96:100;
 			_displayContainer.useHandCursor = true;
 			_displayContainer.addEventListener(MouseEvent.ROLL_OVER,displayContainerrolloverHandler,false,0,true);
@@ -1792,7 +1838,11 @@ package com.devaldi.controls.flexpaper
 					}
 				}
 			}			
-		}		
+		}	
+		
+		public function resetLoadCount():void{
+			_frameLoadCount = 0;
+		}
 		
 		private function docLoaderIOErrorListener(e:IOErrorEvent):void{
 			if(_docLoader!=null&&_docLoader.IsSplit){
@@ -1820,10 +1870,14 @@ package com.devaldi.controls.flexpaper
 		private var searchIndex:int = -1;		
 		private var searchPageIndex:int = -1;
 		private var _selectionMarker:ShapeMarker;
-		private var prevSearchText:String = "";
+		public var prevSearchText:String = "";
 		private var prevYsave:Number=-1;
 		private var _markList:Array;
 		private var prevSearchIndexList:Array;
+		
+		public function get SelectionMarker():ShapeMarker{
+			return _selectionMarker;
+		}
 		
 		public function get SearchPageIndex():int {
 			return searchPageIndex;
@@ -1836,6 +1890,11 @@ package com.devaldi.controls.flexpaper
 		private var _searchExtracts:Array;
 		
 		public function searchTextByService(text:String):void{
+			if(_selectionMarker!=null && _selectionMarker.parent !=null){
+				_selectionMarker.parent.removeChild(_selectionMarker);
+				_selectionMarker=null;
+			}
+			
 			if(prevSearchText != text){
 				_searchExtracts = new Array(numPages);
 				searchPageIndex = -1;
@@ -1865,18 +1924,26 @@ package com.devaldi.controls.flexpaper
 				serve.send();
 			}else{ // perform actual search
 				if((_searchExtracts[searchPageIndex-1]!=null && _searchExtracts[searchPageIndex-1].length>0 && Number(_searchExtracts[searchPageIndex-1]) >= 0) || searchPageIndex==currPage){
-					if(searchPageIndex!=currPage){
+					if(	(!UsingExtViewMode && searchPageIndex!=currPage)/* || (UsingExtViewMode && CurrExtViewMode.translatePageNumber(searchPageIndex)!=currPage) */){
 						_performSearchOnPageLoad=true;
 						_pendingSearchPage = searchPageIndex;
 						gotoPage(searchPageIndex);
 					}
 					else{
-						snap = _pageList[searchPageIndex-1].textSnapshot;
+						
+						if(!UsingExtViewMode)
+							snap = _pageList[searchPageIndex-1].textSnapshot;
+						else{
+							CurrExtViewMode.setTextSelectMode(searchPageIndex-1);
+							snap = CurrExtViewMode.getPageTextSnapshot(searchPageIndex-1);
+						}
+						
 						searchIndex = snap.findText((searchIndex==-1?0:searchIndex),adjustSearchTerm(text),false);
 						var tri:Array;
 						
 						if(searchIndex > 0){ // found a new match
 							_selectionMarker = new ShapeMarker();
+							_selectionMarker.isSearchMarker = true;
 							_selectionMarker.graphics.beginFill(0x0095f7,0.3);
 							
 							tri = snap.getTextRunInfo(searchIndex,searchIndex+text.length-1);
@@ -1897,7 +1964,11 @@ package com.devaldi.controls.flexpaper
 								searchPageIndex++;
 								searchIndex = -1;
 								
-								searchTextByService(prevSearchText);
+								_performSearchOnPageLoad=true;
+								_pendingSearchPage = searchPageIndex;
+								gotoPage(searchPageIndex);
+								
+								//searchTextByService(prevSearchText);
 							}else{
 								dispatchEvent(new Event("onNoMoreSearchResults"));
 								searchPageIndex = 1;
@@ -1979,6 +2050,7 @@ package com.devaldi.controls.flexpaper
 						
 						if(si>0){
 							var sm:ShapeMarker = new ShapeMarker();
+							sm.isSearchMarker = true;
 							sm.PageIndex = spi;
 							
 							tri = snap.getTextRunInfo(si,si+text.length-1);
@@ -2026,6 +2098,7 @@ package com.devaldi.controls.flexpaper
 				
 				if(searchIndex > 0){ // found a new match
 					_selectionMarker = new ShapeMarker();
+					_selectionMarker.isSearchMarker = true;
 					_selectionMarker.graphics.beginFill(0x0095f7,0.3);
 					
 					tri = snap.getTextRunInfo(searchIndex,searchIndex+text.length-1);
@@ -2134,6 +2207,7 @@ package com.devaldi.controls.flexpaper
 					snap = _libMC.textSnapshot;
 					
 					var sm:ShapeMarker = new ShapeMarker();
+					sm.isSearchMarker = false;
 					sm.PageIndex = pg+1;
 					
 					text = snap.getText(0,pos,false);
@@ -2191,6 +2265,7 @@ package com.devaldi.controls.flexpaper
 			
 			try{
 				if(event.target is ITextSelectableDisplayObject){
+					(event.target as ITextSelectableDisplayObject).setTextSelectMode();
 					_selectionMc = (event.target as ITextSelectableDisplayObject).getMovieClip(); 
 				}
 				else if(!(event.target.content is MovieClip)){
@@ -2278,8 +2353,13 @@ package com.devaldi.controls.flexpaper
 			
 			if(_firstHitIndex==-1){_firstHitIndex=hitIndex;}
 			
-			if(_docLoader.IsSplit)
-				_currentSelectionPage = (_selectionMc.parent as DupLoader).pageStartIndex;	
+			if(_docLoader.IsSplit){
+				if(_selectionMc.parent is ITextSelectableDisplayObject){
+					_currentSelectionPage = (_selectionMc.parent as ITextSelectableDisplayObject).getPageIndex();
+				}else{
+					_currentSelectionPage = (_selectionMc.parent as DupLoader).pageStartIndex;
+				}
+			}
 			else
 				_currentSelectionPage = _selectionMc.currentFrame;
 			
@@ -2294,8 +2374,13 @@ package com.devaldi.controls.flexpaper
 			
 			if(_selectionMarker!=null&&_selectionMarker.parent!=null){_selectionMarker.parent.removeChild(_selectionMarker);}
 			
-			if(_docLoader.IsSplit)
-				searchPageIndex = (_selectionMc.parent as DupLoader).pageStartIndex;
+			if(_docLoader.IsSplit){
+				if(_selectionMc.parent is ITextSelectableDisplayObject){
+					searchPageIndex = (_selectionMc.parent as ITextSelectableDisplayObject).getPageIndex();
+				}else{
+					searchPageIndex = (_selectionMc.parent as DupLoader).pageStartIndex;
+				}
+			}
 			else
 				searchPageIndex = _selectionMc.currentFrame;
 			
@@ -2375,6 +2460,12 @@ package com.devaldi.controls.flexpaper
 					ly=tri[i+1].corner1y;lx=tri[i+1].corner3x;li=i+1;
 				}
 			}
+			if(shape is ShapeMarker){
+				(shape as ShapeMarker).minX = minx;
+				(shape as ShapeMarker).minY = miny;
+				(shape as ShapeMarker).maxX = maxx;
+				(shape as ShapeMarker).maxY = maxy;
+			}
 			shape.graphics.drawPath(rect_commands,rect_coords,"nonZero");
 			shape.graphics.endFill();
 			
@@ -2433,6 +2524,7 @@ package com.devaldi.controls.flexpaper
 				if(_selectionMarker!=null&&_selectionMarker.parent!=null){_selectionMarker.parent.removeChild(_selectionMarker);}
 				
 				_selectionMarker = new ShapeMarker();
+				_selectionMarker.isSearchMarker = false;
 				_selectionMarker.PageIndex = _currentSelectionPage;
 				drawCurrentSelection(_selectionColor,_selectionMarker,_tri);
 				snap.setSelected(_firstHitIndex,_lastHitIndex,false);
@@ -2549,6 +2641,8 @@ package com.devaldi.controls.flexpaper
 					else{
 						_pp.ProcessingLabel.text = "Setting up print";
 						_splitpj = new PrintJob();
+						_splitpjoptions = new PrintJobOptions();
+						_splitpjoptions.printAsBitmap = PrintPaperAsBitmap;
 					}
 					
 					_loaderptr = new Loader();
@@ -2577,8 +2671,9 @@ package com.devaldi.controls.flexpaper
 						}
 					}
 					
-					if(!precache)
+					if(!precache){
 						_splitpj.start();
+					}
 					
 					if(!_splitpjPrecaching)
 						_pp.ProcessingLabel.text = "Please wait..";
@@ -2603,6 +2698,7 @@ package com.devaldi.controls.flexpaper
 				if(!_splitpjPrecaching){
 					dispatchEvent(new DocumentPrintedEvent(DocumentPrintedEvent.DOCUMENT_PRINTED));
 					_splitpj.send();
+					repositionPapers();
 				}else{
 					_splitpjPrecacheFinalized=true;
 					printSplitPaper(true,_splitpjrange,false);
@@ -2615,16 +2711,19 @@ package com.devaldi.controls.flexpaper
 			if(!_splitpjPrecaching){
 			
 				var pageToPrint:* = event.target.content;
-			
-				if((_splitpj.pageHeight/pageToPrint.height) < 1 && (_splitpj.pageHeight/pageToPrint.height) < (_splitpj.pageWidth/pageToPrint.width))
-					pageToPrint.scaleX = pageToPrint.scaleY = (_splitpj.pageHeight/pageToPrint.height);
-				else if((_splitpj.pageWidth/pageToPrint.width) < 1)
-					pageToPrint.scaleX = pageToPrint.scaleY = (_splitpj.pageWidth/pageToPrint.width);
+				if(AutoAdjustPrintSize){
+					if((_splitpj.pageHeight/pageToPrint.height) < 1 && (_splitpj.pageHeight/pageToPrint.height) < (_splitpj.pageWidth/pageToPrint.width))
+						pageToPrint.scaleX = pageToPrint.scaleY = (_splitpj.pageHeight/pageToPrint.height);
+					else if((_splitpj.pageWidth/pageToPrint.width) < 1)
+						pageToPrint.scaleX = pageToPrint.scaleY = (_splitpj.pageWidth/pageToPrint.width);
+				}
 				
 				if((_swfContainer.getChildAt(0) as UIComponent).numChildren>0)
 					(_swfContainer.getChildAt(0) as UIComponent).removeChildAt(0);
 				
 				(_swfContainer.getChildAt(0) as UIComponent).addChild(pageToPrint);
+				
+				preparePluginsForPrint(_splitpj,_splitpjprinted);
 				_splitpj.addPage(_swfContainer,null,_splitpjoptions);
 			}
 			

@@ -53,6 +53,7 @@ package com.devaldi.streaming
 		private var loadImg:Bitmap;
 		private var loadSpinner:Spinner;
 		public var DrawBackground:Boolean = true;
+		public var BackgroundColor:uint = 0xffffff;
 		private var _rotationMatrix:Matrix;
 		
 		public function DupImage(){}
@@ -167,7 +168,7 @@ package com.devaldi.streaming
 		}
 
 		override public function get textSnapshot():TextSnapshot{
-			if(getChildAt(0) is DupLoader && (getChildAt(0) as DupLoader).content!=null && (getChildAt(0) as DupLoader).content is MovieClip){
+			if(this.numChildren > 0 && getChildAt(0) is DupLoader && (getChildAt(0) as DupLoader).content!=null && (getChildAt(0) as DupLoader).content is MovieClip){
 				return ((getChildAt(0) as DupLoader).content as MovieClip).textSnapshot;
 			}else
 				return super.textSnapshot;
@@ -201,7 +202,7 @@ package com.devaldi.streaming
 		private function checkRotation(o:Object):void{
 			if(o==null){return;}
 			
-			if(_paperRotation!=0 && o is DupLoader && (o as DupLoader).content !=null){
+			if(_paperRotation!=0 && o is DupLoader && (o as DupLoader).content !=null && ((o as DupLoader).content is MovieClip)){
 				
 				var rot:Number = Math.round(((o as DupLoader).content as MovieClip).rotation);
 				var prot:Number = _paperRotation;
@@ -212,7 +213,7 @@ package com.devaldi.streaming
 					mc.transform.matrix = _rotationMatrix;
 					mc.scaleX = mc.scaleY = 1;
 				}
-			}else if(_paperRotation==0 && o is DupLoader && (o as DupLoader).content !=null && ((o as DupLoader).content as MovieClip).rotation != 0){
+			}else if(_paperRotation==0 && o is DupLoader && (o as DupLoader).content !=null && ((o as DupLoader).content is MovieClip) && ((o as DupLoader).content as MovieClip).rotation != 0){
 				paperRotation = ((o as DupLoader).content as MovieClip).rotation * -1;
 			}
 		}
@@ -298,7 +299,7 @@ package com.devaldi.streaming
 			try{
 
 			if(((_paperRotation!=90 && _paperRotation!=270)||_paperRotation==180) && DrawBackground){
-				graphics.beginFill(0xffffff,1);
+				graphics.beginFill(BackgroundColor,1);
 				graphics.drawRect(0,0,w,h);
 			}else{
 				graphics.clear();

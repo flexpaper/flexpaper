@@ -25,6 +25,7 @@ package com.devaldi.controls
 	import flash.net.URLRequest;
 	import flash.text.TextField;
 	import flash.text.TextFormat;
+	import flash.text.TextSnapshot;
 	import flash.utils.setTimeout;
 	
 	import mx.containers.Box;
@@ -46,12 +47,24 @@ package com.devaldi.controls
 		private var viewer:Viewer;
 		private var _saveScale:Number = 1;
 		
+		public function getPageTextSnapshot(pn:Number):TextSnapshot{
+			return viewer.PageList[pn].textSnapshot as TextSnapshot;
+		}
+		
+		public function setTextSelectMode(pn:Number):void{
+			
+		}
+		
 		public function SinglePagePlugin()
 		{
 		}
 		
 		public function get Name():String{
 			return "SinglePage";
+		}
+		
+		public function translatePageNumber(pn:Number):Number{
+			return pn;
 		}
 		
 		public function initComponent(v:Viewer):Boolean{
@@ -136,11 +149,11 @@ package com.devaldi.controls
 			viewer.DocLoader.LoaderList[0].loadBytes(viewer.libMC.loaderInfo.bytes,StreamUtil.getExecutionContext());
 		}
 		
-		public function mvPrev():void{
+		public function mvPrev(interactive:Boolean=false):void{
 			if(viewer.currPage>1){viewer.gotoPage(viewer.currPage-1);}
 		}
 		
-		public function mvNext():void{
+		public function mvNext(interactive:Boolean=false):void{
 			if(viewer.currPage<viewer.numPages){viewer.gotoPage(viewer.currPage+1);}
 		}
 		 
@@ -252,9 +265,10 @@ package com.devaldi.controls
 			_saveScale = n;
 		}
 		
-		public function gotoPage(page:Number,adjGotoPage:int=0):void{
+		public function gotoPage(page:Number,adjGotoPage:int=0,interactive:Boolean=false):void{
+			var prevPage = viewer.currPage;
 			viewer.currPage = page;
-			viewer.dispatchEvent(new CurrentPageChangedEvent(CurrentPageChangedEvent.PAGE_CHANGED,page));
+			viewer.dispatchEvent(new CurrentPageChangedEvent(CurrentPageChangedEvent.PAGE_CHANGED,page,prevPage));
 		}
 		
 		public function handleDoubleClick(event:MouseEvent):void{

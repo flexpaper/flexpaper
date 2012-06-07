@@ -10,7 +10,7 @@
 		 borderThickness="1" 
 		 verticalScrollPolicy="off" 
 		 horizontalScrollPolicy="off"
-		 
+		  
 		 addedToStage="bindStageEvents(event)"
 		 preinitialize="preInit()">
 	<mx:Script>
@@ -118,6 +118,9 @@
 			
 			[Bindable]
 			public var EncodeURI:Boolean = true;
+			
+			[Bindable]
+			public var PrintEnabled:Boolean = false;
 			
 			public static var Key:String = "";
 			public static var loaderURL:String = "";
@@ -400,6 +403,10 @@
 			
 			public function switchMode(mode:String=null):void{
 				viewer.switchMode(mode);
+			}
+			
+			public function rotate():void{
+				viewer.rotate();
 			}
 			
 			public function setCurrentCursor(cursor:String):void{
