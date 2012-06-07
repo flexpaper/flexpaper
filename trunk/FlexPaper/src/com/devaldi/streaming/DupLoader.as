@@ -34,6 +34,7 @@ package com.devaldi.streaming
 		public var loadingFrames:int = 0;
 		public var pageStartIndex:int = 0;
 		public var loading:Boolean = false;
+		public var callbackData:Object = null;
 		private var _ctx:LoaderContext;
 		private var _inputBytes:ByteArray;
 		

@@ -5,5 +5,8 @@ package com.devaldi.streaming
 	public interface ITextSelectableDisplayObject
 	{
 		function getMovieClip():MovieClip;	
+		function getPageIndex():int;
+		function setTextSelectMode():void;
+		function unSetTextSelectMode():void;
 	}
 }

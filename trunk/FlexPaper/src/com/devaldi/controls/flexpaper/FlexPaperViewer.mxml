@@ -82,6 +82,7 @@ along with FlexPaper.  If not, see <http://www.gnu.org/licenses/>.
 				lblProgress.visible = false;
 				spin1.stop();
 				bttnInfo.visible = (new MenuIcons.SMALL_TRANSPARENT().width > 10);
+				PrintEnabled = true;
 				
 				if(StartAtPage!=1&&!isNaN(StartAtPage)&&StartAtPage>0){paper1.gotoPage(StartAtPage);StartAtPage=-1;}
 				super.documentLoadedHandler(event);
@@ -92,6 +93,7 @@ along with FlexPaper.  If not, see <http://www.gnu.org/licenses/>.
 				lblProgress.visible = false;
 				spin1.stop();
 				bttnInfo.visible = (new MenuIcons.SMALL_TRANSPARENT().width > 10);
+				PrintEnabled = true;
 				
 				super.pageLoadedEventHandler(event);
 			}
@@ -171,9 +173,9 @@ along with FlexPaper.  If not, see <http://www.gnu.org/licenses/>.
 			}
 		]]>
 	</mx:Script>
-	<mx:Style source="styles/default.css" />
+	<mx:Style source="styles/default.css" />    
 	<mx:HBox styleName="toolbarBackground" width="100%" height="26" borderStyle="solid" verticalScrollPolicy="off" horizontalScrollPolicy="off" paddingTop="2" paddingLeft="2" horizontalGap="3">
-		<st:GradientImageButton icon="{MenuIcons.PRINT_ICON}" styleName="toolbttn" width="20" click="printPaper(event)" toolTip="@Resource(key='Print', bundle='FlexPaper')" visible="{!ReadOnly}" includeInLayout="{!ReadOnly}" />
+		<st:GradientImageButton icon="{MenuIcons.PRINT_ICON}" styleName="toolbttn" width="20" click="printPaper(event)" toolTip="@Resource(key='Print', bundle='FlexPaper')" visible="{!ReadOnly}" includeInLayout="{!ReadOnly}" enabled="{PrintEnabled}" />
 		<mx:Image source="{MenuIcons.BAR}" width="3" height="21" visible="{!ReadOnly}" includeInLayout="{!ReadOnly}"  />
 		
 		<st:GradientImageButton icon="{MenuIcons.SINGLE_PAGE}" styleName="toolbttn" width="20" click="paper1.switchMode(Viewer.InitViewMode);" toolTip="@Resource(key='SinglePage', bundle='FlexPaper')" selected="{paper1.ViewMode == Viewer.InitViewMode}" tabIndex="2" visible="{ViewModeToolsVisible}" includeInLayout="{ViewModeToolsVisible}"/>
@@ -181,10 +183,10 @@ along with FlexPaper.  If not, see <http://www.gnu.org/licenses/>.
 		<st:GradientImageButton icon="{MenuIcons.THUMBS}" styleName="toolbttn" width="20" click="paper1.switchMode('Tile');" toolTip="@Resource(key='ThumbView', bundle='FlexPaper')" selected="{paper1.ViewMode == ViewModeEnum.TILE}" tabIndex="4" visible="{ViewModeToolsVisible}" includeInLayout="{ViewModeToolsVisible}"/>
 		<st:GradientImageButton id="bttnFitWidth" icon="{MenuIcons.PAGE_FITWIDTH}" styleName="toolbttn" width="20" selected="{paper1.FitMode == FitModeEnum.FITWIDTH}" toggle="true" click="paper1.fitWidth();bttnFitHeight.selected=false;" enabled="{paper1.ViewMode == ViewModeEnum.PORTRAIT||paper1.ViewMode == ViewModeEnum.SINGLEPAGE}" toolTip="@Resource(key='FitWidth', bundle='FlexPaper')"  tabIndex="5" visible="{ViewModeToolsVisible}" includeInLayout="{ViewModeToolsVisible}"/>
 		<st:GradientImageButton id="bttnFitHeight" icon="{MenuIcons.PAGE_FIT}" styleName="toolbttn" width="20"  click="paper1.fitHeight();bttnFitWidth.selected=false;" selected="{paper1.FitMode == FitModeEnum.FITHEIGHT}" toggle="true" enabled="{paper1.ViewMode == ViewModeEnum.PORTRAIT||paper1.ViewMode == ViewModeEnum.TWOPAGE||paper1.ViewMode == ViewModeEnum.SINGLEPAGE}" toolTip="@Resource(key='FitPage', bundle='FlexPaper')"  tabIndex="6" visible="{ViewModeToolsVisible}" includeInLayout="{ViewModeToolsVisible}"/>
-		<st:GradientImageButton styleName="toolbttn" icon="{MenuIcons.FLIP}"  toolTip="@Resource(key='Rotate', bundle='FlexPaper')"  width="20" click="{paper1.rotate()}" tabIndex="7" enabled="{paper1.ViewMode == ViewModeEnum.PORTRAIT||paper1.ViewMode == ViewModeEnum.SINGLEPAGE}" visible="{ViewModeToolsVisible}" includeInLayout="{ViewModeToolsVisible}" />
+		<st:GradientImageButton styleName="toolbttn" icon="{MenuIcons.FLIP}"  toolTip="@Resource(key='Rotate', bundle='FlexPaper')"  width="20" click="{paper1.rotate()}" tabIndex="7" enabled="{paper1.ViewMode == ViewModeEnum.PORTRAIT}" visible="{ViewModeToolsVisible}" includeInLayout="{ViewModeToolsVisible}" />
 		<mx:Image source="{MenuIcons.BAR}" width="3" height="21" visible="{ViewModeToolsVisible}" includeInLayout="{ViewModeToolsVisible}"/>
 		
-		<st:GradientHSlider id="slidPctScale" mouseDown="_sliderUserChange=true" change="sliderChange(event)"  styleName="sliderbttn" dataTipFormatFunction="formatPct" liveDragging="true" snapInterval="{ZoomInterval}" minimum="{MinZoomSize}" maximum="{MaxZoomSize}" value="{Scale}" width="120" height="15" enabled="true" toolTip="@Resource(key='Scale', bundle='FlexPaper')" tabIndex="8" thumbSkin="{MenuIcons.SLIDER_DOT}" visible="{ZoomToolsVisible}" includeInLayout="{ZoomToolsVisible}"/>
+		<st:GradientHSlider id="slidPctScale" mouseDown="_sliderUserChange=true" change="sliderChange(event)"  styleName="sliderbttn" dataTipFormatFunction="formatPct" liveDragging="true" snapInterval="{ZoomInterval}" minimum="{MinZoomSize}" maximum="{MaxZoomSize}" value="{Scale}" width="90" height="15" enabled="true" toolTip="@Resource(key='Scale', bundle='FlexPaper')" tabIndex="8" thumbSkin="{MenuIcons.SLIDER_DOT}" visible="{ZoomToolsVisible}" includeInLayout="{ZoomToolsVisible}"/>
 		<st:GradientTextInput fontSize="9" height="21" width="40" id="txtPct" text="{formatPct(Scale)}" keyDown="txtPctKeyDown(event)" enabled="{paper1.ViewMode == ViewModeEnum.PORTRAIT || (Viewer.ViewModeExtList.length>0 &amp;&amp; Viewer.ViewModeExtList[0].doZoom) }" toolTip="@Resource(key='Scale', bundle='FlexPaper')" tabIndex="9" visible="{ZoomToolsVisible}" includeInLayout="{ZoomToolsVisible}" />
 		<st:GradientImageButton icon="{MenuIcons.FULLSCREEN}" styleName="toolbttn" toolTip="@Resource(key='Fullscreen', bundle='FlexPaper')"  width="20" height="20" x="312" y="2" click="toggleFullScreen();" tabIndex="10" visible="{ZoomToolsVisible}" includeInLayout="{ZoomToolsVisible}"/>
 		<mx:Image source="{MenuIcons.BAR}" width="3" height="21"  visible="{ZoomToolsVisible}" includeInLayout="{ZoomToolsVisible}"/>
