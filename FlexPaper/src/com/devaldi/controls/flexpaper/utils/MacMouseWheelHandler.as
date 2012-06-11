@@ -98,8 +98,9 @@ package com.devaldi.controls.flexpaper.utils
 						return null;
 					}
 					
-					eb.InitMacMouseWheel = function(id) {	
+					eb.InitMacMouseWheel = function(id) {
 						var swf = eb.findSwf(id);
+						
 						if(swf && eb.platform.mac) {
 							var mouseOver = false;
 		
@@ -111,9 +112,9 @@ package com.devaldi.controls.flexpaper.utils
 							/// Mousewheel support
 							var _mousewheel = function(event) {
 								try{
-									if(!getDocViewer().hasFocus()){return true;}
-									getDocViewer().setViewerFocus(true);
-									getDocViewer().focus();
+									if(!swf.hasFocus()){return true;}
+									swf.setViewerFocus(true);
+									swf.focus();
 									
 									if(!swf.hasFocus()){return true;}
 								}catch(err){return true;}
@@ -154,11 +155,11 @@ package com.devaldi.controls.flexpaper.utils
 							
 							var _handleWheel = function(event){
 								try{
-									if(	!getDocViewer()||
-										(getDocViewer()&&
-										!getDocViewer().hasFocus())){return true;}
-										getDocViewer().setViewerFocus(true);
-										getDocViewer().focus();
+									if(	!swf||
+										(swf&&
+										!swf.hasFocus())){return true;}
+										swf.setViewerFocus(true);
+										swf.focus();
 										
 										if(navigator.appName == "Netscape"){
 											if (event.detail)

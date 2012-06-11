@@ -244,7 +244,7 @@ package com.devaldi.controls.flexpaper
 				reInitialize();
 				FitMode = FitModeEnum.FITNONE;
 				
-				if(_currPage>1 && (s=="Portrait" || s=="TwoPage")){gotoPage(_currPage);repaint();flash.utils.setTimeout(function():void{_paperContainer.visible = true},300);}
+				if(_currPage>1 && (s=="Portrait" || s=="TwoPage")){gotoPage(_currPage);repaint();flash.utils.setTimeout(function():void{repaint();_paperContainer.visible = true},300);}
 				else{_paperContainer.visible = true;}
 				
 				dispatchEvent(new ViewModeChangedEvent(ViewModeChangedEvent.VIEWMODE_CHANGED,_viewMode));
@@ -297,6 +297,7 @@ package com.devaldi.controls.flexpaper
 		
 		public function set TextSelectEnabled(b1:Boolean):void {
 			_textSelectEnabled = b1;
+			_displayContainer.doubleClickEnabled = !b1;
 			
 			if(_textSelectEnabled && CursorsEnabled)	
 				dispatchEvent(new CursorModeChangedEvent(CursorModeChangedEvent.CURSORMODE_CHANGED,"TextSelectorCursor"));
@@ -1416,7 +1417,9 @@ package com.devaldi.controls.flexpaper
 		}
 		
 		private function displayContainerDoubleClickHandler(event:MouseEvent):void{
-			if(TextSelectEnabled){return;}
+			if(TextSelectEnabled){
+				return;
+			}
 			if(ViewMode == ViewModeEnum.PORTRAIT)
 				FitMode = (FitMode == FitModeEnum.FITWIDTH)?FitModeEnum.FITHEIGHT:FitModeEnum.FITWIDTH;
 			
@@ -2259,6 +2262,71 @@ package com.devaldi.controls.flexpaper
 			return di;
 		}	
 		
+		private function textSelectorDoubleClickHandler(event:MouseEvent):void{
+			if(_selectionMarker!=null&&_selectionMarker.parent!=null){_selectionMarker.parent.removeChild(_selectionMarker);_selectionMarker=null;}
+			
+			try{
+				if(event.target is ITextSelectableDisplayObject){
+					(event.target as ITextSelectableDisplayObject).setTextSelectMode();
+					_selectionMc = (event.target as ITextSelectableDisplayObject).getMovieClip(); 
+				}
+				else if(!(event.target.content is MovieClip)){
+					if(!(event.target is MovieClip)){
+						return;
+					}else{
+						_selectionMc = (event.target as MovieClip);
+					}
+				}else{
+					_selectionMc = (event.target.content as MovieClip);
+				}
+			}catch (e:*) {return;}
+			
+			if(_docLoader.IsSplit){
+				if(_selectionMc.parent is ITextSelectableDisplayObject){
+					_currentSelectionPage = (_selectionMc.parent as ITextSelectableDisplayObject).getPageIndex();
+				}else{
+					_currentSelectionPage = (_selectionMc.parent as DupLoader).pageStartIndex;
+				}
+			}
+			else
+				_currentSelectionPage = _selectionMc.currentFrame;			
+			
+			_currentlySelectedText = "";
+			_firstHitIndex = -1;
+			_lastHitIndex = -1;
+			snap = _selectionMc.textSnapshot;
+
+			var hitIndex:int = snap.hitTestTextNearPos(event.target.parent.mouseX,event.target.parent.mouseY,10);
+			var searchIdx:int = hitIndex;
+			var searchEndIdx:int = hitIndex;
+			var searchChar:String = "";
+			var searchEndChar:String = "";
+			
+			if(snap.getText(hitIndex,hitIndex,true) != " " && snap.getText(hitIndex,hitIndex,true) != "\n"){
+				while(searchIdx>0 && searchChar != " " && searchChar != "\n"){
+					searchIdx = searchIdx - 1;
+					searchChar = snap.getText(searchIdx,searchIdx+1,true).charAt(1);		
+				}
+				
+				while(searchEndIdx<snap.charCount && searchEndChar != " " && searchEndChar != "\n"){
+					searchEndIdx = searchEndIdx + 1;
+					searchEndChar = snap.getText(searchEndIdx-1,searchEndIdx,true).charAt(1);		
+				}
+			}
+			
+			if(searchChar == " " || searchEndChar == " " || searchChar == "\n" || searchEndChar == "\n"){
+				_firstHitIndex = searchIdx+((searchChar=="\n")?1:0)+(searchChar==" "?2:0);
+				_lastHitIndex = searchEndIdx-((searchEndChar==" "||searchEndChar=="\n")?1:0)+1;
+				 
+				snap.setSelectColor(_markerColor);
+				snap.setSelected(_firstHitIndex,_lastHitIndex,true);
+				
+				stopSelecting(false);
+			}
+			
+			//snap.setSelected(_firstHitIndex,hitIndex,true);
+		}
+		
 		private function textSelectorMouseDownHandler(event:MouseEvent):void{
 			if(!TextSelectEnabled){return;}
 			if(_selectionMarker!=null&&_selectionMarker.parent!=null){_selectionMarker.parent.removeChild(_selectionMarker);_selectionMarker=null;}
@@ -2475,15 +2543,39 @@ package com.devaldi.controls.flexpaper
 			shape.graphics.endFill();
 		}
 		
+		private var _doubleClickTimer:Timer = new Timer(200);
+		private var _doubleClickTimerTick:int = 0;
+		private var _doubleClickEvent:MouseEvent;
+		
 		private function textSelectorMouseUpHandler(event:MouseEvent):void{
-			stopSelecting();	
+			if(!_doubleClickTimer.running){
+				_doubleClickTimer = new Timer(200);
+				_doubleClickTimerTick = 1;
+				_doubleClickEvent = event;
+				_doubleClickTimer.addEventListener("timer", textSelectorMouseUpDoubleClickHandler);
+				_doubleClickTimer.reset();
+				_doubleClickTimer.start();
+			}else{
+				_doubleClickTimerTick++;
+			}
+		}
+		
+		private function textSelectorMouseUpDoubleClickHandler(e:Event):void{
+			_doubleClickTimer.stop();
+			
+			if(_doubleClickTimerTick == 1){
+				stopSelecting();		
+			}else{
+				textSelectorDoubleClickHandler(_doubleClickEvent);
+			}
 		}
 		
 		private function textSelectorMouseLeaveHandler(event:MouseEvent):void{
-			stopSelecting();	
+			if(_firstHitIndex>0)
+				stopSelecting();	
 		}
 		
-		private function stopSelecting():void{		
+		private function stopSelecting(unselect:Boolean=true):void{		
 			systemManager.removeEventListener(
 				MouseEvent.MOUSE_MOVE, textSelectorMoveHandler, true);
 			
@@ -2527,13 +2619,17 @@ package com.devaldi.controls.flexpaper
 				_selectionMarker.isSearchMarker = false;
 				_selectionMarker.PageIndex = _currentSelectionPage;
 				drawCurrentSelection(_selectionColor,_selectionMarker,_tri);
-				snap.setSelected(_firstHitIndex,_lastHitIndex,false);
+				
+				if(unselect)
+					snap.setSelected(_firstHitIndex,_lastHitIndex,false);
 
 				if(UsingExtViewMode){
 					CurrExtViewMode.renderSelection(_currentSelectionPage-1,_selectionMarker);
 				}else{
 					_pageList[_currentSelectionPage-1].addChildAt(_selectionMarker,_pageList[_selectionMc.currentFrame-1].numChildren);
 				}
+			}else{
+				return;
 			}
 			
 			dispatchEvent(new SelectionCreatedEvent(SelectionCreatedEvent.SELECTION_CREATED,_currentlySelectedText));
@@ -2709,22 +2805,23 @@ package com.devaldi.controls.flexpaper
 		
 		private function printSplitPaperLoaded(event:Event):void{
 			if(!_splitpjPrecaching){
-			
-				var pageToPrint:* = event.target.content;
-				if(AutoAdjustPrintSize){
-					if((_splitpj.pageHeight/pageToPrint.height) < 1 && (_splitpj.pageHeight/pageToPrint.height) < (_splitpj.pageWidth/pageToPrint.width))
-						pageToPrint.scaleX = pageToPrint.scaleY = (_splitpj.pageHeight/pageToPrint.height);
-					else if((_splitpj.pageWidth/pageToPrint.width) < 1)
-						pageToPrint.scaleX = pageToPrint.scaleY = (_splitpj.pageWidth/pageToPrint.width);
-				}
-				
-				if((_swfContainer.getChildAt(0) as UIComponent).numChildren>0)
-					(_swfContainer.getChildAt(0) as UIComponent).removeChildAt(0);
-				
-				(_swfContainer.getChildAt(0) as UIComponent).addChild(pageToPrint);
-				
-				preparePluginsForPrint(_splitpj,_splitpjprinted);
-				_splitpj.addPage(_swfContainer,null,_splitpjoptions);
+				try{
+					var pageToPrint:* = event.target.content;
+					if(AutoAdjustPrintSize){
+						if((_splitpj.pageHeight/pageToPrint.height) < 1 && (_splitpj.pageHeight/pageToPrint.height) < (_splitpj.pageWidth/pageToPrint.width))
+							pageToPrint.scaleX = pageToPrint.scaleY = (_splitpj.pageHeight/pageToPrint.height);
+						else if((_splitpj.pageWidth/pageToPrint.width) < 1)
+							pageToPrint.scaleX = pageToPrint.scaleY = (_splitpj.pageWidth/pageToPrint.width);
+					}
+					
+					if((_swfContainer.getChildAt(0) as UIComponent).numChildren>0)
+						(_swfContainer.getChildAt(0) as UIComponent).removeChildAt(0);
+					
+					(_swfContainer.getChildAt(0) as UIComponent).addChild(pageToPrint);
+					
+					preparePluginsForPrint(_splitpj,_splitpjprinted);
+					_splitpj.addPage(_swfContainer,null,_splitpjoptions);
+				}catch(e:*){PopUpManager.removePopUp(_pp);}
 			}
 			
 			_splitpjloading = false;
