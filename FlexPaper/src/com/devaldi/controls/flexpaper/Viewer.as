@@ -2752,16 +2752,18 @@ package com.devaldi.controls.flexpaper
 							_splitpageNumList[currPage] = true;
 						}
 						else{
-							_splitpageNumList = range.split(",");
-							for(var i:int=0;i<_splitpageNumList.length;i++){
-								if(_splitpageNumList[i].toString().indexOf("-")>-1){
-									var rs:int = Number(_splitpageNumList[i].toString().substr(0,_splitpageNumList[i].toString().indexOf("-")));
-									var re:int = Number(_splitpageNumList[i].toString().substr(_splitpageNumList[i].toString().indexOf("-")+1));
+							var splitpageNumListEntries:Array = range.split(",");
+							_splitpageNumList = new Array();
+							
+							for(var i:int=0;i<splitpageNumListEntries.length;i++){
+								if(splitpageNumListEntries[i].toString().indexOf("-")>-1){
+									var rs:int = Number(splitpageNumListEntries[i].toString().substr(0,splitpageNumListEntries[i].toString().indexOf("-")));
+									var re:int = Number(splitpageNumListEntries[i].toString().substr(splitpageNumListEntries[i].toString().indexOf("-")+1));
 									for(var irs:int=rs;irs<re+1;irs++){
 										_splitpageNumList[irs] = true;
 									}
 								}else{
-									_splitpageNumList[int(Number(_splitpageNumList[i].toString()))] = true;
+									_splitpageNumList[int(Number(splitpageNumListEntries[i].toString()))] = true;
 								}
 							}
 						}
