@@ -51,6 +51,8 @@ along with FlexPaper.  If not, see <http://www.gnu.org/licenses/>.
 			
 			import flash.display.StageDisplayState;
 			import flash.net.navigateToURL;
+			import flash.desktop.Clipboard;
+			import flash.desktop.ClipboardFormats;
 			
 			import mx.controls.Alert;
 			import mx.controls.sliderClasses.Slider;
@@ -67,6 +69,13 @@ along with FlexPaper.  If not, see <http://www.gnu.org/licenses/>.
 			private function bindStageEvents(e:Event):void{
 				stage.removeEventListener(FullScreenEvent.FULL_SCREEN, fullScreenRedraw);
 				stage.addEventListener(FullScreenEvent.FULL_SCREEN, fullScreenRedraw);
+				this.addEventListener(Event.COPY,copyHandler);
+			}
+			
+			private function copyHandler(e:Event):void{
+				if(!ReadOnly){
+					try{Clipboard.generalClipboard.setData(ClipboardFormats.TEXT_FORMAT, viewer.CurrentlySelectedText);}catch (e:*) {}
+				}
 			}
 			
 			private function fullScreenRedraw(event:FullScreenEvent):void{
