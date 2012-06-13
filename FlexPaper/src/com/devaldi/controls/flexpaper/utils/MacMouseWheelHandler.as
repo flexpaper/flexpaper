@@ -67,7 +67,7 @@ package com.devaldi.controls.flexpaper.utils
 				function()
 				{
 					// create unique namespace
-					if(typeof eb == "undefined" || !eb)	eb = {};
+					if(typeof eb == "undefined" || !eb)	window["eb"] = eb = {};
 					
 					var userAgent = navigator.userAgent.toLowerCase();
 					eb.platform = {
@@ -98,15 +98,21 @@ package com.devaldi.controls.flexpaper.utils
 						return null;
 					}
 					
+					eb.flashMouseMoveHandler = function(){
+						if(eb.browser.mozilla || eb.browser.msie){
+							eb.mouseOver = true;
+						}
+					}
+			
 					eb.InitMacMouseWheel = function(id) {
 						var swf = eb.findSwf(id);
 						
 						if(swf && eb.platform.mac) {
-							var mouseOver = false;
+							eb.mouseOver = false;
 		
 							/// Mouse move detection for mouse wheel support
 							function _mousemove(event) {
-								mouseOver = event && event.target && (event.target == swf);
+								eb.mouseOver = event && event.target && (event.target == swf);
 							}
 		
 							/// Mousewheel support
@@ -118,20 +124,23 @@ package com.devaldi.controls.flexpaper.utils
 									
 									if(!swf.hasFocus()){return true;}
 								}catch(err){return true;}
-			
-								if(eb.browser.chrome){
+								
+							 	if(eb.browser.chrome || eb.browser.safari){
 									swf.externalMouseEvent(event.wheelDelta);
 									if(event.preventDefault)	event.preventDefault();
 									return true;
 								}
 			
-								if(mouseOver) {
+								if(eb.mouseOver) {
 									var delta = 0;
 									if(event.wheelDelta)		delta = event.wheelDelta / (eb.browser.opera ? 12 : 120);
 									else if(event.detail)		delta = -event.detail;
 									if(event.preventDefault)	event.preventDefault();
 									swf.externalMouseEvent(delta);
-									
+									if (event.stopPropagation) event.stopPropagation();    
+									if (event.returnValue) event.returnValue = false;
+									if (event.cancelBubble) event.cancelBubble = true;
+			
 									return true;
 								}
 								return false;
@@ -152,25 +161,44 @@ package com.devaldi.controls.flexpaper.utils
 							document.addEventListener("mousemove",_mousemove);
 			
 						}else if(swf && !eb.platform.mac){
+							eb.mouseOver = false;
+							
+							/// Mouse move detection for mouse wheel support
+							function _mousemove(event) {
+							eb.mouseOver = event && event.target && (event.target == swf);
+							}
 							
 							var _handleWheel = function(event){
 								try{
-									if(	!swf||
-										(swf&&
-										!swf.hasFocus())){return true;}
+									if(!swf.hasFocus()){return true;}
 										swf.setViewerFocus(true);
 										swf.focus();
 										
-										if(navigator.appName == "Netscape"){
-											if (event.detail)
-												delta = 0;
-												if (event.preventDefault){
-												event.preventDefault();
-												event.returnValue = false;
-											}
-										}
-									return false;	
-								}catch(err){return true;}		
+										if(!swf.hasFocus()){return true;}
+									}catch(err){return true;}
+			
+									if(eb.browser.chrome || eb.browser.safari){
+										swf.externalMouseEvent(event.wheelDelta);
+										if(event.preventDefault)	event.preventDefault();
+										return true;
+									}
+									
+									if(eb.mouseOver) {
+										var delta = 0;
+										if(event.wheelDelta)		delta = event.wheelDelta / (eb.browser.opera ? 12 : 120);
+										else if(event.detail)		delta = -event.detail;
+										if(event.preventDefault)	event.preventDefault();
+										if (delta > 0.0)
+										delta += 1.0;
+										swf.externalMouseEvent(delta);
+										if (event.stopPropagation) event.stopPropagation();    
+										if (event.returnValue) event.returnValue = false;
+										if (event.cancelBubble) event.cancelBubble = true;
+										
+										return true;
+									}
+			
+								return false;
 							}
 			
 							if(window.addEventListener)
