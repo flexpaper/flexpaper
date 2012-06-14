@@ -194,7 +194,6 @@ package com.devaldi.controls.flexpaper.utils
 										if (event.stopPropagation) event.stopPropagation();    
 										if (event.returnValue) event.returnValue = false;
 										if (event.cancelBubble) event.cancelBubble = true;
-										
 										return true;
 									}
 			
