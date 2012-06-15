@@ -688,6 +688,10 @@ package com.devaldi.controls.flexpaper
 				else if(_swfFile.length > 0 && !pagesSplit)
 					_docLoader.load(new URLRequest(_swfFile),StreamUtil.getExecutionContext());
 			}
+			
+			if(ExternalInterface.available){
+				ExternalInterface.call("eb.enableMouseWheelHandler",!pagesSplit);
+			}
 		}
 		
 		[Bindable]
