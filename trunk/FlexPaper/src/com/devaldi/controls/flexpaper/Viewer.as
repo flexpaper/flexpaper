@@ -2877,6 +2877,14 @@ package com.devaldi.controls.flexpaper
 					_libMC.nextFrame();
 				}
 				
+				if(AutoAdjustPrintSize){
+					if((pj.pageHeight/_libMC.height) < 1 && (pj.pageHeight/_libMC.height) < (pj.pageWidth/_libMC.width))
+						_libMC.scaleX = _libMC.scaleY = (pj.pageHeight/_libMC.height);
+					
+					if((pj.pageWidth/_libMC.width) < 1)
+						_libMC.scaleX = _libMC.scaleY = (pj.pageWidth/_libMC.width);
+				}
+				
 				preparePluginsForPrint(pj,i);
 				pj.addPage(_swfContainer,null,options);
 				pj.send();
