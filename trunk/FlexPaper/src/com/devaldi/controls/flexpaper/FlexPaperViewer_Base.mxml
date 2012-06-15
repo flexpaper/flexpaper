@@ -21,6 +21,7 @@
 			import com.devaldi.controls.flexpaper.resources.MenuIcons;
 			import com.devaldi.controls.flexpaper.utils.StreamUtil;
 			import com.devaldi.controls.flexpaper.utils.VersionHandler;
+			import com.devaldi.controls.flexpaper.utils.MacMouseWheelHandler;
 			import com.devaldi.events.CurrentPageChangedEvent;
 			import com.devaldi.events.CursorModeChangedEvent;
 			import com.devaldi.events.DocumentLoadedEvent;
@@ -133,7 +134,7 @@
 			protected var _browserManager:IBrowserManager;
 
 			public dynamic function get viewer():com.devaldi.controls.flexpaper.Viewer{return null;}
-			
+		
 			private function preInit():void{
 				_twopage = new TwoPagePlugin();
 				_singlepage = new SinglePagePlugin();
@@ -143,6 +144,10 @@
 				
 				Viewer.ViewModeExtList[Viewer.ViewModeExtList.length] = _twopage;
 				Viewer.ViewModeExtList[Viewer.ViewModeExtList.length] = _singlepage;
+				
+				if(ExternalInterface.available){
+					ExternalInterface.call(MacMouseWheelHandler.eb_mouseWheelEventHandler_jscode);
+				}
 			}
 			
 			private function bindStageEvents(e:Event):void{

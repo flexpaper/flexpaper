@@ -61,6 +61,20 @@ package com.devaldi.controls.flexpaper.utils
 					int(delta)));
 		}
 		
+		static public const 	eb_mouseWheelEventHandler_jscode : XML =
+			<script><![CDATA[
+			function()
+			{
+			if(typeof eb == "undefined" || !eb)	window["eb"] = eb = {};
+			eb.wheelHandlerEnabled = true;
+			
+				eb.enableMouseWheelHandler = function(enable){
+					eb.wheelHandlerEnabled = enable;
+				}
+			}
+			
+			]]></script>;
+		
 		// javascript mouse handling code
 		static private const 	c_jscode : XML =
 			<script><![CDATA[
@@ -109,7 +123,7 @@ package com.devaldi.controls.flexpaper.utils
 						
 						if(swf && eb.platform.mac) {
 							eb.mouseOver = false;
-		
+							
 							/// Mouse move detection for mouse wheel support
 							function _mousemove(event) {
 								eb.mouseOver = event && event.target && (event.target == swf);
@@ -117,6 +131,8 @@ package com.devaldi.controls.flexpaper.utils
 		
 							/// Mousewheel support
 							var _mousewheel = function(event) {
+								if(!eb.wheelHandlerEnabled){return true;}
+			
 								try{
 									if(!swf.hasFocus()){return true;}
 									swf.setViewerFocus(true);
@@ -124,7 +140,7 @@ package com.devaldi.controls.flexpaper.utils
 									
 									if(!swf.hasFocus()){return true;}
 								}catch(err){return true;}
-								
+			
 							 	if(eb.browser.chrome || eb.browser.safari){
 									swf.externalMouseEvent(event.wheelDelta);
 									if(event.preventDefault)	event.preventDefault();
@@ -170,6 +186,8 @@ package com.devaldi.controls.flexpaper.utils
 							
 							var _handleWheel = function(event){
 								try{
+									if(!eb.wheelHandlerEnabled){return true;}
+			
 									if(!swf.hasFocus()){return true;}
 										swf.setViewerFocus(true);
 										swf.focus();
