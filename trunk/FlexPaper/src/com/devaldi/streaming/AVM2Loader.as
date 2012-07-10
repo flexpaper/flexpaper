@@ -36,6 +36,7 @@ package com.devaldi.streaming
         import flash.net.URLRequest;
         import flash.net.URLStream;
         import flash.system.LoaderContext;
+        import flash.system.Security;
         import flash.utils.ByteArray;
         import flash.utils.Endian;
         
@@ -181,7 +182,7 @@ package com.devaldi.streaming
                 public function load(request:URLRequest, loaderCtx:LoaderContext):void
                 {
 					//resetURLStream();
-					
+					flash.system.Security.allowDomain(request.url);
 					_attempts++;					
 					_request = request;
                     _stream.load(request);

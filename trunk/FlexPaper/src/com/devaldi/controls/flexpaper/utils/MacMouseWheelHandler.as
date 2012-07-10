@@ -193,8 +193,9 @@ package com.devaldi.controls.flexpaper.utils
 										swf.focus();
 										
 										if(!swf.hasFocus()){return true;}
-									}catch(err){return true;}
+								}catch(err){return true;}
 			
+								try{
 									if(eb.browser.chrome || eb.browser.safari){
 										swf.externalMouseEvent(event.wheelDelta);
 										if(event.preventDefault)	event.preventDefault();
@@ -214,6 +215,7 @@ package com.devaldi.controls.flexpaper.utils
 										if (event.cancelBubble) event.cancelBubble = true;
 										return true;
 									}
+								}catch(err){return true;}
 			
 								return false;
 							}
