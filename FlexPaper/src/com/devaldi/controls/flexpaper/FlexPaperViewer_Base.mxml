@@ -19,9 +19,9 @@
 			import com.devaldi.controls.TwoPagePlugin;
 			import com.devaldi.controls.flexpaper.resources.LicenseKey;
 			import com.devaldi.controls.flexpaper.resources.MenuIcons;
+			import com.devaldi.controls.flexpaper.utils.MacMouseWheelHandler;
 			import com.devaldi.controls.flexpaper.utils.StreamUtil;
 			import com.devaldi.controls.flexpaper.utils.VersionHandler;
-			import com.devaldi.controls.flexpaper.utils.MacMouseWheelHandler;
 			import com.devaldi.events.CurrentPageChangedEvent;
 			import com.devaldi.events.CursorModeChangedEvent;
 			import com.devaldi.events.DocumentLoadedEvent;
@@ -234,6 +234,7 @@
 			public function printPaperRange(range:String):void{
 				viewer.printPaperRange(range);
 			}
+			
 			
 			protected function printHandler(event:Event):void{
 				

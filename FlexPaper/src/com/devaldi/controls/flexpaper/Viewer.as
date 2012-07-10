@@ -2857,7 +2857,7 @@ package com.devaldi.controls.flexpaper
 				
 				var i:int=0;
 				_libMC.gotoAndStop(i+1);
-				
+
 				while(_libMC.totalFrames > _libMC.currentFrame){
 					if(AutoAdjustPrintSize){
 						if((pj.pageHeight/_libMC.height) < 1 && (pj.pageHeight/_libMC.height) < (pj.pageWidth/_libMC.width))
