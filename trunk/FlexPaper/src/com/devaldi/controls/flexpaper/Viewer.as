@@ -703,8 +703,8 @@ package com.devaldi.controls.flexpaper
 			return _currentlySelectedText;
 		}
 		
-		public function Zoom(factor:Number, fnOnUpdate:Function=null, fnComplete:Function=null):void{
-			if(factor<_minZoomSize || factor>_maxZoomSize || factor == _scale)
+		public function Zoom(factor:Number, fnOnUpdate:Function=null, fnComplete:Function=null, forceZoom:Boolean=false):void{
+			if((factor<_minZoomSize || factor>_maxZoomSize || factor == _scale) && !(factor>_minZoomSize && factor<_maxZoomSize && forceZoom))
 				return;
 			
 			if((!UsingExtViewMode && _viewMode != ViewModeEnum.PORTRAIT) || (UsingExtViewMode && !CurrExtViewMode.doZoom)){return;}
