@@ -2206,34 +2206,46 @@ package com.devaldi.controls.flexpaper
 				color = uint("0x" + String(highlightXML.Body.@color).substring(1, String(highlightXML.Body.@color).length));
 				
 				for each (var item:XML in highlightXML.Body.Highlight.loc){
+					snap = null;
 					pg = Number(item.@pg);
 					pos = Number(item.@pos);
 					len = Number(item.@len);
 					
-					_libMC.gotoAndStop(pg+1);
-					snap = _libMC.textSnapshot;
-					
-					var sm:ShapeMarker = new ShapeMarker();
-					sm.isSearchMarker = false;
-					sm.PageIndex = pg+1;
-					
-					text = snap.getText(0,pos,false);
-					
-					for(var ci:int=0;ci<text.length;ci++){
-						if(text.charCodeAt(ci) > 10000){
-							pos = pos -1 ;	
-						}
+					if(!_docLoader.IsSplit){
+						_libMC.gotoAndStop(pg+1); 
+						snap = _libMC.textSnapshot;
+					}else{
+						/*var uloaderidx = finduloaderIdx(pg+1);
+						if(_docLoader.LoaderList[uloaderidx] != null && _docLoader.LoaderList[uloaderidx].content is MovieClip){
+							snap = (_docLoader.LoaderList[uloaderidx].content as MovieClip).textSnapshot;
+						}*/
+						if(_pageList[pg]!=null)
+							snap = _pageList[pg].textSnapshot;
 					}
 					
-					tri = snap.getTextRunInfo(pos,pos+len);
-					
-					drawCurrentSelection(color,sm,tri,false,0.25);
-					
-					if(	_markList[pg] == null){
-						_markList[pg] = new UIComponent();
-					}				
-					
-					_markList[pg].addChild(sm);
+					if(snap != null){
+						var sm:ShapeMarker = new ShapeMarker();
+						sm.isSearchMarker = false;
+						sm.PageIndex = pg+1;
+						
+						text = snap.getText(0,pos,false);
+						
+						for(var ci:int=0;ci<text.length;ci++){
+							if(text.charCodeAt(ci) > 10000){
+								pos = pos -1 ;	
+							}
+						}
+						
+						tri = snap.getTextRunInfo(pos,pos+len);
+						
+						drawCurrentSelection(color,sm,tri,false,0.25);
+						
+						if(	_markList[pg] == null){
+							_markList[pg] = new UIComponent();
+						}				
+						
+						_markList[pg].addChild(sm);
+					}
 				}
 				
 				repositionPapers();
