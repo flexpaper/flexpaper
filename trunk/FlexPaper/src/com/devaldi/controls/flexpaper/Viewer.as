@@ -114,6 +114,7 @@ package com.devaldi.controls.flexpaper
 	{
 		private var _swfFile:String = "";
 		private var _swfFileChanged:Boolean = false;
+		private var _loadingInitalized:Boolean = false;
 		private var _initialized:Boolean = false;
 		private var _loaderptr:Loader;
 		private var _libMC:IGenericDocument;
@@ -580,6 +581,7 @@ package com.devaldi.controls.flexpaper
 			
 			_swfFileChanged = true;
 			_frameLoadCount = 0;
+			_loadingInitalized = false;
 			
 			ViewMode = Viewer.InitViewMode;
 			
@@ -641,6 +643,7 @@ package com.devaldi.controls.flexpaper
 				_swfFileChanged = true;
 				_frameLoadCount = 0;
 				_currPage = 0;
+				_loadingInitalized = false;
 				
 				if(!pagesSplit){
 					if(EncodeURI)
@@ -930,8 +933,6 @@ package com.devaldi.controls.flexpaper
 				_bbusyloading = false;
 				_displayContainer.visible = true;
 
-				dispatchEvent(new PageLoadedEvent(PageLoadedEvent.PAGE_LOADED,event.target.loader.pageStartIndex));
-				
 				if(!bFound){
 					if(_fitPageOnLoad&&((_paperContainer.height / _libMC.height)>0)){FitMode = FitModeEnum.FITHEIGHT;_fitPageOnLoad=false;_scrollToPage=1;_pscale=_scale;}
 					if(_fitWidthOnLoad&&((_paperContainer.width / _libMC.width)>0)){FitMode = FitModeEnum.FITWIDTH;_fitWidthOnLoad=false;_scrollToPage=1;_pscale=_scale;}
@@ -1105,6 +1106,11 @@ package com.devaldi.controls.flexpaper
 											_pageList[i].addChild(_docLoader.LoaderList[uloaderidx]);
 											_pageList[i].loadedIndex = _pageList[i].dupIndex; 
 											
+											if(!_pageList[i].loadedEventDispatched && _loadingInitalized){
+												dispatchEvent(new PageLoadedEvent(PageLoadedEvent.PAGE_LOADED,i+1));
+												_pageList[i].loadedEventDispatched = true;
+											}
+											
 											if((_performSearchOnPageLoad && _pendingSearchPage == _pageList[i].dupIndex)||(SearchMatchAll && prevSearchText.length>0)){
 												_performSearchOnPageLoad = false;
 												searchTextByService(prevSearchText)
@@ -1174,6 +1180,29 @@ package com.devaldi.controls.flexpaper
 						}
 						
 						if(_viewMode != ViewModeEnum.TILE && !UsingExtViewMode && _markList[i] != null){
+							
+							// check for unitialized highlights
+							if(_docLoader.IsSplit){
+								for(var mi:int=0;mi<_markList[i].numChildren;mi++){
+									if(_markList[i].getChildAt(mi) is HighlightMarker){
+										if(!((_markList[i].getChildAt(mi) as HighlightMarker).initialized)){
+											var hmark:HighlightMarker = (_markList[i].getChildAt(mi) as HighlightMarker);
+											
+											snap = _pageList[i].textSnapshot;
+											var tri:Array= snap.getTextRunInfo(hmark.pos,hmark.pos+hmark.len);
+											hmark.initialized = tri.length>0;
+											
+											if(hmark.initialized){
+												drawCurrentSelection(0x0095f7,_markList[i].getChildAt(mi),tri,false,0.25);
+											}else{
+												if(snap.charCount > 0 && snap.getTextRunInfo(0,1).length == 0) // obviously has not initialized yet
+													repaint();	
+											}
+										}
+									}
+								}
+							}
+							
 							if(_markList[i].parent != _pageList[i]){
 								_pageList[i].addChildAt(_markList[i],_pageList[i].numChildren);
 							}else{ 
@@ -1509,10 +1538,9 @@ package com.devaldi.controls.flexpaper
 			super.commitProperties();
 			
 			if(_swfFileChanged && _swfFile != null && _swfFile.length > 0){ // handler for when the Swf file has changed.
-				
-				dispatchEvent(new Event("onDocumentLoading"));
-				
 				_swfFileChanged = false;
+				dispatchEvent(new Event("onDocumentLoading"));
+				_loadingInitalized = true;
 			}
 		}
 		
@@ -2215,18 +2243,16 @@ package com.devaldi.controls.flexpaper
 						_libMC.gotoAndStop(pg+1); 
 						snap = _libMC.textSnapshot;
 					}else{
-						/*var uloaderidx = finduloaderIdx(pg+1);
-						if(_docLoader.LoaderList[uloaderidx] != null && _docLoader.LoaderList[uloaderidx].content is MovieClip){
-							snap = (_docLoader.LoaderList[uloaderidx].content as MovieClip).textSnapshot;
-						}*/
 						if(_pageList[pg]!=null)
 							snap = _pageList[pg].textSnapshot;
 					}
 					
 					if(snap != null){
-						var sm:ShapeMarker = new ShapeMarker();
+						var sm:HighlightMarker = new HighlightMarker();
 						sm.isSearchMarker = false;
 						sm.PageIndex = pg+1;
+						sm.pos = pos;
+						sm.len = len;
 						
 						text = snap.getText(0,pos,false);
 						
@@ -2237,8 +2263,10 @@ package com.devaldi.controls.flexpaper
 						}
 						
 						tri = snap.getTextRunInfo(pos,pos+len);
+						sm.initialized = tri.length>0;
 						
-						drawCurrentSelection(color,sm,tri,false,0.25);
+						if(sm.initialized)
+							drawCurrentSelection(color,sm,tri,false,0.25);
 						
 						if(	_markList[pg] == null){
 							_markList[pg] = new UIComponent();

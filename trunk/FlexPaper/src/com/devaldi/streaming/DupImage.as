@@ -55,6 +55,7 @@ package com.devaldi.streaming
 		public var DrawBackground:Boolean = true;
 		public var BackgroundColor:uint = 0xffffff;
 		private var _rotationMatrix:Matrix;
+		public var loadedEventDispatched:Boolean = false;
 		
 		public function DupImage(){}
 		
