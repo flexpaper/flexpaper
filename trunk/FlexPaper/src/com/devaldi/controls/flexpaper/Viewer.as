@@ -932,6 +932,9 @@ package com.devaldi.controls.flexpaper
 				_frameLoadCount = numPages;
 				_bbusyloading = false;
 				_displayContainer.visible = true;
+				
+				if(UsingExtViewMode)
+					dispatchEvent(new PageLoadedEvent(PageLoadedEvent.PAGE_LOADED,event.target.loader.pageStartIndex));
 
 				if(!bFound){
 					if(_fitPageOnLoad&&((_paperContainer.height / _libMC.height)>0)){FitMode = FitModeEnum.FITHEIGHT;_fitPageOnLoad=false;_scrollToPage=1;_pscale=_scale;}
@@ -1106,7 +1109,7 @@ package com.devaldi.controls.flexpaper
 											_pageList[i].addChild(_docLoader.LoaderList[uloaderidx]);
 											_pageList[i].loadedIndex = _pageList[i].dupIndex; 
 											
-											if(!_pageList[i].loadedEventDispatched && _loadingInitalized){
+											if(!_pageList[i].loadedEventDispatched && _loadingInitalized && !UsingExtViewMode){
 												dispatchEvent(new PageLoadedEvent(PageLoadedEvent.PAGE_LOADED,i+1));
 												_pageList[i].loadedEventDispatched = true;
 											}
