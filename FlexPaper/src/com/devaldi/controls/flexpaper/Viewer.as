@@ -1185,7 +1185,7 @@ package com.devaldi.controls.flexpaper
 						if(_viewMode != ViewModeEnum.TILE && !UsingExtViewMode && _markList[i] != null){
 							
 							// check for unitialized highlights
-							if(_docLoader.IsSplit){
+							if(_docLoader.IsSplit && _pageList[i].loadedIndex == _pageList[i].dupIndex){
 								for(var mi:int=0;mi<_markList[i].numChildren;mi++){
 									if(_markList[i].getChildAt(mi) is HighlightMarker){
 										if(!((_markList[i].getChildAt(mi) as HighlightMarker).initialized)){
@@ -2246,37 +2246,35 @@ package com.devaldi.controls.flexpaper
 						_libMC.gotoAndStop(pg+1); 
 						snap = _libMC.textSnapshot;
 					}else{
-						if(_pageList[pg]!=null)
+						if(_pageList[pg]!=null && _pageList[pg].loadedIndex == pg)
 							snap = _pageList[pg].textSnapshot;
 					}
 					
-					if(snap != null){
-						var sm:HighlightMarker = new HighlightMarker();
-						sm.isSearchMarker = false;
-						sm.PageIndex = pg+1;
-						sm.pos = pos;
-						sm.len = len;
-						
-						text = snap.getText(0,pos,false);
-						
-						for(var ci:int=0;ci<text.length;ci++){
-							if(text.charCodeAt(ci) > 10000){
-								pos = pos -1 ;	
-							}
+					var sm:HighlightMarker = new HighlightMarker();
+					sm.isSearchMarker = false;
+					sm.PageIndex = pg+1;
+					sm.pos = pos;
+					sm.len = len;
+					
+					text = (snap!=null)?snap.getText(0,pos,false):"";
+					
+					for(var ci:int=0;ci<text.length;ci++){
+						if(text.charCodeAt(ci) > 10000){
+							pos = pos -1 ;	
 						}
-						
-						tri = snap.getTextRunInfo(pos,pos+len);
-						sm.initialized = tri.length>0;
-						
-						if(sm.initialized)
-							drawCurrentSelection(color,sm,tri,false,0.25);
-						
-						if(	_markList[pg] == null){
-							_markList[pg] = new UIComponent();
-						}				
-						
-						_markList[pg].addChild(sm);
 					}
+					
+					tri = (snap!=null)?snap.getTextRunInfo(pos,pos+len):null;
+					sm.initialized = tri!=null && tri.length>0;
+					
+					if(sm.initialized)
+						drawCurrentSelection(color,sm,tri,false,0.25);
+					
+					if(	_markList[pg] == null){
+						_markList[pg] = new UIComponent();
+					}				
+					
+					_markList[pg].addChild(sm);
 				}
 				
 				repositionPapers();
