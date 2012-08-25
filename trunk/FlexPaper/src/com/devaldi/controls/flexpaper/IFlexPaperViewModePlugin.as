@@ -33,5 +33,6 @@ package com.devaldi.controls.flexpaper
 		function translatePageNumber(pn:Number):Number;
 		function getPageTextSnapshot(pn:Number):TextSnapshot;
 		function setTextSelectMode(pn:Number):void;
+		function clearSearch():void;
 	}
 }

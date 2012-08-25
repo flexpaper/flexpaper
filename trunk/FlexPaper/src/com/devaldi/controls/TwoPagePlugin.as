@@ -19,6 +19,7 @@ along with FlexPaper.  If not, see <http://www.gnu.org/licenses/>.
 package com.devaldi.controls
 {
 	import com.devaldi.controls.flexpaper.FitModeEnum;
+	import com.devaldi.controls.flexpaper.HighlightMarker;
 	import com.devaldi.controls.flexpaper.IFlexPaperViewModePlugin;
 	import com.devaldi.controls.flexpaper.ShapeMarker;
 	import com.devaldi.controls.flexpaper.Viewer;
@@ -150,7 +151,24 @@ package com.devaldi.controls
 		public function renderMark(sm:UIComponent,pageIndex:int):void{
 			var rp:int = (pageIndex % 2 == 0)?0:1;
 			
-			viewer.PageList[rp].addChildAt(sm,viewer.PageList[rp].numChildren);
+			for(var mi:int=0;mi<sm.numChildren;mi++){
+				if((sm.getChildAt(mi) is HighlightMarker) && !(sm.getChildAt(mi) as HighlightMarker).initialized && viewer.PageList[rp].dupIndex == viewer.PageList[rp].loadedIndex){
+					var hmark:HighlightMarker = (sm.getChildAt(mi) as HighlightMarker); 
+					viewer.snap = (viewer.PageList[rp]).textSnapshot
+					var tri:Array= viewer.snap.getTextRunInfo(hmark.pos,hmark.pos+hmark.len);
+					hmark.initialized = tri.length>0;
+					
+					if(hmark.initialized){
+						viewer.drawCurrentSelection(0x0095f7,(sm.getChildAt(mi) as HighlightMarker),tri,false,0.25);
+					}
+				}
+			}
+			
+			if( sm.parent != viewer.PageList[rp]){
+				viewer.PageList[rp].addChildAt(sm,viewer.PageList[rp].numChildren);
+			}else{
+				viewer.PageList[rp].setChildIndex(sm,viewer.PageList[rp].numChildren -1);
+			}
 		}
 		
 		public function addEventListener(type:String, listener:Function, useCapture:Boolean = false, priority:int = 0, useWeakReference:Boolean = false):void {
@@ -267,6 +285,10 @@ package com.devaldi.controls
 				_hasinitialized = true;
 			}
 		}		
+		
+		public function clearSearch():void{
+			
+		}
 		
 		public function initOnLoading():void{
 			viewer.BusyLoading = true; 

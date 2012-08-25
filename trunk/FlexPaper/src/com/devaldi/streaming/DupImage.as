@@ -284,6 +284,8 @@ package com.devaldi.streaming
 		}
 		
 		override public function addChildAt(child:DisplayObject,index:int):DisplayObject{
+			if(index>this.numChildren){index = numChildren;}
+			
 			super.addChildAt(child,index);
 			
 			checkRotation(child);

@@ -84,7 +84,6 @@ along with FlexPaper.  If not, see <http://www.gnu.org/licenses/>.
 				bttnInfo.visible = (new MenuIcons.SMALL_TRANSPARENT().width > 10);
 				PrintEnabled = true;
 				
-				if(StartAtPage!=1&&!isNaN(StartAtPage)&&StartAtPage>0){paper1.gotoPage(StartAtPage);StartAtPage=-1;}
 				super.documentLoadedHandler(event);
 			}
 			
@@ -204,7 +203,7 @@ along with FlexPaper.  If not, see <http://www.gnu.org/licenses/>.
 		<st:GradientImageButton icon="{MenuIcons.HAND}" styleName="toolbttn" toolTip="@Resource(key='TextDrag', bundle='FlexPaper')"  width="22" selected="{!paper1.TextSelectEnabled}"  click="{paper1.TextSelectEnabled=false}" tabIndex="15" visible="{!ReadOnly &amp;&amp; CursorToolsVisible}" includeInLayout="{!ReadOnly &amp;&amp; CursorToolsVisible}" />
 		<mx:Image source="{MenuIcons.BAR}" width="3" height="21" visible="{!ReadOnly &amp;&amp; CursorToolsVisible}" includeInLayout="{!ReadOnly &amp;&amp; CursorToolsVisible}" />
 		
-		<st:GradientTextInput fontSize="9" height="20" width="65" id="txtSearch" keyDown="txtSearchKeyDown(event)" enabled="{paper1.ViewMode == ViewModeEnum.PORTRAIT||paper1.ViewMode == ViewModeEnum.TWOPAGE}" toolTip="@Resource(key='Search', bundle='FlexPaper')" tabIndex="16" visible="{SearchToolsVisible}" includeInLayout="{SearchToolsVisible}"/>
+		<st:GradientTextInput fontSize="9" height="20" width="65" id="txtSearch" keyDown="txtSearchKeyDown(event)" enabled="{paper1.ViewMode == ViewModeEnum.SINGLEPAGE||paper1.ViewMode == ViewModeEnum.PORTRAIT||paper1.ViewMode == ViewModeEnum.TWOPAGE}" toolTip="@Resource(key='Search', bundle='FlexPaper')" tabIndex="16" visible="{SearchToolsVisible}" includeInLayout="{SearchToolsVisible}"/>
 		<st:GradientImageButton icon="{MenuIcons.FIND}" styleName="toolbttn" width="20" height="20" click="paper1.searchText(txtSearch.text);" toolTip="@Resource(key='Search', bundle='FlexPaper')" tabIndex="17" enabled="{!TrueFullScreenActive}" visible="{SearchToolsVisible}" includeInLayout="{SearchToolsVisible}"/>
 		<mx:Image source="{MenuIcons.BAR}" width="3" height="21" visible="{SearchToolsVisible}" includeInLayout="{SearchToolsVisible}" />
 		

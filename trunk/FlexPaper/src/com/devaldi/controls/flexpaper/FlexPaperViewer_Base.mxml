@@ -12,7 +12,8 @@
 		 horizontalScrollPolicy="off"
 		  
 		 addedToStage="bindStageEvents(event)"
-		 preinitialize="preInit()">
+		 preinitialize="preInit()"
+	     creationComplete="viewercreationCompleteHandler(event)">
 	<mx:Script>
 		<![CDATA[
 			import com.devaldi.controls.SinglePagePlugin;
@@ -40,6 +41,7 @@
 			import mx.controls.Alert;
 			import mx.core.Application;
 			import mx.core.UITextField;
+			import mx.events.FlexEvent;
 			import mx.graphics.ImageSnapshot;
 			import mx.managers.BrowserManager;
 			import mx.managers.IBrowserManager;
@@ -132,7 +134,9 @@
 			private var _twopage:TwoPagePlugin;
 			private var _singlepage:SinglePagePlugin;
 			protected var _browserManager:IBrowserManager;
-
+			private var _documentLoadedFirst:Boolean = false;
+			private var _stageinitialized:Boolean = false;
+			
 			public dynamic function get viewer():com.devaldi.controls.flexpaper.Viewer{return null;}
 		
 			private function preInit():void{
@@ -177,6 +181,18 @@
 					cmi_print.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, printPaper);
 					contextMenu.customItems.push(cmi_print);
 				}
+			}
+			
+			private function viewercreationCompleteHandler(e:FlexEvent):void{
+				if(_documentLoadedFirst && !_stageinitialized){
+					dispatchEvent(new DocumentLoadedEvent(DocumentLoadedEvent.DOCUMENT_LOADED,viewer.numPages));
+					if(StartAtPage!=1&&!isNaN(StartAtPage)&&StartAtPage>0){viewer.gotoPage(StartAtPage);}
+					flash.utils.setTimeout(function():void{
+						if(StartAtPage!=1&&!isNaN(StartAtPage)&&StartAtPage>0){viewer.gotoPage(StartAtPage);StartAtPage=-1;}
+					},1000);
+				}
+				
+				_stageinitialized = true;
 			}
 			
 			public function setViewerFocus():void{
@@ -380,7 +396,16 @@
 			}
 			
 			protected function documentLoadedHandler(event:Event):void{
-				dispatchEvent(event);
+				if(_stageinitialized){
+					dispatchEvent(event);
+					
+					if(StartAtPage!=1&&!isNaN(StartAtPage)&&StartAtPage>0){viewer.gotoPage(StartAtPage);}
+					flash.utils.setTimeout(function():void{
+						if(StartAtPage!=1&&!isNaN(StartAtPage)&&StartAtPage>0){viewer.gotoPage(StartAtPage);StartAtPage=-1;}
+					},1000);
+				}else{
+					_documentLoadedFirst = true;
+				}
 			}	
 			
 			protected function pageLoadedEventHandler(event:Event):void{

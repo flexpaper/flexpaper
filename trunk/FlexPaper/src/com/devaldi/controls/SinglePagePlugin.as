@@ -279,6 +279,10 @@ package com.devaldi.controls
 			
 		}
 		
+		public function clearSearch():void{
+			
+		}
+		
 		public function addEventListener(type:String, listener:Function, useCapture:Boolean = false, priority:int = 0, useWeakReference:Boolean = false):void {
 			dispatcher.addEventListener(type, listener, useCapture, priority, useWeakReference);
 		}
