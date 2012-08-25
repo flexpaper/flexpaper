@@ -35,6 +35,7 @@ package com.devaldi.controls.flexpaper
 	import com.devaldi.events.ErrorLoadingPageEvent;
 	import com.devaldi.events.ExternalLinkClickedEvent;
 	import com.devaldi.events.FitModeChangedEvent;
+	import com.devaldi.events.InternalLinkClickedEvent;
 	import com.devaldi.events.PageLoadedEvent;
 	import com.devaldi.events.PageLoadingEvent;
 	import com.devaldi.events.ScaleChangedEvent;
@@ -100,6 +101,7 @@ package com.devaldi.controls.flexpaper
 	[Event(name="onLoadingProgress", type="flash.events.ProgressEvent")]
 	[Event(name="onScaleChanged", type="com.devaldi.events.ScaleChangedEvent")]
 	[Event(name="onExternalLinkClicked", type="com.devaldi.events.ExternalLinkClickedEvent")]
+	[Event(name="onInternalLinkClicked", type="com.devaldi.events.InternalLinkClickedEvent")]
 	[Event(name="onCurrPageChanged", type="com.devaldi.events.CurrentPageChangedEvent")]
 	[Event(name="onViewModeChanged", type="com.devaldi.events.ViewModeChangedEvent")]
 	[Event(name="onFitModeChanged", type="com.devaldi.events.FitModeChangedEvent")]
@@ -157,6 +159,8 @@ package com.devaldi.controls.flexpaper
 		private var _minZoomSize:Number = 0.3;
 		private var _maxZoomSize:Number = 5;
 		private var _searchMatchAll:Boolean = false;
+		private var _provideSearchAbstracts:Boolean = false;
+		private var _searchAbstracts:Array;
 		private var _searchServiceUrl:String = "";
 		private var _performSearchOnPageLoad:Boolean = false;
 		private var _autoAdjustPrintSize:Boolean = true;
@@ -448,6 +452,15 @@ package com.devaldi.controls.flexpaper
 		
 		public function set SearchMatchAll(b1:Boolean):void {
 			_searchMatchAll = b1;
+		}
+		
+		[Bindable]
+		public function get ProvideSearchAbstracts():Boolean{
+			return _provideSearchAbstracts;
+		}
+		
+		public function set ProvideSearchAbstracts(b:Boolean):void{
+			_provideSearchAbstracts = b;
 		}
 		
 		public function set AutoAdjustPrintSize(b1:Boolean):void {
@@ -1182,7 +1195,7 @@ package com.devaldi.controls.flexpaper
 							}
 						}
 						
-						if(_viewMode != ViewModeEnum.TILE && !UsingExtViewMode && _markList[i] != null){
+						if(_viewMode != ViewModeEnum.TILE && /* !UsingExtViewMode && */ _markList[i] != null){
 							
 							// check for unitialized highlights
 							if(_docLoader.IsSplit && _pageList[i].loadedIndex == _pageList[i].dupIndex){
@@ -1206,10 +1219,12 @@ package com.devaldi.controls.flexpaper
 								}
 							}
 							
-							if(_markList[i].parent != _pageList[i]){
-								_pageList[i].addChildAt(_markList[i],_pageList[i].numChildren);
-							}else{ 
-								_pageList[i].setChildIndex(_markList[i],_pageList[i].numChildren -1);
+							if(!UsingExtViewMode){
+								if(_markList[i].parent != _pageList[i]){
+									_pageList[i].addChildAt(_markList[i],_pageList[i].numChildren);
+								}else{ 
+									_pageList[i].setChildIndex(_markList[i],_pageList[i].numChildren -1);
+								}
 							}
 						}
 						
@@ -1913,8 +1928,16 @@ package com.devaldi.controls.flexpaper
 		private var _markList:Array;
 		private var prevSearchIndexList:Array;
 		
+		public function get MarkList():Array{
+			return _markList;
+		}
+		
 		public function get SelectionMarker():ShapeMarker{
 			return _selectionMarker;
+		}
+		
+		public function set SelectionMarker(sm:ShapeMarker):void{
+			_selectionMarker = sm;
 		}
 		
 		public function get SearchPageIndex():int {
@@ -1982,12 +2005,12 @@ package com.devaldi.controls.flexpaper
 						if(searchIndex > 0){ // found a new match
 							_selectionMarker = new ShapeMarker();
 							_selectionMarker.isSearchMarker = true;
-							_selectionMarker.graphics.beginFill(0x0095f7,0.3);
+							_selectionMarker.graphics.beginFill(SearchMatchColor,0.3);
 							
 							tri = snap.getTextRunInfo(searchIndex,searchIndex+text.length-1);
 							if(tri.length>0){
 								prevYsave = tri[0].matrix_ty;
-								drawCurrentSelection(0x0095f7,_selectionMarker,tri);
+								drawCurrentSelection(SearchMatchColor,_selectionMarker,tri);
 							}
 							
 							if(prevYsave>0){
@@ -2038,6 +2061,20 @@ package com.devaldi.controls.flexpaper
 			dispatchEvent(new Event("onNoMoreSearchResults"));
 		}
 		
+		private var _searchMatchColor:uint = 0x0095f7;
+		
+		public function get SearchMatchColor():uint {
+			return _searchMatchColor;
+		}
+		
+		public function set SearchMatchColor(c:uint):void {
+			_searchMatchColor = c;
+		}
+		
+		public function get SearchAbstracts():Array{
+			return _searchAbstracts;
+		}
+		
 		public function searchText(text:String, clearmarklist:Boolean=true):void{
 			if(text==null){return;}
 			
@@ -2050,6 +2087,11 @@ package com.devaldi.controls.flexpaper
 			var tri:Array;
 			
 			if(prevSearchText != text){
+
+				if(UsingExtViewMode){
+					CurrExtViewMode.clearSearch();
+				}
+
 				searchIndex = -1;
 				prevSearchIndexList = new Array();
 				prevSearchText = text;
@@ -2079,6 +2121,10 @@ package com.devaldi.controls.flexpaper
 						return;
 					}
 					
+					if(ProvideSearchAbstracts){
+						_searchAbstracts = new Array();						
+					}
+					
 					while((spi -1) < _libMC.framesLoaded){
 						_libMC.gotoAndStop(spi);
 						snap = _libMC.textSnapshot;
@@ -2087,13 +2133,20 @@ package com.devaldi.controls.flexpaper
 						//si = searchString(snap.getText(0,snap.charCount),text,si);
 						
 						if(si>0){
-							var sm:ShapeMarker = new ShapeMarker();
+							var sm:SearchShapeMarker = new SearchShapeMarker();
 							sm.isSearchMarker = true;
 							sm.PageIndex = spi;
 							
 							tri = snap.getTextRunInfo(si,si+text.length-1);
-							drawCurrentSelection(0x0095f7,sm,tri,false,0.25);
+							drawCurrentSelection(SearchMatchColor,sm,tri,false,0.25);
 							
+							if(ProvideSearchAbstracts){
+								_searchAbstracts[_searchAbstracts.length] = new Object();
+								_searchAbstracts[_searchAbstracts.length-1].pageNumber = sm.PageIndex;
+								_searchAbstracts[_searchAbstracts.length-1].SearchMarker = sm;
+								_searchAbstracts[_searchAbstracts.length-1].text = snap.getText((si-50>0)?si-50:0,(si+75<snap.charCount)?si+75:snap.charCount);
+								_searchAbstracts[_searchAbstracts.length-1].text = TextMapUtil.checkUnicodeIntegrity(_searchAbstracts[_searchAbstracts.length-1].text,null,_libMC)
+							}
 							
 							if(	_markList[spi-1] == null){
 								_markList[spi-1] = new UIComponent();
@@ -2137,12 +2190,12 @@ package com.devaldi.controls.flexpaper
 				if(searchIndex > 0){ // found a new match
 					_selectionMarker = new ShapeMarker();
 					_selectionMarker.isSearchMarker = true;
-					_selectionMarker.graphics.beginFill(0x0095f7,0.3);
+					_selectionMarker.graphics.beginFill(SearchMatchColor,0.3);
 					
 					tri = snap.getTextRunInfo(searchIndex,searchIndex+text.length-1);
 					if(tri.length>0){
 						prevYsave = tri[0].matrix_ty;
-						drawCurrentSelection(0x0095f7,_selectionMarker,tri);
+						drawCurrentSelection(SearchMatchColor,_selectionMarker,tri);
 					}
 					
 					if(prevYsave>0){
@@ -2681,16 +2734,25 @@ package com.devaldi.controls.flexpaper
 			_selectionMc = null;
 		}
 		
+		private var _scrollToPageHandler:int = -1;
+		private function scrollOnViewModeChangeHandler(evt:Event):void{
+			this.gotoPage(_scrollToPageHandler);
+			this.removeEventListener(ViewModeChangedEvent.VIEWMODE_CHANGED, scrollOnViewModeChangeHandler);
+		}
+		
 		private function dupImageClickHandler(event:MouseEvent):void{
 			stage.stageFocusRect = false;
 			stage.focus = event.target as InteractiveObject;
 			if((_viewMode == ViewModeEnum.TILE) && event.target != null && event.target is DupImage){
+				_scrollToPageHandler = (event.target as DupImage).dupIndex;
+				
+				this.addEventListener(ViewModeChangedEvent.VIEWMODE_CHANGED, scrollOnViewModeChangeHandler);
+				
 				if(_currentExtViewMode == null || (_currentExtViewMode!=null && _currentExtViewMode.Name == "TwoPage")){
 					ViewMode = 'Portrait';
 				}else{
 					ViewMode = _currentExtViewMode.Name;
 				}
-				_scrollToPage = (event.target as DupImage).dupIndex;
 			}else{
 				_dupImageClicked = true;
 				var t:Timer = new Timer(100,1);
@@ -2703,8 +2765,11 @@ package com.devaldi.controls.flexpaper
 				}else if(event.target is SimpleButton && (event.target as SimpleButton).name.indexOf("url:")>=0){
 					dispatchEvent(new ExternalLinkClickedEvent(ExternalLinkClickedEvent.EXTERNALLINK_CLICKED,
 						(event.target as SimpleButton).name.substring((event.target as SimpleButton).name.indexOf("url:"))));	
+				}else if(event.target is SimpleButton && (event.target as SimpleButton).name.indexOf("page:")>=0){
+					var page:int = parseInt((event.target as SimpleButton).name.substring((event.target as SimpleButton).name.indexOf("page:")+9));
+					dispatchEvent(new InternalLinkClickedEvent(InternalLinkClickedEvent.INTERNALLINK_CLICKED,page));
+					gotoPage(page);
 				}
-				
 			}
 		}
 		

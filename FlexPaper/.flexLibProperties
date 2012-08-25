@@ -53,6 +53,8 @@
     <classEntry path="com.devaldi.controls.flexpaper.ProcessingPrint"/>
     <classEntry path="com.devaldi.streaming.ITextSelectableDisplayObject"/>
     <classEntry path="com.devaldi.controls.flexpaper.HighlightMarker"/>
+    <classEntry path="com.devaldi.events.InternalLinkClickedEvent"/>
+    <classEntry path="com.devaldi.controls.flexpaper.SearchShapeMarker"/>
   </includeClasses>
   <includeResources/>
   <namespaceManifests/>
