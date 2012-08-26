@@ -19,7 +19,7 @@ along with FlexPaper.  If not, see <http://www.gnu.org/licenses/>.
 package com.devaldi.controls.flexpaper
 {
 	import caurina.transitions.Tweener;
-	
+	import mx.controls.Alert;
 	import com.devaldi.controls.FlowBox;
 	import com.devaldi.controls.FlowVBox;
 	import com.devaldi.controls.MatrixTransformer;
@@ -1640,7 +1640,7 @@ package com.devaldi.controls.flexpaper
 						
 						firstLoad = _pageList == null || (_pageList.length == 0 && numPages > 0);
 						
-						if(_loaderptr==null){_inputBytes = _docLoader.InputBytes;}else{_inputBytes = _loaderptr.contentLoaderInfo.bytes;}
+						if(_loaderptr==null){_inputBytes = _docLoader.InputBytes;}else{_inputBytes = _docLoader.InputBytes;}
 						
 						if(_libMC.framesLoaded > 0)
 							addInLoadedPages();
@@ -1651,7 +1651,7 @@ package com.devaldi.controls.flexpaper
 								
 								if(_libMC.framesLoaded>_frameLoadCount){
 									repositionPapers();
-									if(_docLoader.LoaderList.length>0 && _viewMode == ViewModeEnum.PORTRAIT){_bbusyloading = true; _docLoader.LoaderList[_docLoader.LoaderList.length-1].unloadAndStop(true); _docLoader.LoaderList[_docLoader.LoaderList.length-1].loadBytes(_libMC.loaderInfo.bytes,StreamUtil.getExecutionContext());}
+									if(_docLoader.LoaderList.length>0 && _viewMode == ViewModeEnum.PORTRAIT){_bbusyloading = true; _docLoader.LoaderList[_docLoader.LoaderList.length-1].unloadAndStop(true); _docLoader.LoaderList[_docLoader.LoaderList.length-1].loadBytes(_docLoader.InputBytes,StreamUtil.getExecutionContext());}
 									_frameLoadCount = _libMC.framesLoaded;
 								}
 								
@@ -1858,13 +1858,13 @@ package com.devaldi.controls.flexpaper
 			
 			// kick off the first page to load
 			if(!_docLoader.IsSplit){
-				if(_docLoader.LoaderList.length>0){_bbusyloading = true; _docLoader.LoaderList[0].unloadAndStop(true); _docLoader.LoaderList[0].loadBytes(_libMC.loaderInfo.bytes,StreamUtil.getExecutionContext());}
+				if(_docLoader.LoaderList.length>0){_bbusyloading = true; _docLoader.LoaderList[0].unloadAndStop(true); _docLoader.LoaderList[0].loadBytes(_docLoader.InputBytes,StreamUtil.getExecutionContext());}
 			}else{
-				if(_docLoader.LoaderList.length>0 && (_viewMode == ViewModeEnum.PORTRAIT) && _libMC.loaderInfo!=null && _libMC.loaderInfo.bytes != null)
+				if(_docLoader.LoaderList.length>0 && (_viewMode == ViewModeEnum.PORTRAIT) && _docLoader.InputBytes != null)
 				{
 					_bbusyloading = true; 
 					_docLoader.LoaderList[0].pageStartIndex = 1;
-					_docLoader.LoaderList[0].loadBytes(_libMC.loaderInfo.bytes,StreamUtil.getExecutionContext());
+					_docLoader.LoaderList[0].loadBytes(_docLoader.InputBytes,StreamUtil.getExecutionContext());
 				}
 			}
 			
