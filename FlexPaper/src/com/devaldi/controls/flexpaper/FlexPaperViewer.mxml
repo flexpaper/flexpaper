@@ -73,8 +73,16 @@ along with FlexPaper.  If not, see <http://www.gnu.org/licenses/>.
 				txtSearch.enabled = !TrueFullScreenActive; 
 			}
 			
+			var _nmsr:NoMoreSearchResultsDialog
 			private function onNoMoreSearchResultsHandler(event:Event):void{
-				Alert.show(resourceManager.getString("FlexPaper", "Finishedsearching"),resourceManager.getString("FlexPaper", "Searchfinished"),mx.controls.Alert.OK,this);
+				if(_nmsr == null){
+					_nmsr = new NoMoreSearchResultsDialog();
+					_nmsr.MessageTitle = resourceManager.getString("FlexPaper", "Searchfinished");
+					_nmsr.Message = resourceManager.getString("FlexPaper", "Finishedsearching");
+					PopUpManager.addPopUp(_nmsr, viewer, true);
+					PopUpManager.centerPopUp(_nmsr);
+					_nmsr["bttnOk"].addEventListener("click", function():void{_nmsr = null;});
+				}
 			}
 			
 			protected override function documentLoadedHandler(event:Event):void{
