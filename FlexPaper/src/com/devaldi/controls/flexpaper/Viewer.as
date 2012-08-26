@@ -19,7 +19,6 @@ along with FlexPaper.  If not, see <http://www.gnu.org/licenses/>.
 package com.devaldi.controls.flexpaper
 {
 	import caurina.transitions.Tweener;
-	import mx.controls.Alert;
 	import com.devaldi.controls.FlowBox;
 	import com.devaldi.controls.FlowVBox;
 	import com.devaldi.controls.MatrixTransformer;
