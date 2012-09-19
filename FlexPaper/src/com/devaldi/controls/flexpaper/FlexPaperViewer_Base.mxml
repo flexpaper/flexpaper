@@ -52,6 +52,9 @@
 			
 			[Bindable]
 			public var SwfFile:String = "";
+
+			[Bindable]
+			public var JSONFile:String = "";
 			
 			[Bindable]
 			public var SearchServiceUrl:String = "";

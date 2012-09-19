@@ -19,6 +19,8 @@ along with FlexPaper.  If not, see <http://www.gnu.org/licenses/>.
 package com.devaldi.controls.flexpaper
 {
 	import caurina.transitions.Tweener;
+	
+	import com.adobe.serialization.json.JSON;
 	import com.devaldi.controls.FlowBox;
 	import com.devaldi.controls.FlowVBox;
 	import com.devaldi.controls.MatrixTransformer;
@@ -97,6 +99,8 @@ package com.devaldi.controls.flexpaper
 	[Event(name="onPageLoading", type="com.devaldi.events.PageLoadingEvent")]
 	[Event(name="onDocumentLoading", type="flash.events.Event")]
 	[Event(name="onNoMoreSearchResults", type="flash.events.Event")]
+	[Event(name="onDownloadSearchResultCompleted", type="flash.events.Event")]
+	[Event(name="onDownloadingSearchResult", type="flash.events.Event")]
 	[Event(name="onLoadingProgress", type="flash.events.ProgressEvent")]
 	[Event(name="onScaleChanged", type="com.devaldi.events.ScaleChangedEvent")]
 	[Event(name="onExternalLinkClicked", type="com.devaldi.events.ExternalLinkClickedEvent")]
@@ -114,6 +118,7 @@ package com.devaldi.controls.flexpaper
 	public class Viewer extends Canvas
 	{
 		private var _swfFile:String = "";
+		private var _jsonFile:String = null;
 		private var _swfFileChanged:Boolean = false;
 		private var _loadingInitalized:Boolean = false;
 		private var _initialized:Boolean = false;
@@ -656,6 +661,7 @@ package com.devaldi.controls.flexpaper
 				_frameLoadCount = 0;
 				_currPage = 0;
 				_loadingInitalized = false;
+				_jsonPageData = null;
 				
 				if(!pagesSplit){
 					if(EncodeURI)
@@ -707,6 +713,15 @@ package com.devaldi.controls.flexpaper
 			if(ExternalInterface.available){
 				ExternalInterface.call("eb.enableMouseWheelHandler",!pagesSplit);
 			}
+		}
+		
+		[Bindable]
+		public function get JSONFile():String{
+			return _jsonFile;
+		}
+		
+		public function set JSONFile(val:String):void{
+			_jsonFile = val;
 		}
 		
 		[Bindable]
@@ -1009,10 +1024,10 @@ package com.devaldi.controls.flexpaper
 							var perH:int=0;
 							if(_pageList.length>1)
 							{
-								var nowpH:Number = 0;
+								var nowpH:Number = 1;
 								var nowP:Number = 0;
 
-								while(_paperContainer.verticalScrollPosition+1>nowpH && nowP-1<_pageList.length){
+								while(_paperContainer.verticalScrollPosition>nowpH && nowP-1<_pageList.length){
 									nowP++;
 									
 									if(nowP<_pageList.length)
@@ -1128,7 +1143,11 @@ package com.devaldi.controls.flexpaper
 											
 											if((_performSearchOnPageLoad && _pendingSearchPage == _pageList[i].dupIndex)||(SearchMatchAll && prevSearchText.length>0)){
 												_performSearchOnPageLoad = false;
-												searchTextByService(prevSearchText)
+												
+												if(JSONFile!=null)
+													searchTextByJSONFile(prevSearchText);
+												else
+													searchTextByService(prevSearchText)
 											}
 										}	
 									}
@@ -1947,6 +1966,111 @@ package com.devaldi.controls.flexpaper
 			searchPageIndex = s; 
 		}	
 		
+		var _jsonPageData:Object = null;
+		private function searchTextByJSONFile(text:String):void{
+			if(prevSearchText != text){
+				searchPageIndex = -1;
+				prevSearchText = text;
+				searchIndex = -1;
+			}
+			
+			if(_jsonPageData==null){
+				dispatchEvent(new Event("onDownloadingSearchResult"));
+				
+				flash.utils.setTimeout(function():void{
+					var serve:HTTPService = new HTTPService();
+					serve.url = JSONFile;
+					serve.method = "GET";
+					serve.resultFormat = "text";
+					serve.addEventListener("result",function searchByJSONResult(evt:ResultEvent):void {
+						_jsonPageData = JSON.decode(evt.result.toString());
+						dispatchEvent(new Event("onDownloadSearchResultCompleted"));
+						performSearchTextByJSON(text);
+					});
+					serve.addEventListener(FaultEvent.FAULT,function searchByJSONFault(evt:ResultEvent):void {
+						dispatchEvent(new Event("onDownloadSearchResultCompleted"));
+						dispatchEvent(new Event("onNoMoreSearchResults"));
+					});
+					serve.send();			
+				},100);
+				
+			}else{
+				performSearchTextByJSON(text);
+			}
+		}
+		
+		private function performSearchTextByJSON(text:String):void{
+			if(searchPageIndex == -1){
+				searchPageIndex = currPage;
+			}
+			
+			if(_jsonPageData[searchPageIndex-1]!=null){
+				if(	(!UsingExtViewMode && searchPageIndex!=currPage)){
+					_performSearchOnPageLoad=true;
+					_pendingSearchPage = searchPageIndex;
+					gotoPage(searchPageIndex);
+				}else{
+					if(!UsingExtViewMode)
+						snap = _pageList[searchPageIndex-1].textSnapshot;
+					else{
+						CurrExtViewMode.setTextSelectMode(searchPageIndex-1);
+						snap = CurrExtViewMode.getPageTextSnapshot(searchPageIndex-1);
+					}
+					
+					searchIndex = snap.findText((searchIndex==-1?0:searchIndex),adjustSearchTerm(text),false);
+					var tri:Array;
+					
+					if(searchIndex > 0){ // found a new match
+						_selectionMarker = new ShapeMarker();
+						_selectionMarker.isSearchMarker = true;
+						_selectionMarker.graphics.beginFill(SearchMatchColor,0.3);
+						
+						tri = snap.getTextRunInfo(searchIndex,searchIndex+text.length-1);
+						if(tri.length>0){
+							prevYsave = tri[0].matrix_ty;
+							drawCurrentSelection(SearchMatchColor,_selectionMarker,tri);
+						}
+						
+						if(prevYsave>0){
+							_selectionMarker.graphics.endFill();
+							_adjGotoPage = (ViewMode==ViewModeEnum.PORTRAIT)?(prevYsave) * _scale - 50:0;
+							gotoPage(searchPageIndex);
+						}
+						
+						searchIndex = searchIndex + text.length;
+					}else{
+						if(searchPageIndex+1<=numPages){
+							var searchBlob:String = "";
+							
+							for(var sp:int=searchPageIndex;sp<numPages;sp++){
+								searchBlob = "";
+								
+								if(_jsonPageData[sp].hasOwnProperty("text")){
+									for(var spt:int=0;spt<_jsonPageData[sp].text.length;spt++){
+										searchBlob+=(_jsonPageData[sp].text[spt]).toString();	
+									}
+								}
+								
+								if(searchBlob.toLowerCase().indexOf(text.toLowerCase())>=0){
+									searchPageIndex = sp+1;
+									searchIndex = -1;
+									performSearchTextByJSON(prevSearchText);
+									return;
+								}
+							}
+							
+							dispatchEvent(new Event("onNoMoreSearchResults"));
+							searchPageIndex = 1;							
+						}else{
+							dispatchEvent(new Event("onNoMoreSearchResults"));
+							searchPageIndex = 1;
+						}	
+					}	
+				}
+			}
+		}
+				
+		
 		private var _searchExtracts:Array;
 		
 		public function searchTextByService(text:String):void{
@@ -2026,9 +2150,8 @@ package com.devaldi.controls.flexpaper
 								
 								_performSearchOnPageLoad=true;
 								_pendingSearchPage = searchPageIndex;
-								gotoPage(searchPageIndex);
 								
-								//searchTextByService(prevSearchText);
+								searchTextByService(prevSearchText);
 							}else{
 								dispatchEvent(new Event("onNoMoreSearchResults"));
 								searchPageIndex = 1;
@@ -2080,7 +2203,11 @@ package com.devaldi.controls.flexpaper
 			if(text.length==0){return;}
 			text = text.toLowerCase();
 			
-			if(_docLoader.IsSplit&&SearchServiceUrl!=null&&SearchServiceUrl.length>0)
+			if(_docLoader.IsSplit && JSONFile != null){
+				return searchTextByJSONFile(text);
+			}
+			
+			if(_docLoader.IsSplit && SearchServiceUrl!=null && SearchServiceUrl.length>0)
 				return searchTextByService(text);
 			
 			var tri:Array;
@@ -2919,6 +3046,7 @@ package com.devaldi.controls.flexpaper
 				try{
 					var pageToPrint:* = event.target.content;
 					if(AutoAdjustPrintSize){
+						
 						if((_splitpj.pageHeight/pageToPrint.height) < 1 && (_splitpj.pageHeight/pageToPrint.height) < (_splitpj.pageWidth/pageToPrint.width))
 							pageToPrint.scaleX = pageToPrint.scaleY = (_splitpj.pageHeight/pageToPrint.height);
 						else if((_splitpj.pageWidth/pageToPrint.width) < 1)
@@ -2964,6 +3092,8 @@ package com.devaldi.controls.flexpaper
 				_libMC.gotoAndStop(i+1);
 
 				while(_libMC.totalFrames > _libMC.currentFrame){
+					_libMC.scaleX = _libMC.scaleY = 1;
+					
 					if(AutoAdjustPrintSize){
 						if((pj.pageHeight/_libMC.height) < 1 && (pj.pageHeight/_libMC.height) < (pj.pageWidth/_libMC.width))
 							_libMC.scaleX = _libMC.scaleY = (pj.pageHeight/_libMC.height);
@@ -3073,7 +3203,8 @@ package com.devaldi.controls.flexpaper
 				var i:int=0;
 				_libMC.gotoAndStop(i+1);
 				while(_libMC.totalFrames > _libMC.currentFrame){
-
+					_libMC.scaleX = _libMC.scaleY = 1;
+					
 					if(AutoAdjustPrintSize){
 						if((pj.pageHeight/_libMC.height) < 1 && (pj.pageHeight/_libMC.height) < (pj.pageWidth/_libMC.width))
 							_libMC.scaleX = _libMC.scaleY = (pj.pageHeight/_libMC.height);
