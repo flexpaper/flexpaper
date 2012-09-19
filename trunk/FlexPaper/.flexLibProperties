@@ -56,6 +56,8 @@
     <classEntry path="com.devaldi.events.InternalLinkClickedEvent"/>
     <classEntry path="com.devaldi.controls.flexpaper.SearchShapeMarker"/>
     <classEntry path="com.devaldi.controls.flexpaper.NoMoreSearchResultsDialog"/>
+    <classEntry path="com.devaldi.controls.flexpaper.PleaseWaitPerformingSearch"/>
+    <classEntry path="com.devaldi.controls.flexpaper.utils.ResourceUtil"/>
   </includeClasses>
   <includeResources/>
   <namespaceManifests/>

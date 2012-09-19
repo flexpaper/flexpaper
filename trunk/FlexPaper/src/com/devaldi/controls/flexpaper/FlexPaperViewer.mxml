@@ -48,6 +48,7 @@ along with FlexPaper.  If not, see <http://www.gnu.org/licenses/>.
 			import com.devaldi.events.FitModeChangedEvent;
 			import com.devaldi.events.ScaleChangedEvent;
 			import com.devaldi.events.ViewModeChangedEvent;
+			import com.devaldi.controls.flexpaper.utils.ResourceUtil;
 			
 			import flash.display.StageDisplayState;
 			import flash.net.navigateToURL;
@@ -73,7 +74,22 @@ along with FlexPaper.  If not, see <http://www.gnu.org/licenses/>.
 				txtSearch.enabled = !TrueFullScreenActive; 
 			}
 			
-			var _nmsr:NoMoreSearchResultsDialog
+			private var _pwps:PleaseWaitPerformingSearch;
+			private function onDownloadingSearchResultResultsHandler(event:Event):void{
+				if(_pwps==null){
+					_pwps = new PleaseWaitPerformingSearch(); 
+					_pwps.Message = ResourceUtil.getResource("PerformingSearchPleaseWait",resourceManager); 
+					PopUpManager.addPopUp(_pwps, viewer, true);
+					PopUpManager.centerPopUp(_pwps);
+					_pwps["bttnCancel"].addEventListener("click", function():void{_pwps = null;});
+				}
+			}
+			
+			private function onDownloadSearchResultCompletedResultsHandler(event:Event):void{
+				PopUpManager.removePopUp(_pwps);
+			}
+			
+			private var _nmsr:NoMoreSearchResultsDialog;
 			private function onNoMoreSearchResultsHandler(event:Event):void{
 				if(_nmsr == null){
 					_nmsr = new NoMoreSearchResultsDialog();
@@ -226,6 +242,8 @@ along with FlexPaper.  If not, see <http://www.gnu.org/licenses/>.
 			   onDocumentLoadedError="documentLoadedErrorHandler(event)"
 			   onLogoClicked="logoClickedEventHandler(event)"
 			   
+			   onDownloadingSearchResult="onDownloadingSearchResultResultsHandler(event)"
+			   onDownloadSearchResultCompleted="onDownloadSearchResultCompletedResultsHandler(event)"
 			   onNoMoreSearchResults="onNoMoreSearchResultsHandler(event)"
 			   onLoadingProgress="onDocumentLoadingProgressHandler(event)"
 			   onScaleChanged="onScaleChanged(event)"
@@ -239,7 +257,9 @@ along with FlexPaper.  If not, see <http://www.gnu.org/licenses/>.
 			   onPageLoading="pageLoadingEventHandler(event)"
 			   onErrorLoadingPage="errorLoadingPageEventHandler(event)"
 			   
-			   SwfFile="{SwfFile}" 
+			   SwfFile="{SwfFile}"
+			   JSONFile="{JSONFile}"
+			   
 			   Scale="{Scale}" 
 			   ZoomTransition="{ZoomTransition}" 
 			   ZoomTime="{ZoomTime}"
