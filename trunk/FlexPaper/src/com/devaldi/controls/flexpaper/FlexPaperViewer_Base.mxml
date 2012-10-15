@@ -8,7 +8,7 @@
 		 xmlns:st="com.devaldi.skinning.*" 
 		 borderColor="#8a8a8a" 
 		 borderThickness="1" 
-		 verticalScrollPolicy="off" 
+		 verticalScrollPolicy="off"  
 		 horizontalScrollPolicy="off"
 		  
 		 addedToStage="bindStageEvents(event)"
@@ -280,7 +280,7 @@
 					viewer.PaperVisible = true;
 				}
 				
-				TrueFullScreenActive = event.fullScreen && !FullScreenAsMaxWindow;
+				TrueFullScreenActive = event.fullScreen && !FullScreenAsMaxWindow && this.stage.displayState != "fullScreenInteractive";
 			}
 			
 			private function viewerKeyDown(event:KeyboardEvent):void{
@@ -306,11 +306,18 @@
 						}
 						
 						switch (this.stage.displayState) {
+							case "fullScreenInteractive":
+								this.stage.displayState = StageDisplayState.NORMAL;
+								break;
 							case StageDisplayState.FULL_SCREEN:
 								this.stage.displayState = StageDisplayState.NORMAL;
 								break;
 							default:
-								this.stage.displayState = StageDisplayState.FULL_SCREEN;
+								try{
+									this.stage.displayState = "fullScreenInteractive";
+								}catch(e:*){
+									this.stage.displayState = StageDisplayState.FULL_SCREEN;
+								}
 								break;
 						}
 					}else{

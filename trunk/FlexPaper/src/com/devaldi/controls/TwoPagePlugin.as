@@ -76,7 +76,7 @@ package com.devaldi.controls
 			_saveScale = n;
 		}
 		
-		public function setViewMode(s:String):void{
+		public function setViewMode(s:String, viewer:Viewer):void{
 		}
 		
 		public function addChild(i:int,o:DisplayObject):void{
