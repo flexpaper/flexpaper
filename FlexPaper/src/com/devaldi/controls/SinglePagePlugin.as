@@ -200,7 +200,7 @@ package com.devaldi.controls
 			}
 		}
 		
-		public function setViewMode(s:String):void{
+		public function setViewMode(s:String, viewer:Viewer):void{
 			viewer.PaperContainer.x = 0;
 			if (viewer.IsInitialized && viewer.SwfLoaded){
 				viewer.createDisplayContainer();

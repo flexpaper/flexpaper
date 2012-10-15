@@ -15,7 +15,7 @@ package com.devaldi.controls.flexpaper
 		function get supportsTextSelect():Boolean;
 		function initComponent(v:Viewer):Boolean;
 		function initOnLoading():void;
-		function setViewMode(s:String):void;
+		function setViewMode(s:String, viewer:Viewer):void;
 		function gotoPage(page:Number,adjGotoPage:int=0,interactive:Boolean=false):void;
 		function get currentPage():int;
 		function renderPage(page:Number):void;

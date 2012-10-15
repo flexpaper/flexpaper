@@ -71,7 +71,7 @@ along with FlexPaper.  If not, see <http://www.gnu.org/licenses/>.
 			}
 			
 			private function fullScreenRedraw(event:FullScreenEvent):void{
-				txtSearch.enabled = !TrueFullScreenActive; 
+				txtSearch.enabled = !TrueFullScreenActive || this.stage.displayState == "fullScreenInteractive"; 
 			}
 			
 			private var _pwps:PleaseWaitPerformingSearch;

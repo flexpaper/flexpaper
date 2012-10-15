@@ -246,7 +246,7 @@ package com.devaldi.controls.flexpaper
 				_viewMode = s;
 				
 				if(CurrExtViewMode!=null){
-					CurrExtViewMode.setViewMode(s);
+					CurrExtViewMode.setViewMode(s,this);
 					_viewMode = s;
 				}	
 				
@@ -1144,10 +1144,12 @@ package com.devaldi.controls.flexpaper
 											if((_performSearchOnPageLoad && _pendingSearchPage == _pageList[i].dupIndex)||(SearchMatchAll && prevSearchText.length>0)){
 												_performSearchOnPageLoad = false;
 												
-												if(JSONFile!=null)
+												if(SearchServiceUrl!=null)
+													searchTextByService(prevSearchText);
+												else if(JSONFile!=null)
 													searchTextByJSONFile(prevSearchText);
-												else
-													searchTextByService(prevSearchText)
+												
+													
 											}
 										}	
 									}
@@ -1983,7 +1985,7 @@ package com.devaldi.controls.flexpaper
 					serve.method = "GET";
 					serve.resultFormat = "text";
 					serve.addEventListener("result",function searchByJSONResult(evt:ResultEvent):void {
-						_jsonPageData = JSON.decode(evt.result.toString());
+						_jsonPageData = com.adobe.serialization.json.JSON.decode(evt.result.toString());
 						dispatchEvent(new Event("onDownloadSearchResultCompleted"));
 						performSearchTextByJSON(text);
 					});
@@ -2203,12 +2205,12 @@ package com.devaldi.controls.flexpaper
 			if(text.length==0){return;}
 			text = text.toLowerCase();
 			
+			if(_docLoader.IsSplit && SearchServiceUrl!=null && SearchServiceUrl.length>0)
+				return searchTextByService(text);
+			
 			if(_docLoader.IsSplit && JSONFile != null){
 				return searchTextByJSONFile(text);
 			}
-			
-			if(_docLoader.IsSplit && SearchServiceUrl!=null && SearchServiceUrl.length>0)
-				return searchTextByService(text);
 			
 			var tri:Array;
 			
@@ -2922,7 +2924,8 @@ package com.devaldi.controls.flexpaper
 		
 		public function resetCursor():void{
 			if(CursorsEnabled)
-				_grabCursorID = CursorManager.setCursor(MenuIcons.GRAB);
+				CursorManager.removeAllCursors();
+				//_grabCursorID = CursorManager.setCursor(MenuIcons.GRAB);
 		}
 		
 		private function dupImageMoutHandler(event:MouseEvent):void{
