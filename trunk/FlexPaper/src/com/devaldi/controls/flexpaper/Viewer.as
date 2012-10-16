@@ -2175,8 +2175,14 @@ package com.devaldi.controls.flexpaper
 		}
 		
 		private function searchByServiceResult(evt:ResultEvent):void {
-			var textExtract:String = evt.result.toString();
-			_searchExtracts[searchPageIndex-1] = textExtract;
+			var jsonRes:Object = com.adobe.serialization.json.JSON.decode(evt.result.toString());
+			if(parseInt(jsonRes[0].page) > -1){
+				searchPageIndex = parseInt(jsonRes[0].page);
+				_searchExtracts[searchPageIndex-1] = jsonRes[0].position.toString();
+			}else{
+				_searchExtracts[searchPageIndex-1] = null;	
+				searchPageIndex = numPages;
+			}
 			
 			searchTextByService(prevSearchText);
 		}
