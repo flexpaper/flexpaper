@@ -2179,12 +2179,12 @@ package com.devaldi.controls.flexpaper
 			if(parseInt(jsonRes[0].page) > -1){
 				searchPageIndex = parseInt(jsonRes[0].page);
 				_searchExtracts[searchPageIndex-1] = jsonRes[0].position.toString();
+				searchTextByService(prevSearchText);				
 			}else{
 				_searchExtracts[searchPageIndex-1] = null;	
-				searchPageIndex = numPages;
+				dispatchEvent(new Event("onNoMoreSearchResults"));
+				searchPageIndex = 1;
 			}
-			
-			searchTextByService(prevSearchText);
 		}
 		
 		private function searchByServiceFault(evt:FaultEvent):void{
