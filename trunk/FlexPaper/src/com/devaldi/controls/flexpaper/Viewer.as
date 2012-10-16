@@ -2476,6 +2476,7 @@ package com.devaldi.controls.flexpaper
 			di.width = w;
 			di.height = h;
 			di.init();
+			di.DrawBackground = !DocLoader.IsSplit;
 			di.NeedsFitting = DocLoader.IsSplit;
 			di.RoleModelHeight = _libMC.height;
 			di.RoleModelWidth = _libMC.width;
