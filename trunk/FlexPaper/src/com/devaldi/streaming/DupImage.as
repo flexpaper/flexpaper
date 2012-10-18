@@ -301,8 +301,8 @@ package com.devaldi.streaming
 			if(w>0&&h>0){
 			try{
 
-			if(((_paperRotation!=90 && _paperRotation!=270)||_paperRotation==180) && DrawBackground){
-				graphics.beginFill(BackgroundColor,1);
+			if(((_paperRotation!=90 && _paperRotation!=270)||_paperRotation==180)){
+				graphics.beginFill(BackgroundColor,(DrawBackground?1:0));
 				graphics.drawRect(0,0,w,h);
 			}else{
 				graphics.clear();
