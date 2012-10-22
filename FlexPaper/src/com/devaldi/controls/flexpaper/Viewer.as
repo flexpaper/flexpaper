@@ -1133,8 +1133,9 @@ package com.devaldi.controls.flexpaper
 											if(_docLoader.LoaderList[uloaderidx].parent != null)
 												_docLoader.LoaderList[uloaderidx].parent.removeChild(_docLoader.LoaderList[uloaderidx]);
 											
-											_pageList[i].addChild(_docLoader.LoaderList[uloaderidx]);
 											_pageList[i].DrawBackground = true;
+											_pageList[i].addChild(_docLoader.LoaderList[uloaderidx]);
+											_pageList[i].invalidateSize();
 											_pageList[i].loadedIndex = _pageList[i].dupIndex; 
 											
 											if(!_pageList[i].loadedEventDispatched && _loadingInitalized && !UsingExtViewMode){
