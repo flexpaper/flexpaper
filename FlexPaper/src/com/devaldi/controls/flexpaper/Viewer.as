@@ -99,6 +99,7 @@ package com.devaldi.controls.flexpaper
 	[Event(name="onPageLoading", type="com.devaldi.events.PageLoadingEvent")]
 	[Event(name="onDocumentLoading", type="flash.events.Event")]
 	[Event(name="onNoMoreSearchResults", type="flash.events.Event")]
+	[Event(name="onMaxSearchResultsExceeded", type="flash.events.Event")]
 	[Event(name="onDownloadSearchResultCompleted", type="flash.events.Event")]
 	[Event(name="onDownloadingSearchResult", type="flash.events.Event")]
 	[Event(name="onLoadingProgress", type="flash.events.ProgressEvent")]
@@ -448,7 +449,7 @@ package com.devaldi.controls.flexpaper
 
 		[Bindable]
 		public function get SearchMatchAll():Boolean {
-			if(SearchServiceUrl!=null && SearchServiceUrl.length>0)
+			if(SearchServiceUrl!=null && SearchServiceUrl.length>0 && _docLoader.IsSplit)
 				return false;
 			else
 				return _searchMatchAll;
@@ -1045,6 +1046,10 @@ package com.devaldi.controls.flexpaper
 									if(_pageList.length>p-1&&_paperContainer.verticalScrollPosition<_pageList[p-1].y && p!=_pageList.length){
 										p-=1;
 									}
+									
+									if(_pageList.length >= 2 && p==_pageList.length-1 && (_paperContainer.verticalScrollPosition - _pageList[p-1].y) > (_pageList[_pageList.length-1].y-_pageList[p-1].y)/2){
+										p = _pageList.length;
+									}
 								}
 								bFoundFirst = true;
 							}
@@ -1146,7 +1151,7 @@ package com.devaldi.controls.flexpaper
 											if((_performSearchOnPageLoad && _pendingSearchPage == _pageList[i].dupIndex)||(SearchMatchAll && prevSearchText.length>0)){
 												_performSearchOnPageLoad = false;
 												
-												if(SearchServiceUrl!=null)
+												if(SearchServiceUrl!=null && SearchServiceUrl.length>0)
 													searchTextByService(prevSearchText);
 												else if(JSONFile!=null)
 													searchTextByJSONFile(prevSearchText);
@@ -1483,7 +1488,7 @@ package com.devaldi.controls.flexpaper
 				
 				if(TextSelectEnabled && CursorsEnabled){
 					_grabCursorID = CursorManager.setCursor(MenuIcons.TEXT_SELECT_CURSOR);
-				}else if(CursorsEnabled && !(event.target is IFlexPaperPluginControl) || (event.target.parent !=null && event.target.parent.parent !=null && event.target.parent.parent is IFlexPaperPluginControl)){
+				}else if(CursorsEnabled && !(event.target is IFlexPaperPluginControl) || (CursorsEnabled && event.target.parent !=null && event.target.parent.parent !=null && event.target.parent.parent is IFlexPaperPluginControl)){
 					resetCursor();
 				}
 			}
@@ -1971,7 +1976,7 @@ package com.devaldi.controls.flexpaper
 		}	
 		
 		var _jsonPageData:Object = null;
-		private function searchTextByJSONFile(text:String):void{
+		public function searchTextByJSONFile(text:String):void{
 			if(prevSearchText != text){
 				searchPageIndex = -1;
 				prevSearchText = text;
@@ -2112,21 +2117,26 @@ package com.devaldi.controls.flexpaper
 				serve.send();
 			}else{ // perform actual search
 				if((_searchExtracts[searchPageIndex-1]!=null && _searchExtracts[searchPageIndex-1].length>0 && Number(_searchExtracts[searchPageIndex-1]) >= 0) || searchPageIndex==currPage){
-					if(	(!UsingExtViewMode && searchPageIndex!=currPage)/* || (UsingExtViewMode && CurrExtViewMode.translatePageNumber(searchPageIndex)!=currPage) */){
+					if(	(!UsingExtViewMode && searchPageIndex!=currPage) || (ViewMode != "SinglePage" && ViewMode != "TwoPage" && UsingExtViewMode && CurrExtViewMode.translatePageNumber(searchPageIndex)!=currPage)){ // last criteria not nessecary for singlepage
 						_performSearchOnPageLoad=true;
 						_pendingSearchPage = searchPageIndex;
 						gotoPage(searchPageIndex);
 					}
 					else{
-						
 						if(!UsingExtViewMode)
 							snap = _pageList[searchPageIndex-1].textSnapshot;
 						else{
 							CurrExtViewMode.setTextSelectMode(searchPageIndex-1);
 							snap = CurrExtViewMode.getPageTextSnapshot(searchPageIndex-1);
+							/*
+							var loaderIdx:int = finduloaderIdx(searchPageIndex);
+							var dl:DupLoader = DocLoader.LoaderList[loaderIdx];
+							if(dl!=null && dl.contentLoaderInfo!=null && dl.contentLoaderInfo.content is MovieClip){
+								snap = (dl.contentLoaderInfo.content as MovieClip).textSnapshot;
+							}*/
 						}
 						
-						searchIndex = snap.findText((searchIndex==-1?0:searchIndex),adjustSearchTerm(text),false);
+						searchIndex = (snap!=null)?snap.findText((searchIndex==-1?0:searchIndex),adjustSearchTerm(text),false):-1;
 						var tri:Array;
 						
 						if(searchIndex > 0){ // found a new match
@@ -2261,8 +2271,9 @@ package com.devaldi.controls.flexpaper
 						_searchAbstracts = new Array();						
 					}
 					
-					while((spi -1) < _libMC.framesLoaded){
+					while((spi -1) < _libMC.framesLoaded && _searchAbstracts.length<500){ // limit the amount of searchabstracts returned to avoid timeout
 						_libMC.gotoAndStop(spi);
+						
 						snap = _libMC.textSnapshot;
 						si = snap.findText((si==-1?0:si),adjustSearchTerm(text),false);
 						//si = snap.getText(0,snap.charCount).toLowerCase().indexOf(text,(si==-1?0:si));
@@ -2289,13 +2300,16 @@ package com.devaldi.controls.flexpaper
 							}				
 							
 							_markList[spi-1].addChild(sm);
-							
 						}
 						
 						if(si==-1)
 							spi++;
 						else
 							si++;
+					}
+					
+					if(_searchAbstracts.length>=500){
+						dispatchEvent(new Event("onMaxSearchResultsExceeded"));
 					}
 				}
 			}
