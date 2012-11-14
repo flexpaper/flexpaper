@@ -46,6 +46,7 @@ package com.devaldi.controls.flexpaper.utils
 					var id:String = 'eb_' + Math.floor(Math.random()*1000000);
 					ExternalInterface.addCallback(id, function(){});
 					ExternalInterface.call(c_jscode);
+					ExternalInterface.call("eb.focusSwf", id);
 					ExternalInterface.call("eb.InitMacMouseWheel", id);
 					ExternalInterface.addCallback('externalMouseEvent', _externalMouseEvent);	
 				}
@@ -96,6 +97,11 @@ package com.devaldi.controls.flexpaper.utils
 						mozilla: /mozilla/.test(userAgent) && !/(compatible|webkit)/.test(userAgent),
 						chrome: /chrome/.test(userAgent)
 					};
+			
+					eb.focusSwf = function(id){
+						var swf = eb.findSwf(id);
+						swf.focus();
+					}
 					
 					// find the function we added
 					eb.findSwf = function(id) {
@@ -108,7 +114,7 @@ package com.devaldi.controls.flexpaper.utils
 						for(var j = 0; j < embeds.length; j++)
 							if(typeof embeds[j][id] != "undefined")
 								return embeds[j];
-							
+								
 						return null;
 					}
 					
