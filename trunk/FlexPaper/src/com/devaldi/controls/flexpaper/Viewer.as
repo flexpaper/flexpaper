@@ -29,6 +29,7 @@ package com.devaldi.controls.flexpaper
 	import com.devaldi.controls.flexpaper.resources.MenuIcons;
 	import com.devaldi.controls.flexpaper.utils.StreamUtil;
 	import com.devaldi.controls.flexpaper.utils.TextMapUtil;
+	import com.devaldi.controls.flexpaper.utils.FlexPaperCursorManager;
 	import com.devaldi.events.CurrentPageChangedEvent;
 	import com.devaldi.events.CursorModeChangedEvent;
 	import com.devaldi.events.DocumentLoadedEvent;
@@ -77,6 +78,7 @@ package com.devaldi.controls.flexpaper
 	import flash.system.System;
 	import flash.text.TextSnapshot;
 	import flash.ui.Keyboard;
+	import flash.ui.Mouse;
 	import flash.utils.ByteArray;
 	import flash.utils.Timer;
 	import flash.utils.escapeMultiByte;
@@ -87,7 +89,6 @@ package com.devaldi.controls.flexpaper
 	import mx.core.Container;
 	import mx.core.UIComponent;
 	import mx.events.FlexEvent;
-	import mx.managers.CursorManager;
 	import mx.managers.PopUpManager;
 	import mx.resources.ResourceManager;
 	import mx.rpc.events.FaultEvent;
@@ -1377,6 +1378,8 @@ package com.devaldi.controls.flexpaper
 		}		
 		
 		public function createDisplayContainer(immidiateVisibility:Boolean=true):void{
+			FlexPaperCursorManager.init();
+			
 			if(_skinImgDo != null && _skinImgDo.parent == this){
 				removeChild(_skinImgDo);
 				_skinImgDo.removeEventListener(MouseEvent.MOUSE_OVER,skinMouseOver);
@@ -1473,7 +1476,7 @@ package com.devaldi.controls.flexpaper
 			
 			if(_viewMode==ViewModeEnum.PORTRAIT||(UsingExtViewMode && CurrExtViewMode.supportsTextSelect)){
 				if(TextSelectEnabled && CursorsEnabled){
-					_grabCursorID = CursorManager.setCursor(MenuIcons.TEXT_SELECT_CURSOR);
+					Mouse.cursor = FlexPaperCursorManager.TEXT_SELECT_CURSOR;
 				}else if(CursorsEnabled){
 					resetCursor();
 				}
@@ -1484,10 +1487,10 @@ package com.devaldi.controls.flexpaper
 			if(_viewMode==ViewModeEnum.PORTRAIT||(UsingExtViewMode && CurrExtViewMode.supportsTextSelect)){
 				
 				if(CursorsEnabled)
-					CursorManager.removeCursor(_grabbingCursorID);
+					Mouse.cursor = flash.ui.MouseCursor.AUTO;
 				
 				if(TextSelectEnabled && CursorsEnabled){
-					_grabCursorID = CursorManager.setCursor(MenuIcons.TEXT_SELECT_CURSOR);
+					Mouse.cursor = FlexPaperCursorManager.TEXT_SELECT_CURSOR;
 				}else if(CursorsEnabled && !(event.target is IFlexPaperPluginControl) || (CursorsEnabled && event.target.parent !=null && event.target.parent.parent !=null && event.target.parent.parent is IFlexPaperPluginControl)){
 					resetCursor();
 				}
@@ -1509,12 +1512,12 @@ package com.devaldi.controls.flexpaper
 			if(_viewMode==ViewModeEnum.PORTRAIT||(UsingExtViewMode && CurrExtViewMode.supportsTextSelect)){
 				
 				if(CursorsEnabled)
-					CursorManager.removeCursor(_grabCursorID);
+					Mouse.cursor = flash.ui.MouseCursor.AUTO;
 				
 				if(TextSelectEnabled && CursorsEnabled){
-					_grabbingCursorID = CursorManager.setCursor(MenuIcons.TEXT_SELECT_CURSOR);
+					Mouse.cursor = FlexPaperCursorManager.TEXT_SELECT_CURSOR;
 				}else if(CursorsEnabled){
-					_grabbingCursorID = CursorManager.setCursor(MenuIcons.GRABBING);
+					Mouse.cursor = FlexPaperCursorManager.GRABBING;
 				}
 			}
 			
@@ -1524,7 +1527,7 @@ package com.devaldi.controls.flexpaper
 		
 		private function displayContainerrolloutHandler(event:Event):void{
 			if(CursorsEnabled)
-				CursorManager.removeAllCursors();
+				Mouse.cursor = flash.ui.MouseCursor.AUTO;
 		}		
 		
 		private function wheelHandler(evt:MouseEvent):void {
@@ -2934,10 +2937,10 @@ package com.devaldi.controls.flexpaper
 				addGlowFilter(event.target as DupImage);
 			}else{
 				if(event.target is flash.display.SimpleButton || event.target is mx.core.SpriteAsset || (event.target is IFlexPaperPluginControl) || (event.target.parent !=null && event.target.parent.parent !=null && event.target.parent.parent is IFlexPaperPluginControl)){
-					CursorManager.removeAllCursors();
+					Mouse.cursor = flash.ui.MouseCursor.AUTO;
 				}else{
 					if(TextSelectEnabled && CursorsEnabled){
-						_grabCursorID = CursorManager.setCursor(MenuIcons.TEXT_SELECT_CURSOR);	
+						Mouse.cursor = FlexPaperCursorManager.TEXT_SELECT_CURSOR;	
 					}else if(CursorsEnabled){
 						resetCursor();
 					}
@@ -2947,17 +2950,16 @@ package com.devaldi.controls.flexpaper
 		
 		public function resetCursor():void{
 			if(CursorsEnabled)
-				CursorManager.removeAllCursors();
-				//_grabCursorID = CursorManager.setCursor(MenuIcons.GRAB);
+				Mouse.cursor = FlexPaperCursorManager.GRAB;
 		}
-		
+		 
 		private function dupImageMoutHandler(event:MouseEvent):void{
 			if(_viewMode == ViewModeEnum.TILE && event.target != null && event.target is DupImage){
 				(event.target as DupImage).filters = null;
 				(event.target as DupImage).addDropShadow();
 			}
-		}
-		
+		}  
+		 
 		private function addPages():void{
 			for(var pi:int=0;pi<_pageList.length;pi++){
 				if(!UsingExtViewMode)
