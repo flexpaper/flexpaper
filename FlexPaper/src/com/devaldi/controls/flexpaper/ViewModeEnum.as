@@ -6,5 +6,6 @@ package com.devaldi.controls.flexpaper
 	  		public static const TILE:String = "Tile";
 			public static const TWOPAGE:String = "TwoPage";
 			public static const SINGLEPAGE:String = "SinglePage";
+			public static const CADPAGE:String = "CADView";
 	  }
 }

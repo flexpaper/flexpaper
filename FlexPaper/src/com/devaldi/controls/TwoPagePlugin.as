@@ -298,5 +298,9 @@ package com.devaldi.controls
 				viewer.DocLoader.LoaderList[0].loadBytes(viewer.libMC.loaderInfo.bytes,StreamUtil.getExecutionContext());
 			}
 		}
+		
+		public function disposeViewMode():void{
+			
+		}
 	}
 }

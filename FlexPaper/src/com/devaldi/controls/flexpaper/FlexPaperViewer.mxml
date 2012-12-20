@@ -194,6 +194,11 @@ along with FlexPaper.  If not, see <http://www.gnu.org/licenses/>.
 				else
 					return n.toString();
 			}
+			
+			public override function searchText(text:String):void{
+				txtSearch.text = text;
+				super.searchText(text);				
+			}
 		]]>
 	</mx:Script>
 	<mx:Style source="styles/default.css" />    

@@ -59,6 +59,7 @@
     <classEntry path="com.devaldi.controls.flexpaper.PleaseWaitPerformingSearch"/>
     <classEntry path="com.devaldi.controls.flexpaper.utils.ResourceUtil"/>
     <classEntry path="com.devaldi.controls.flexpaper.utils.FlexPaperCursorManager"/>
+    <classEntry path="com.devaldi.controls.CadViewPlugin"/>
   </includeClasses>
   <includeResources/>
   <namespaceManifests/>

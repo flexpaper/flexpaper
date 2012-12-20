@@ -16,6 +16,7 @@
 	     creationComplete="viewercreationCompleteHandler(event)">
 	<mx:Script>
 		<![CDATA[
+			import com.devaldi.controls.CadViewPlugin;
 			import com.devaldi.controls.SinglePagePlugin;
 			import com.devaldi.controls.TwoPagePlugin;
 			import com.devaldi.controls.flexpaper.resources.LicenseKey;
@@ -136,6 +137,7 @@
 			private var prd:PrintRangeDialog;
 			private var _twopage:TwoPagePlugin;
 			private var _singlepage:SinglePagePlugin;
+			private var _cadpage:CadViewPlugin;
 			protected var _browserManager:IBrowserManager;
 			private var _documentLoadedFirst:Boolean = false;
 			private var _stageinitialized:Boolean = false;
@@ -145,12 +147,14 @@
 			private function preInit():void{
 				_twopage = new TwoPagePlugin();
 				_singlepage = new SinglePagePlugin();
+				_cadpage = new CadViewPlugin();
 				
 				if(Viewer.ViewModeExtList==null)
 					Viewer.ViewModeExtList = new Array();
 				
 				Viewer.ViewModeExtList[Viewer.ViewModeExtList.length] = _twopage;
 				Viewer.ViewModeExtList[Viewer.ViewModeExtList.length] = _singlepage;
+				Viewer.ViewModeExtList[Viewer.ViewModeExtList.length] = _cadpage;
 				
 				if(ExternalInterface.available){
 					ExternalInterface.call(MacMouseWheelHandler.eb_mouseWheelEventHandler_jscode);

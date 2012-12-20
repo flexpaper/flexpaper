@@ -34,5 +34,6 @@ package com.devaldi.controls.flexpaper
 		function getPageTextSnapshot(pn:Number):TextSnapshot;
 		function setTextSelectMode(pn:Number):void;
 		function clearSearch():void;
+		function disposeViewMode():void;
 	}
 }
