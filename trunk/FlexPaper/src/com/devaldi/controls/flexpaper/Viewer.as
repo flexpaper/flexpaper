@@ -27,9 +27,9 @@ package com.devaldi.controls.flexpaper
 	import com.devaldi.controls.Spinner;
 	import com.devaldi.controls.ZoomCanvas;
 	import com.devaldi.controls.flexpaper.resources.MenuIcons;
+	import com.devaldi.controls.flexpaper.utils.FlexPaperCursorManager;
 	import com.devaldi.controls.flexpaper.utils.StreamUtil;
 	import com.devaldi.controls.flexpaper.utils.TextMapUtil;
-	import com.devaldi.controls.flexpaper.utils.FlexPaperCursorManager;
 	import com.devaldi.events.CurrentPageChangedEvent;
 	import com.devaldi.events.CursorModeChangedEvent;
 	import com.devaldi.events.DocumentLoadedEvent;
@@ -236,6 +236,10 @@ package com.devaldi.controls.flexpaper
 		
 		public function set ViewMode(s:String):void {
 			if(s!=_viewMode){
+				if(_currentExtViewMode!=null){
+					_currentExtViewMode.disposeViewMode();
+				}
+				
 				for each (var vme:IFlexPaperViewModePlugin in ViewModeExtList){
 					if(s == vme.Name){
 						_currentExtViewMode = vme;
@@ -995,6 +999,8 @@ package com.devaldi.controls.flexpaper
 						dispatchEvent(new DocumentLoadedEvent(DocumentLoadedEvent.DOCUMENT_LOADED,numPages));
 						_frameLoadCount = _libMC.framesLoaded;
 					}
+				}else{
+					_bbusyloading = false;
 				}
 			}
 		}
@@ -1114,6 +1120,13 @@ package com.devaldi.controls.flexpaper
 											} */ 
 										}	
 									} 
+									
+									if(_performSearchOnPageLoad && _pendingSearchPage == _pageList[i].dupIndex){
+										_performSearchOnPageLoad = false;
+										
+										if(JSONFile!=null)
+											searchTextByJSONFile(prevSearchText);
+									}
 								}
 								
 								if(_docLoader.IsSplit){
@@ -1157,7 +1170,6 @@ package com.devaldi.controls.flexpaper
 												else if(JSONFile!=null)
 													searchTextByJSONFile(prevSearchText);
 												
-													
 											}
 										}	
 									}
@@ -1385,7 +1397,7 @@ package com.devaldi.controls.flexpaper
 				_skinImgDo.removeEventListener(MouseEvent.MOUSE_OVER,skinMouseOver);
 				_skinImgDo.removeEventListener(MouseEvent.MOUSE_OUT,skinMouseOut);
 				_skinImgDo.removeEventListener(MouseEvent.MOUSE_DOWN,skinMouseDown);
-			}
+			} 
 			
 			_skinImgDo = new Image();
 			_skinImgDo.source = _skinImg;
@@ -1461,7 +1473,7 @@ package com.devaldi.controls.flexpaper
 			if(!UsingExtViewMode)
 				_displayContainer.percentHeight = 100;
 			
-			_displayContainer.percentWidth = (ViewMode==ViewModeEnum.PORTRAIT)?96:100;
+			_displayContainer.percentWidth = (ViewMode==ViewModeEnum.PORTRAIT || ViewMode==ViewModeEnum.CADPAGE)?96:100;
 			_displayContainer.useHandCursor = true;
 			_displayContainer.addEventListener(MouseEvent.ROLL_OVER,displayContainerrolloverHandler,false,0,true);
 			_displayContainer.addEventListener(MouseEvent.ROLL_OUT,displayContainerrolloutHandler,false,0,true);
@@ -1976,9 +1988,28 @@ package com.devaldi.controls.flexpaper
 		
 		public function set SearchPageIndex(s:int):void {
 			searchPageIndex = s; 
-		}	
+		}
+		
+		private function getJsonPageIndex(searchIndex:int):int{
+			var itemIndex:int = -1;
+			
+			if(_jsonPageData!=null && JSONFile.indexOf("{page}")>-1){
+				var passed:Boolean = false;
+				for(var si:int=0;si<_jsonPageData.length;si++){
+					if(_jsonPageData[si].number == searchIndex){
+						itemIndex = si;
+					}
+				}
+			}else if(JSONFile.indexOf("{page}")==-1){
+				itemIndex = searchIndex-1;
+			}
+			
+			return itemIndex;
+		}
 		
 		var _jsonPageData:Object = null;
+		var _jsonPageDataFault:String = "";
+		
 		public function searchTextByJSONFile(text:String):void{
 			if(prevSearchText != text){
 				searchPageIndex = -1;
@@ -1986,12 +2017,19 @@ package com.devaldi.controls.flexpaper
 				searchIndex = -1;
 			}
 			
-			if(_jsonPageData==null){
+			if(_selectionMarker!=null && _selectionMarker.parent !=null){
+				_selectionMarker.parent.removeChild(_selectionMarker);
+				_selectionMarker=null;
+			}
+			
+			var outOfRange:Boolean = getJsonPageIndex(searchPageIndex) == -1;
+			
+			if(_jsonPageData==null || outOfRange){
 				dispatchEvent(new Event("onDownloadingSearchResult"));
 				
 				flash.utils.setTimeout(function():void{
 					var serve:HTTPService = new HTTPService();
-					serve.url = JSONFile;
+					serve.url = (JSONFile.indexOf("{page}")>-1)?JSONFile.replace("{page}",(searchPageIndex) + (10 - (searchPageIndex) % 10)):JSONFile;
 					serve.method = "GET";
 					serve.resultFormat = "text";
 					serve.addEventListener("result",function searchByJSONResult(evt:ResultEvent):void {
@@ -1999,9 +2037,16 @@ package com.devaldi.controls.flexpaper
 						dispatchEvent(new Event("onDownloadSearchResultCompleted"));
 						performSearchTextByJSON(text);
 					});
-					serve.addEventListener(FaultEvent.FAULT,function searchByJSONFault(evt:ResultEvent):void {
+					serve.addEventListener(FaultEvent.FAULT,function searchByJSONFault(evt:FaultEvent):void {
+						_jsonPageDataFault = JSONFile;
 						dispatchEvent(new Event("onDownloadSearchResultCompleted"));
-						dispatchEvent(new Event("onNoMoreSearchResults"));
+						var text:String = prevSearchText;
+						prevSearchText = "";
+						searchText(text);
+						
+						if(_docLoader.IsSplit && SearchServiceUrl==null){
+							dispatchEvent(new Event("onNoMoreSearchResults"));
+						}
 					});
 					serve.send();			
 				},100);
@@ -2011,13 +2056,27 @@ package com.devaldi.controls.flexpaper
 			}
 		}
 		
+		private function getCurrentJSONSearchBlob(dataIndex:int):String{
+			var searchBlob:String = "";
+			
+			if(_jsonPageData[dataIndex].hasOwnProperty("text")){
+				for(var spt:int=0;spt<_jsonPageData[dataIndex].text.length;spt++){
+					searchBlob+=(_jsonPageData[dataIndex].text[spt][5]).toString();	
+				}
+			}
+			
+			return searchBlob;
+		}
+		
 		private function performSearchTextByJSON(text:String):void{
 			if(searchPageIndex == -1){
 				searchPageIndex = currPage;
 			}
 			
-			if(_jsonPageData[searchPageIndex-1]!=null){
-				if(	(!UsingExtViewMode && searchPageIndex!=currPage)){
+			var dataIndex:int = getJsonPageIndex(searchPageIndex);
+			
+			if(_jsonPageData[dataIndex]!=null){
+				if(	(!UsingExtViewMode && searchPageIndex!=currPage) && (JSONFile.indexOf("{page}")==-1)){
 					_performSearchOnPageLoad=true;
 					_pendingSearchPage = searchPageIndex;
 					gotoPage(searchPageIndex);
@@ -2029,7 +2088,14 @@ package com.devaldi.controls.flexpaper
 						snap = CurrExtViewMode.getPageTextSnapshot(searchPageIndex-1);
 					}
 					
-					searchIndex = snap.findText((searchIndex==-1?0:searchIndex),adjustSearchTerm(text),false);
+					//searchIndex = snap.findText((searchIndex==-1?0:searchIndex),adjustSearchTerm(text),false);
+					
+					var flashBlob:String = snap.getText(0,snap.charCount);
+					var searchBlob:String = getCurrentJSONSearchBlob(dataIndex);
+					flashBlob = TextMapUtil.checkUnicodeIntegrityByTextmap(flashBlob,searchBlob);
+					
+					searchIndex = flashBlob.toLowerCase().indexOf(adjustSearchTerm(text).toLowerCase(),(searchIndex==-1?0:searchIndex));
+					
 					var tri:Array;
 					
 					if(searchIndex > 0){ // found a new match
@@ -2053,8 +2119,9 @@ package com.devaldi.controls.flexpaper
 					}else{
 						if(searchPageIndex+1<=numPages){
 							var searchBlob:String = "";
+							var startIndex:int = (JSONFile.indexOf("{page}")>-1)?(searchPageIndex % 10)+1:searchPageIndex;
 							
-							for(var sp:int=searchPageIndex;sp<numPages;sp++){
+							for(var sp:int=startIndex;sp<_jsonPageData.length;sp++){
 								searchBlob = "";
 								
 								if(_jsonPageData[sp].hasOwnProperty("text")){
@@ -2064,15 +2131,22 @@ package com.devaldi.controls.flexpaper
 								}
 								
 								if(searchBlob.toLowerCase().indexOf(text.toLowerCase())>=0){
-									searchPageIndex = sp+1;
+									searchPageIndex = _jsonPageData[sp].number;
 									searchIndex = -1;
 									performSearchTextByJSON(prevSearchText);
 									return;
-								}
+								}								
 							}
 							
-							dispatchEvent(new Event("onNoMoreSearchResults"));
-							searchPageIndex = 1;							
+						 	if(JSONFile.indexOf("{page}")>-1){
+								searchPageIndex = searchPageIndex + 1;
+								searchIndex = -1;
+								searchTextByJSONFile(prevSearchText);
+								return;
+							}else{
+								dispatchEvent(new Event("onNoMoreSearchResults"));
+								searchPageIndex = 1;
+							}
 						}else{
 							dispatchEvent(new Event("onNoMoreSearchResults"));
 							searchPageIndex = 1;
@@ -2229,7 +2303,7 @@ package com.devaldi.controls.flexpaper
 			if(_docLoader.IsSplit && SearchServiceUrl!=null && SearchServiceUrl.length>0)
 				return searchTextByService(text);
 			
-			if(_docLoader.IsSplit && JSONFile != null){
+			if(JSONFile != null && _jsonPageDataFault != JSONFile){
 				return searchTextByJSONFile(text);
 			}
 			
@@ -2274,12 +2348,14 @@ package com.devaldi.controls.flexpaper
 						_searchAbstracts = new Array();						
 					}
 					
-					while((spi -1) < _libMC.framesLoaded && _searchAbstracts.length<500){ // limit the amount of searchabstracts returned to avoid timeout
+					while((spi -1) < _libMC.framesLoaded && ((_searchAbstracts!=null && _searchAbstracts.length<500)||_searchAbstracts==null)){ // limit the amount of searchabstracts returned to avoid timeout
 						_libMC.gotoAndStop(spi);
 						
 						snap = _libMC.textSnapshot;
 						si = snap.findText((si==-1?0:si),adjustSearchTerm(text),false);
-						//si = snap.getText(0,snap.charCount).toLowerCase().indexOf(text,(si==-1?0:si));
+						if(si==-1){
+							si = TextMapUtil.checkUnicodeIntegrity(snap.getText(0,snap.charCount),null,_libMC).toLowerCase().indexOf(text,(si==-1?0:si));
+						}
 						//si = searchString(snap.getText(0,snap.charCount),text,si);
 						
 						if(si>0){
@@ -2311,7 +2387,7 @@ package com.devaldi.controls.flexpaper
 							si++;
 					}
 					
-					if(_searchAbstracts.length>=500){
+					if(_searchAbstracts!=null && _searchAbstracts.length>=500){
 						dispatchEvent(new Event("onMaxSearchResultsExceeded"));
 					}
 				}
@@ -2336,6 +2412,9 @@ package com.devaldi.controls.flexpaper
 			while((searchPageIndex -1) < numPagesLoaded){
 				snap = _libMC.textSnapshot;
 				searchIndex = snap.findText((searchIndex==-1?0:searchIndex),adjustSearchTerm(text),false);
+				if(searchIndex==-1){
+					searchIndex = TextMapUtil.checkUnicodeIntegrity(snap.getText(0,snap.charCount),text,_libMC).toLowerCase().indexOf(text,(searchIndex==-1?0:searchIndex));
+				}
 				//searchIndex = TextMapUtil.checkUnicodeIntegrity(snap.getText(0,snap.charCount),text,_libMC).toLowerCase().indexOf(text,(searchIndex==-1?0:searchIndex));
 				//searchIndex = snap.getText(0,snap.charCount).toLowerCase().indexOf(text,(searchIndex==-1?0:searchIndex));
 				//searchIndex = searchString(snap.getText(0,snap.charCount),text,searchIndex);

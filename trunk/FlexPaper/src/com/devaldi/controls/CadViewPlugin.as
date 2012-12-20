@@ -2,8 +2,10 @@ package com.devaldi.controls
 {
 	import caurina.transitions.Tweener;
 	
+	import com.devaldi.controls.flexpaper.FitModeEnum;
 	import com.devaldi.controls.flexpaper.IFlexPaperViewModePlugin;
 	import com.devaldi.controls.flexpaper.ShapeMarker;
+	import com.devaldi.controls.flexpaper.ViewModeEnum;
 	import com.devaldi.controls.flexpaper.Viewer;
 	import com.devaldi.controls.flexpaper.utils.StreamUtil;
 	import com.devaldi.events.CurrentPageChangedEvent;
@@ -13,6 +15,7 @@ package com.devaldi.controls
 	import flash.display.Bitmap;
 	import flash.display.BitmapData;
 	import flash.display.DisplayObject;
+	import flash.display.Sprite;
 	import flash.events.Event;
 	import flash.events.EventDispatcher;
 	import flash.events.IEventDispatcher;
@@ -26,6 +29,7 @@ package com.devaldi.controls
 	import flash.text.TextField;
 	import flash.text.TextFormat;
 	import flash.text.TextSnapshot;
+	import flash.ui.Mouse;
 	import flash.utils.setTimeout;
 	
 	import mx.containers.Box;
@@ -33,6 +37,7 @@ package com.devaldi.controls
 	import mx.containers.HBox;
 	import mx.containers.Panel;
 	import mx.containers.VBox;
+	import mx.controls.Image;
 	import mx.controls.Label;
 	import mx.core.Container;
 	import mx.core.UIComponent;
@@ -41,7 +46,7 @@ package com.devaldi.controls
 	import mx.effects.Resize;
 	import mx.events.EffectEvent;
 	
-	public class SinglePagePlugin implements IFlexPaperViewModePlugin, IEventDispatcher
+	public class CadViewPlugin implements IFlexPaperViewModePlugin, IEventDispatcher
 	{
 		private var dispatcher:IEventDispatcher = new EventDispatcher();
 		private var viewer:Viewer;
@@ -55,17 +60,19 @@ package com.devaldi.controls
 			
 		}
 		
-		public function SinglePagePlugin()
+		public function CadViewPlugin()
 		{
 		}
 		
 		public function get Name():String{
-			return "SinglePage";
+			return "CADView";
 		}
 		
 		public function translatePageNumber(pn:Number):Number{
 			return pn;
 		}
+		
+		var _imgPreview:Image;
 		
 		public function initComponent(v:Viewer):Boolean{
 			viewer = v;
@@ -74,15 +81,35 @@ package com.devaldi.controls
 			viewer.PaperContainer.addChild(viewer.DisplayContainer);
 			viewer.PaperContainer.childrenDoDrag = true;
 			viewer.DisplayContainer.percentWidth = 100;
-
-			//viewer.PaperContainer.verticalScrollPolicy = "off";
-			//viewer.PaperContainer.horizontalScrollPolicy = "off";
-			//viewer.verticalScrollPolicy = "off";
-			//viewer.horizontalScrollPolicy = "off";
+			
+			if(_imgPreview!=null){
+				_imgPreview.parent.removeChild(_imgPreview);
+			}
+			
+			_imgPreview = new Image();
+			_imgPreview.width = 150; _imgPreview.height = 150;
+			_imgPreview.x = viewer.width-_imgPreview.width - 22; _imgPreview.y = viewer.height-_imgPreview.height - 22;
+			viewer.addChildAt(_imgPreview,viewer.numChildren-1);
+			viewer.addEventListener(Event.RESIZE, viewerSizeChanged,false,0,true);
+			viewer.addEventListener(MouseEvent.DOUBLE_CLICK,displayContainerDoubleClickHandler,false,0,true);
 			
 			return true;
 		}
+		
+		private function viewerSizeChanged(evt:Event):void{
+			_imgPreview.width = viewer.width/5; _imgPreview.height = _imgPreview.width / (viewer.width/viewer.height);
+			_imgPreview.x = viewer.width-_imgPreview.width - 22; _imgPreview.y = viewer.height-_imgPreview.height - 22;
+		}
+		
 		var move:Move;
+		
+		private function displayContainerDoubleClickHandler(event:MouseEvent):void{
+			if(viewer.TextSelectEnabled){
+				return;
+			}
+			if(viewer.ViewMode == this.Name)
+				viewer.FitMode = (viewer.FitMode == FitModeEnum.FITWIDTH)?FitModeEnum.FITHEIGHT:FitModeEnum.FITWIDTH;
+		}
 		
 		public function moveOutLeft():void{
 			move = new Move(viewer.PaperContainer);
@@ -91,7 +118,7 @@ package com.devaldi.controls
 			move.xTo = 800;
 			move.addEventListener(EffectEvent.EFFECT_END,onMoveOutLeftEnd);
 			move.play();
-		
+			
 		}
 		
 		private function onMoveOutLeftEnd(event:EffectEvent):void{
@@ -156,7 +183,7 @@ package com.devaldi.controls
 		public function mvNext(interactive:Boolean=false):void{
 			if(viewer.currPage<viewer.numPages){viewer.gotoPage(viewer.currPage+1);}
 		}
-		 
+		
 		public function renderSelection(i:int,marker:ShapeMarker):void{
 			if(i+1 == viewer.SearchPageIndex && marker.parent != viewer.PageList[0]){
 				viewer.PageList[0].addChildAt(marker,viewer.PageList[0].numChildren);
@@ -198,7 +225,130 @@ package com.devaldi.controls
 				viewer.PageList[0].loadedIndex = viewer.currPage;
 				viewer.PageList[0].dupIndex = viewer.currPage; 
 			}
+			
+			redrawPreview(i);
 		}
+		
+		// draws the preview in the bottom right corner
+		var _rectSprite:Sprite = new Sprite();
+		var _highlightRectSprite:Sprite = new Sprite();
+		var _highlightBitmap:Bitmap;
+		
+		private function redrawPreview(i:Number):void{
+			if(_draggingThumbnail){return;}
+			
+			while(_imgPreview.numChildren > 0)
+				delete(_imgPreview.removeChildAt(0));
+			
+			_imgPreview.graphics.clear();
+			_imgPreview.graphics.beginFill(0xdddddd,1);
+			_imgPreview.graphics.drawRect(0,0,_imgPreview.width,_imgPreview.height);
+			_imgPreview.graphics.endFill();
+			
+			var bmd:BitmapData;
+			var bmdscale:Number;
+			
+			if(viewer.libMC.height>viewer.libMC.width){
+				bmd = new BitmapData((viewer.libMC.width/viewer.libMC.height)*_imgPreview.height, _imgPreview.height, false, 0xFFFFFF);
+				bmdscale = bmd.height/viewer.libMC.height;
+			}else{
+				bmd = new BitmapData(_imgPreview.width, (viewer.libMC.height/viewer.libMC.width) * _imgPreview.width, false, 0xFFFFFF);
+				bmdscale = bmd.width/viewer.libMC.width;
+			}
+			
+			bmd.draw(viewer.PageList[0],new Matrix(bmdscale, 0, 0, bmdscale),null,null,null,true);
+			_highlightBitmap = new Bitmap(bmd);
+			_highlightBitmap.x = (_highlightBitmap.width<_imgPreview.width)?(_imgPreview.width-_highlightBitmap.width)/2:0;
+			_highlightBitmap.y = (_highlightBitmap.height<_imgPreview.height)?(_imgPreview.height-_highlightBitmap.height)/2:0;
+			
+			_imgPreview.addChild(_highlightBitmap);
+			
+			var rectPosXAdj:Number = _imgPreview.width * ((viewer.DisplayContainer.width * 0.96 - viewer.PageList[0].width) / viewer.DisplayContainer.width);rectPosXAdj = (rectPosXAdj<0)?0:rectPosXAdj/2;
+			var rectPosYAdj:Number = _imgPreview.height * ((viewer.DisplayContainer.height - viewer.PageList[0].height) / viewer.DisplayContainer.height);rectPosYAdj = (rectPosYAdj<0)?0:rectPosYAdj/2;
+			var rectSizeWidth:Number = _highlightBitmap.width * (viewer.PaperContainer.width / viewer.DisplayContainer.width); // ok
+			var rectSizeHeight:Number = _highlightBitmap.height * (viewer.PaperContainer.height / viewer.DisplayContainer.height); // ok
+			
+			var rectPosX:Number = ((_highlightBitmap.width - rectSizeWidth) * (viewer.PaperContainer.horizontalScrollPosition / viewer.PaperContainer.maxHorizontalScrollPosition));
+			var rectPosY:Number = ((_highlightBitmap.height - rectSizeHeight) * (viewer.PaperContainer.verticalScrollPosition / viewer.PaperContainer.maxVerticalScrollPosition));
+			
+			rectPosX = _highlightBitmap.x + rectPosX - rectPosXAdj;
+			
+			if(rectPosX<0 || isNaN(rectPosX)){
+				rectPosX = _highlightBitmap.x - rectPosXAdj;
+			}
+			
+			rectPosY = _highlightBitmap.y + rectPosY - rectPosYAdj;
+			
+			if(rectPosY<0 || isNaN(rectPosY)){
+				rectPosY = _highlightBitmap.y - rectPosYAdj;
+			}
+			
+			rectSizeWidth = rectSizeWidth + rectPosXAdj*2;
+			if(rectSizeWidth > _imgPreview.width){
+				rectSizeWidth = _imgPreview.width;
+			}
+			
+			rectSizeHeight = rectSizeHeight + rectPosYAdj*2;
+			if(rectSizeHeight > _imgPreview.height){
+				rectSizeHeight = _imgPreview.height;
+			}
+			
+			if(rectPosX<0){rectPosX = 0;}if(rectPosY<0){rectPosY = 0;}
+			
+			if(rectSizeWidth > 0 && rectSizeHeight > 0){
+				_rectSprite.graphics.clear();
+				
+				_rectSprite.graphics.lineStyle(1, 1, 1);
+				_rectSprite.graphics.drawRect(0,0,_imgPreview.width,_imgPreview.height);
+				if(_rectSprite.parent != _imgPreview)
+					_imgPreview.addChild(_rectSprite);
+				
+				_highlightRectSprite.graphics.clear();
+				_highlightRectSprite.graphics.beginFill(0xffffff,0);
+				_highlightRectSprite.graphics.drawRect(0, 0, rectSizeWidth, rectSizeHeight);
+				_highlightRectSprite.graphics.endFill();
+				
+				_highlightRectSprite.graphics.lineStyle(1, 0x0000ff, 1);
+				_highlightRectSprite.x = rectPosX;
+				_highlightRectSprite.y = rectPosY;
+				_highlightRectSprite.graphics.drawRect(0, 0, rectSizeWidth, rectSizeHeight);
+				
+				if(_highlightRectSprite.parent != _imgPreview){
+					_imgPreview.addChild(_highlightRectSprite);
+					
+					if(!_highlightRectSprite.hasEventListener(MouseEvent.MOUSE_MOVE)){
+						_highlightRectSprite.addEventListener(MouseEvent.MOUSE_MOVE, thumbMouseMoveHandler);
+						_highlightRectSprite.addEventListener(MouseEvent.MOUSE_DOWN, thumbMouseDownHandler);
+						_highlightRectSprite.addEventListener(MouseEvent.MOUSE_UP, thumbMouseUpHandler);
+						_highlightRectSprite.buttonMode = true;
+					}
+				}
+			}
+		}
+		
+		private var _draggingThumbnail:Boolean = false;
+		protected function thumbMouseDownHandler (e:MouseEvent):void{
+			var r:Rectangle = new Rectangle(_highlightBitmap.x,_highlightBitmap.y,_highlightBitmap.width-_highlightRectSprite.width+1,_highlightBitmap.height-_highlightRectSprite.height+2);
+			
+			e.target.startDrag(false,r);
+			_draggingThumbnail = true;
+		}
+		
+		protected function thumbMouseMoveHandler (e:MouseEvent):void{
+			if(_draggingThumbnail){
+				var pctX:Number = (e.target.x-_highlightBitmap.x)/(_highlightBitmap.width-e.target.width);
+				var pctY:Number = (e.target.y-_highlightBitmap.y)/(_highlightBitmap.height-e.target.height);
+				viewer.PaperContainer.horizontalScrollPosition = viewer.PaperContainer.maxHorizontalScrollPosition * pctX;
+				viewer.PaperContainer.verticalScrollPosition = viewer.PaperContainer.maxVerticalScrollPosition * pctY;
+			}
+		}
+		
+		protected function thumbMouseUpHandler (e:MouseEvent):void{
+			e.target.stopDrag();
+			_draggingThumbnail = false;
+			redrawPreview(-1);
+		}
+		
 		
 		public function setViewMode(s:String, viewer:Viewer):void{
 			viewer.PaperContainer.x = 0;
@@ -211,6 +361,14 @@ package com.devaldi.controls
 				}
 				viewer.DisplayContainer.visible = true;
 			} 
+			
+		}
+		
+		public function disposeViewMode():void{
+			if(_imgPreview!=null){
+				_imgPreview.parent.removeChild(_imgPreview);
+				_imgPreview = null;
+			}
 		}
 		
 		public function renderMark(sm:UIComponent,pageIndex:int):void{
@@ -301,10 +459,6 @@ package com.devaldi.controls
 		
 		public function removeEventListener(type:String, listener:Function, useCapture:Boolean = false):void {
 			dispatcher.removeEventListener(type, listener, useCapture);
-		}
-
-		public function disposeViewMode():void{
-			
 		}
 	}
 }

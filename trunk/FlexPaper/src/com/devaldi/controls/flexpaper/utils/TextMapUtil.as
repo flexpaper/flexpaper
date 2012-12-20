@@ -176,6 +176,33 @@ package com.devaldi.controls.flexpaper.utils
 			return s;	
 		}
 		
+		public static function checkUnicodeIntegrityByTextmap(s:String, map:String):String{
+			var lmi:int = -1;
+			s = s.toLowerCase();
+			map = map.toLowerCase();
+			
+			for(var ci:int=0;ci<s.length;ci++){
+				if(s.charCodeAt(ci) > 10000){
+					
+					var foundMatch:Boolean = false;
+					// try to find the same text fragment in the map string by checking if the next 4 characters correlate, otherwise keep looking
+					for(var ssi:int=ci+1;ssi<map.length-4;ssi++){
+						if(		map.charCodeAt(ssi+0) == s.charCodeAt(ssi+0) && 
+								map.charCodeAt(ssi+1) == s.charCodeAt(ssi+1) && 
+								map.charCodeAt(ssi+2) == s.charCodeAt(ssi+2) && 
+								map.charCodeAt(ssi+3) == s.charCodeAt(ssi+3) &&
+								!foundMatch){
+							// found a match looking forward
+							foundMatch = true;
+							s = s.substr(0,ci)+map.charAt(ci)+s.substr(ci+1);
+						}
+					}
+				}
+			}
+			
+			return s;
+		}
+		
 		public static function StringReplaceAll( source:String, find:String, replacement:String ) : String
 		{
 			return source.split( find ).join( replacement );
