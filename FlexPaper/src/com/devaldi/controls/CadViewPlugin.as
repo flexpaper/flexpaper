@@ -308,6 +308,12 @@ package com.devaldi.controls
 				_highlightRectSprite.graphics.drawRect(0, 0, rectSizeWidth, rectSizeHeight);
 				_highlightRectSprite.graphics.endFill();
 				
+				_highlightRectSprite.graphics.beginFill(0xb4d4f8,0.3);
+				_highlightRectSprite.x = rectPosX;
+				_highlightRectSprite.y = rectPosY;
+				_highlightRectSprite.graphics.drawRect(0, 0, rectSizeWidth, rectSizeHeight);
+				_highlightRectSprite.graphics.endFill();
+				
 				_highlightRectSprite.graphics.lineStyle(1, 0x0000ff, 1);
 				_highlightRectSprite.x = rectPosX;
 				_highlightRectSprite.y = rectPosY;
