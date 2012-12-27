@@ -2086,6 +2086,7 @@ package com.devaldi.controls.flexpaper
 					else{
 						CurrExtViewMode.setTextSelectMode(searchPageIndex-1);
 						snap = CurrExtViewMode.getPageTextSnapshot(searchPageIndex-1);
+						if(snap==null){snap = _pageList[searchPageIndex-1].textSnapshot;}
 					}
 					
 					//searchIndex = snap.findText((searchIndex==-1?0:searchIndex),adjustSearchTerm(text),false);
@@ -2353,9 +2354,9 @@ package com.devaldi.controls.flexpaper
 						
 						snap = _libMC.textSnapshot;
 						si = snap.findText((si==-1?0:si),adjustSearchTerm(text),false);
-						if(si==-1){
-							si = TextMapUtil.checkUnicodeIntegrity(snap.getText(0,snap.charCount),null,_libMC).toLowerCase().indexOf(text,(si==-1?0:si));
-						}
+						//if(si==-1){
+							//si = TextMapUtil.checkUnicodeIntegrity(snap.getText(0,snap.charCount),null,_libMC).toLowerCase().indexOf(text,(si==-1?0:si));
+						//}
 						//si = searchString(snap.getText(0,snap.charCount),text,si);
 						
 						if(si>0){
