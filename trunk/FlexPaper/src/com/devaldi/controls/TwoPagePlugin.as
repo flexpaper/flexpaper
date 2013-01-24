@@ -90,10 +90,12 @@ package com.devaldi.controls
 			rp = (i % 2 == 0)?0:1;
 			var uloaderidx:int = (i % 2 == 0)?0:1;
 			
-			if(i==viewer.PageList.length-1 && viewer.PageList.length % 2 == 1)
-				viewer.DisplayContainer.getChildAt(1).visible = false;
-			else
-				viewer.DisplayContainer.getChildAt(1).visible = true;
+			if(viewer.DisplayContainer.numChildren>1){
+				if(i==viewer.PageList.length-1 && viewer.PageList.length % 2 == 1)
+					viewer.DisplayContainer.getChildAt(1).visible = false;
+				else
+					viewer.DisplayContainer.getChildAt(1).visible = true;
+			}
 			
 			if(((!viewer.BusyLoading||viewer.DocLoader.IsSplit)&&(!viewer.DocLoader.LoaderList[uloaderidx].loading)) && viewer.DocLoader.LoaderList!=null && viewer.DocLoader.LoaderList.length>0){
 				if(	viewer.libMC!=null&&

@@ -32,7 +32,7 @@ package com.devaldi.streaming
 		function set LoaderList(v:Array):void;
 		function postProcessBytes(b:ByteArray):void;
 		function load(request:URLRequest, loaderCtx:LoaderContext):void;
-		function loadFromBytes(bytes:ByteArray):void;
+		function loadFromBytes(bytes:ByteArray, context:LoaderContext=null):void;
 		function resetURLStream():void;
 		function signFileHeader(bytes:ByteArray, ldr:Loader=null):void;
 		function get InputBytes():ByteArray;

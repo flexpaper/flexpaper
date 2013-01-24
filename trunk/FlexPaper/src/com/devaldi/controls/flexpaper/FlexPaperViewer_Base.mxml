@@ -194,9 +194,9 @@
 				if(_documentLoadedFirst && !_stageinitialized){
 					dispatchEvent(new DocumentLoadedEvent(DocumentLoadedEvent.DOCUMENT_LOADED,viewer.numPages));
 					if(StartAtPage!=1&&!isNaN(StartAtPage)&&StartAtPage>0){viewer.gotoPage(StartAtPage);}
-					flash.utils.setTimeout(function():void{
+					//flash.utils.setTimeout(function():void{
 						if(StartAtPage!=1&&!isNaN(StartAtPage)&&StartAtPage>0){viewer.gotoPage(StartAtPage);StartAtPage=-1;}
-					},1000);
+					//},1000);
 				}
 				
 				_stageinitialized = true;
@@ -471,8 +471,8 @@
 				viewer.SwfFile = s;
 			}
 			
-			public dynamic function loadFromBytes(b:ByteArray):void{
-				viewer.loadFromBytes(b);
+			public dynamic function loadFromBytes(b:ByteArray, context:LoaderContext=null):void{
+				viewer.loadFromBytes(b,context);
 			}
 			
 			private function getUrlParamaters():Dictionary

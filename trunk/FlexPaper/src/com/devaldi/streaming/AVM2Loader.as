@@ -173,8 +173,19 @@ package com.devaldi.streaming
                         _loader = value;
                 }
 				
-				public function loadFromBytes(bytes:ByteArray):void{
+				public function loadFromBytes(bytes:ByteArray, context:LoaderContext=null):void{
+					if(context!=null){
+						_loaderCtx = context;
+					}
 					_inputBytes = bytes;
+					
+					if(_inputBytes.length>4){
+						version = uint(_inputBytes[3]);
+						
+						if (version <= 9) {
+							updateVersion(9,_inputBytes);
+						}					
+					}
 					
 					confirmBytesLoaded();
 				}

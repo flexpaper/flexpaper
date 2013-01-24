@@ -14,7 +14,7 @@ GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
 along with FlexPaper.  If not, see <http://www.gnu.org/licenses/>.	
-*/
+*/  
 
 package com.devaldi.controls.flexpaper
 {
@@ -591,7 +591,7 @@ package com.devaldi.controls.flexpaper
 			return encodeURI(fileName);
 		}
 		
-		public function loadFromBytes(bytes:ByteArray):void{
+		public function loadFromBytes(bytes:ByteArray, context:LoaderContext=null):void{
 			clearPlugins();
 			deleteDisplayContainer(); 
 			deletePageList();
@@ -625,7 +625,7 @@ package com.devaldi.controls.flexpaper
 				_docLoader.stream.addEventListener(ProgressEvent.PROGRESS, onLoadProgress,false,0,true);
 			}
 		
-			_docLoader.loadFromBytes(bytes);
+			_docLoader.loadFromBytes(bytes,context);
 			
 			_paperContainer.verticalScrollPosition = 0;
 			createDisplayContainer();
@@ -638,6 +638,7 @@ package com.devaldi.controls.flexpaper
 		
 		public function set SwfFile(s:String):void {
 			var pagesSplit:Boolean = false;
+			if(s==null){return;}
 			
 			if(EncodeURI)
 				s = unescape(s);
@@ -1124,7 +1125,7 @@ package com.devaldi.controls.flexpaper
 									if(_performSearchOnPageLoad && _pendingSearchPage == _pageList[i].dupIndex){
 										_performSearchOnPageLoad = false;
 										
-										if(JSONFile!=null)
+										if(JSONFile!=null && _docLoader.IsSplit)
 											searchTextByJSONFile(prevSearchText);
 									}
 								}
@@ -2029,7 +2030,9 @@ package com.devaldi.controls.flexpaper
 				
 				flash.utils.setTimeout(function():void{
 					var serve:HTTPService = new HTTPService();
-					serve.url = (JSONFile.indexOf("{page}")>-1)?JSONFile.replace("{page}",(searchPageIndex) + (10 - (searchPageIndex) % 10)):JSONFile;
+					var json_unescaped = unescape(JSONFile);
+					
+					serve.url = (json_unescaped.indexOf("{page}")>-1)?json_unescaped.replace("{page}",(searchPageIndex) + (10 - (searchPageIndex) % 10)):json_unescaped;
 					serve.method = "GET";
 					serve.resultFormat = "text";
 					serve.addEventListener("result",function searchByJSONResult(evt:ResultEvent):void {
@@ -2038,7 +2041,7 @@ package com.devaldi.controls.flexpaper
 						performSearchTextByJSON(text);
 					});
 					serve.addEventListener(FaultEvent.FAULT,function searchByJSONFault(evt:FaultEvent):void {
-						_jsonPageDataFault = JSONFile;
+						_jsonPageDataFault = json_unescaped;
 						dispatchEvent(new Event("onDownloadSearchResultCompleted"));
 						var text:String = prevSearchText;
 						prevSearchText = "";
@@ -2304,7 +2307,7 @@ package com.devaldi.controls.flexpaper
 			if(_docLoader.IsSplit && SearchServiceUrl!=null && SearchServiceUrl.length>0)
 				return searchTextByService(text);
 			
-			if(JSONFile != null && _jsonPageDataFault != JSONFile){
+			if(JSONFile != null && _jsonPageDataFault != JSONFile && !SearchMatchAll && _docLoader.IsSplit){
 				return searchTextByJSONFile(text);
 			}
 			
@@ -2353,10 +2356,11 @@ package com.devaldi.controls.flexpaper
 						_libMC.gotoAndStop(spi);
 						
 						snap = _libMC.textSnapshot;
+						var oldsi:int = si;
 						si = snap.findText((si==-1?0:si),adjustSearchTerm(text),false);
-						//if(si==-1){
-							//si = TextMapUtil.checkUnicodeIntegrity(snap.getText(0,snap.charCount),null,_libMC).toLowerCase().indexOf(text,(si==-1?0:si));
-						//}
+						if(si==-1){
+							si = TextMapUtil.checkUnicodeIntegrity(snap.getText(0,snap.charCount),null,_libMC).toLowerCase().indexOf(text,(oldsi==-1?0:oldsi));
+						}
 						//si = searchString(snap.getText(0,snap.charCount),text,si);
 						
 						if(si>0){
@@ -2412,9 +2416,10 @@ package com.devaldi.controls.flexpaper
 			
 			while((searchPageIndex -1) < numPagesLoaded){
 				snap = _libMC.textSnapshot;
+				var prevSearchIndex:int = searchIndex;
 				searchIndex = snap.findText((searchIndex==-1?0:searchIndex),adjustSearchTerm(text),false);
 				if(searchIndex==-1){
-					searchIndex = TextMapUtil.checkUnicodeIntegrity(snap.getText(0,snap.charCount),text,_libMC).toLowerCase().indexOf(text,(searchIndex==-1?0:searchIndex));
+					searchIndex = TextMapUtil.checkUnicodeIntegrity(snap.getText(0,snap.charCount),text,_libMC).toLowerCase().indexOf(text,(prevSearchIndex==-1?0:prevSearchIndex));
 				}
 				//searchIndex = TextMapUtil.checkUnicodeIntegrity(snap.getText(0,snap.charCount),text,_libMC).toLowerCase().indexOf(text,(searchIndex==-1?0:searchIndex));
 				//searchIndex = snap.getText(0,snap.charCount).toLowerCase().indexOf(text,(searchIndex==-1?0:searchIndex));
