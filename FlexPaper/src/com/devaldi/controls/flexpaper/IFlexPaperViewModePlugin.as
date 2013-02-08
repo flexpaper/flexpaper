@@ -23,6 +23,7 @@ package com.devaldi.controls.flexpaper
 		function checkIsVisible(page:int):Boolean;
 		function handleDoubleClick(event:MouseEvent):void;
 		function handleMouseDown(event:MouseEvent):void;
+		function handleMouseUp(event:MouseEvent):void;
 		function get loaderListLength():int;
 		function addChild(childindex:int,o:DisplayObject):void;
 		function get SaveScale():Number;

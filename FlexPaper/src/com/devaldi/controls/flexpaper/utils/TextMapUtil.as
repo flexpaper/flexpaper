@@ -198,6 +198,10 @@ package com.devaldi.controls.flexpaper.utils
 						}
 					}
 				}
+				
+				if(s.charCodeAt(ci) == 160){
+					s = s.substr(0,ci)+" "+s.substr(ci+1);
+				}
 			}
 			
 			return s;

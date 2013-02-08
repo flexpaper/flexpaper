@@ -43,5 +43,6 @@ package com.devaldi.streaming
 		function set IsSplit(b:Boolean):void;
 		function get ShouldPreStream():Boolean;
 		function touch(b:ByteArray):void;
+		function parseNumPages(url:String):Number;
 	}
 }

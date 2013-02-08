@@ -443,6 +443,10 @@ package com.devaldi.controls
 			
 		}
 		
+		public function handleMouseUp(event:MouseEvent):void{
+			
+		}
+		
 		public function clearSearch():void{
 			
 		}
