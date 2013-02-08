@@ -421,6 +421,10 @@ package com.devaldi.streaming
 				public function willTrigger(type:String):Boolean {
 					return dispatcher.willTrigger(type);
 				}				
+				
+				public function parseNumPages(s:String):Number{
+					return parseInt(s.substr(s.lastIndexOf(",")+1,s.indexOf("}")-s.lastIndexOf(",")-1));
+				}
                 
                 private function ioErrorHandler(event:IOErrorEvent):void
                 {

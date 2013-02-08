@@ -246,6 +246,10 @@ package com.devaldi.controls
 			}
 		}
 		
+		public function handleMouseUp(event:MouseEvent):void{
+			
+		}
+		
 		public function hasEventListener(type:String):Boolean {
 			return dispatcher.hasEventListener(type);
 		}
