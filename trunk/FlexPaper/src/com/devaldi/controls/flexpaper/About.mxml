@@ -27,7 +27,7 @@
 	import mx.managers.PopUpManager;
 		
 	public static var LicenseText:String = "GPL 3 (non-commercial) License."	
-	public static var LicenseVersion:String = "2.0.6";
+	public static var LicenseVersion:String = "2.0.9";
 		
 	private function Init():void{
 		this.addEventListener(CloseEvent.CLOSE, onClose);
