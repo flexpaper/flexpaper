@@ -246,7 +246,7 @@ package com.devaldi.controls.flexpaper
 					}
 				}
 				
-				if(s == ViewModeEnum.TILE&&ViewMode==ViewModeEnum.PORTRAIT){_pscale = _scale; _scale = 0.23;_paperContainer.verticalScrollPosition = 0;_fitMode = FitModeEnum.FITNONE;}else{_scale = _pscale;}
+				if(s == ViewModeEnum.TILE){_pscale = _scale; _scale = 0.23;_paperContainer.verticalScrollPosition = 0;_fitMode = FitModeEnum.FITNONE;}else{_scale = _pscale;}
 //hkh				_paperContainer.x = (s==ViewModeEnum.PORTRAIT||s==ViewModeEnum.TILE)?200.5:200;
 				
 				_viewMode = s;
