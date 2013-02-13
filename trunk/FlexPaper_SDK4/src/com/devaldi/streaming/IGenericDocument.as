@@ -24,6 +24,7 @@ package com.devaldi.streaming
 
 	public interface IGenericDocument
 	{
+		function nextFrame():void;
 		function gotoAndStop(pagNumber:int):void;
 		function stop():void;
 		function getDocument():DisplayObject;

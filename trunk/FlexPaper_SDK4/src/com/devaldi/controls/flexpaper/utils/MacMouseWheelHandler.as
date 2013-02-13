@@ -46,6 +46,7 @@ package com.devaldi.controls.flexpaper.utils
 					var id:String = 'eb_' + Math.floor(Math.random()*1000000);
 					ExternalInterface.addCallback(id, function(){});
 					ExternalInterface.call(c_jscode);
+					ExternalInterface.call("eb.focusSwf", id);
 					ExternalInterface.call("eb.InitMacMouseWheel", id);
 					ExternalInterface.addCallback('externalMouseEvent', _externalMouseEvent);	
 				}
@@ -61,13 +62,27 @@ package com.devaldi.controls.flexpaper.utils
 					int(delta)));
 		}
 		
+		static public const 	eb_mouseWheelEventHandler_jscode : XML =
+			<script><![CDATA[
+			function()
+			{
+			if(typeof eb == "undefined" || !eb)	window["eb"] = eb = {};
+			eb.wheelHandlerEnabled = true;
+			
+				eb.enableMouseWheelHandler = function(enable){
+					eb.wheelHandlerEnabled = enable;
+				}
+			}
+			
+			]]></script>;
+		
 		// javascript mouse handling code
 		static private const 	c_jscode : XML =
 			<script><![CDATA[
 				function()
 				{
 					// create unique namespace
-					if(typeof eb == "undefined" || !eb)	eb = {};
+					if(typeof eb == "undefined" || !eb)	window["eb"] = eb = {};
 					
 					var userAgent = navigator.userAgent.toLowerCase();
 					eb.platform = {
@@ -82,6 +97,11 @@ package com.devaldi.controls.flexpaper.utils
 						mozilla: /mozilla/.test(userAgent) && !/(compatible|webkit)/.test(userAgent),
 						chrome: /chrome/.test(userAgent)
 					};
+			
+					eb.focusSwf = function(id){
+						var swf = eb.findSwf(id);
+						swf.focus();
+					}
 					
 					// find the function we added
 					eb.findSwf = function(id) {
@@ -94,43 +114,55 @@ package com.devaldi.controls.flexpaper.utils
 						for(var j = 0; j < embeds.length; j++)
 							if(typeof embeds[j][id] != "undefined")
 								return embeds[j];
-							
+								
 						return null;
 					}
 					
-					eb.InitMacMouseWheel = function(id) {	
+					eb.flashMouseMoveHandler = function(){
+						if(eb.browser.mozilla || eb.browser.msie){
+							eb.mouseOver = true;
+						}
+					}
+			
+					eb.InitMacMouseWheel = function(id) {
 						var swf = eb.findSwf(id);
+						
 						if(swf && eb.platform.mac) {
-							var mouseOver = false;
-		
+							eb.mouseOver = false;
+							
 							/// Mouse move detection for mouse wheel support
 							function _mousemove(event) {
-								mouseOver = event && event.target && (event.target == swf);
+								eb.mouseOver = event && event.target && (event.target == swf);
 							}
 		
 							/// Mousewheel support
 							var _mousewheel = function(event) {
+								if(!eb.wheelHandlerEnabled){return true;}
+			
 								try{
-									if(!getDocViewer().hasFocus()){return true;}
-									getDocViewer().setViewerFocus(true);
-									getDocViewer().focus();
+									if(!swf.hasFocus()){return true;}
+									swf.setViewerFocus(true);
+									swf.focus();
 									
 									if(!swf.hasFocus()){return true;}
 								}catch(err){return true;}
 			
-								if(eb.browser.chrome){
+							 	if(eb.browser.chrome || eb.browser.safari){
 									swf.externalMouseEvent(event.wheelDelta);
 									if(event.preventDefault)	event.preventDefault();
 									return true;
 								}
 			
-								if(mouseOver) {
+								if(eb.mouseOver) {
 									var delta = 0;
 									if(event.wheelDelta)		delta = event.wheelDelta / (eb.browser.opera ? 12 : 120);
 									else if(event.detail)		delta = -event.detail;
 									if(event.preventDefault)	event.preventDefault();
 									swf.externalMouseEvent(delta);
-									
+									if (event.stopPropagation) event.stopPropagation();    
+									if (event.returnValue) event.returnValue = false;
+									if (event.cancelBubble) event.cancelBubble = true;
+			
 									return true;
 								}
 								return false;
@@ -151,25 +183,47 @@ package com.devaldi.controls.flexpaper.utils
 							document.addEventListener("mousemove",_mousemove);
 			
 						}else if(swf && !eb.platform.mac){
+							eb.mouseOver = false;
+							
+							/// Mouse move detection for mouse wheel support
+							function _mousemove(event) {
+							eb.mouseOver = event && event.target && (event.target == swf);
+							}
 							
 							var _handleWheel = function(event){
 								try{
-									if(	!getDocViewer()||
-										(getDocViewer()&&
-										!getDocViewer().hasFocus())){return true;}
-										getDocViewer().setViewerFocus(true);
-										getDocViewer().focus();
+									if(!eb.wheelHandlerEnabled){return true;}
+			
+									if(!swf.hasFocus()){return true;}
+										swf.setViewerFocus(true);
+										swf.focus();
 										
-										if(navigator.appName == "Netscape"){
-											if (event.detail)
-												delta = 0;
-												if (event.preventDefault){
-												event.preventDefault();
-												event.returnValue = false;
-											}
-										}
-									return false;	
-								}catch(err){return true;}		
+										if(!swf.hasFocus()){return true;}
+								}catch(err){return true;}
+			
+								try{
+									if(eb.browser.chrome || eb.browser.safari){
+										swf.externalMouseEvent(event.wheelDelta);
+										if(event.preventDefault)	event.preventDefault();
+										return true;
+									}
+									
+									if(eb.mouseOver) {
+										var delta = 0;
+										if(event.wheelDelta)		delta = event.wheelDelta / (eb.browser.opera ? 12 : 120);
+										else if(event.detail)		delta = -event.detail;
+										if(event.preventDefault)	event.preventDefault();
+										if (delta > 0.0)
+										delta += 1.0;
+										swf.externalMouseEvent(delta);
+										if (event.stopPropagation) event.stopPropagation();    
+										if (event.returnValue) event.returnValue = false;
+										if (event.cancelBubble) event.cancelBubble = true;
+										return true;
+									}
+								}catch(err){return true;}
+			
+								return false;
 							}
 			
 							if(window.addEventListener)

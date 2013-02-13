@@ -20,24 +20,20 @@ package com.devaldi.events
 {
 	import flash.events.Event;
 	
-	public class CurrentPageChangedEvent extends Event
+	public class InternalLinkClickedEvent extends Event
 	{
-		public static const PAGE_CHANGED:String = "onCurrPageChanged";
-		public var pageNum:Number;
-		public var prevPageNum:Number;
-		public var interactive:Boolean=false;
+		public var pagenumber:int;
+		public static const INTERNALLINK_CLICKED:String = "onInternalLinkClicked";
 		
-		public function CurrentPageChangedEvent(type:String,p:Number,pp:Number,inter:Boolean=false){
+		public function InternalLinkClickedEvent(type:String,lpagenumber:int)
+		{
 			super(type);
-			pageNum=p;
-			prevPageNum=pp;
-			interactive=inter;
+			pagenumber=lpagenumber;
 		}
 		
 		// Override the inherited clone() method.
 		override public function clone():Event {
-			return new CurrentPageChangedEvent(type, pageNum,prevPageNum);
+			return new InternalLinkClickedEvent(type, pagenumber);
 		}
-		
 	}
 }

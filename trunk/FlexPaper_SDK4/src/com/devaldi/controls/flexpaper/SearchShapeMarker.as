@@ -16,28 +16,15 @@ You should have received a copy of the GNU General Public License
 along with FlexPaper.  If not, see <http://www.gnu.org/licenses/>.	
 */
 
-package com.devaldi.events
+package com.devaldi.controls.flexpaper
 {
-	import flash.events.Event;
-	
-	public class CurrentPageChangedEvent extends Event
+	public class SearchShapeMarker extends ShapeMarker
 	{
-		public static const PAGE_CHANGED:String = "onCurrPageChanged";
-		public var pageNum:Number;
-		public var prevPageNum:Number;
-		public var interactive:Boolean=false;
+		public var searchPhrase:String = "";
 		
-		public function CurrentPageChangedEvent(type:String,p:Number,pp:Number,inter:Boolean=false){
-			super(type);
-			pageNum=p;
-			prevPageNum=pp;
-			interactive=inter;
+		public function SearchShapeMarker()
+		{
+			super.isSearchMarker = true;
 		}
-		
-		// Override the inherited clone() method.
-		override public function clone():Event {
-			return new CurrentPageChangedEvent(type, pageNum,prevPageNum);
-		}
-		
 	}
 }

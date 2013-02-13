@@ -39,6 +39,11 @@ package com.devaldi.streaming
 			_mc.gotoAndStop(pagNumber);
 		}
 		
+		public function nextFrame():void{
+			_mc.nextFrame();
+			_mc.stop();
+		}
+		
 		public function stop():void{
 			_mc.stop();
 		}

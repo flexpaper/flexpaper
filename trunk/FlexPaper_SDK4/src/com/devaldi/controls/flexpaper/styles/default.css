@@ -7,6 +7,10 @@
 		backgroundColor: #EDEDED;
 	}
 	
+	.clearToolbarBackground{
+		 background-color:#FFFFFF;	
+	}
+	
 	.viewerBackground {
 		backgroundImage: ClassReference("com.devaldi.skinning.GradientBackground"); 
 		backgroundSize: "100%";

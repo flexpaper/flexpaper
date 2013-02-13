@@ -36,6 +36,7 @@ package com.devaldi.streaming
         import flash.net.URLRequest;
         import flash.net.URLStream;
         import flash.system.LoaderContext;
+        import flash.system.Security;
         import flash.utils.ByteArray;
         import flash.utils.Endian;
         
@@ -121,11 +122,11 @@ package com.devaldi.streaming
 					dispatchEvent(new SwfLoadedEvent(SwfLoadedEvent.SWFLOADED,event.currentTarget));
 				}
 				
-				public function get PagesSplit():Boolean{
+				public function get IsSplit():Boolean{
 					return _pagesSplit;
 				}
 				
-				public function set PagesSplit(b:Boolean):void{
+				public function set IsSplit(b:Boolean):void{
 					_pagesSplit = b;
 				}
 				
@@ -157,6 +158,10 @@ package com.devaldi.streaming
                 {
                         return _stream;
                 }
+				
+				public function get ShouldPreStream():Boolean{
+					return false;
+				}
                 
                 public function get loader():Loader
                 {
@@ -167,11 +172,17 @@ package com.devaldi.streaming
                 {
                         _loader = value;
                 }
+				
+				public function loadFromBytes(bytes:ByteArray):void{
+					_inputBytes = bytes;
+					
+					confirmBytesLoaded();
+				}
                 
                 public function load(request:URLRequest, loaderCtx:LoaderContext):void
                 {
 					//resetURLStream();
-					
+					flash.system.Security.allowDomain(request.url);
 					_attempts++;					
 					_request = request;
                     _stream.load(request);
@@ -180,6 +191,10 @@ package com.devaldi.streaming
 					// wait with this one.. seems a bit dodgy
 					//flash.utils.setTimeout(retry,7000);
                 }
+				
+				public function touch(b:ByteArray):void{
+					
+				}
 				
 				private function retry():void{
 					if(_attempts<4 && _doretry){
@@ -399,14 +414,26 @@ package com.devaldi.streaming
                 private function ioErrorHandler(event:IOErrorEvent):void
                 {
 					var evt:ErrorEvent = new ErrorEvent("onDocumentLoadedError");
-					evt.text = event.text;
-                	dispatchEvent(evt);
+					if(_inputBytes.length<1000){
+						if(_inputBytes.toString().indexOf("Error:")>=0){
+							evt.text = _inputBytes.toString();
+						}
+					}else
+						evt.text = event.text;
+					
+					dispatchEvent(evt);
                 }
                 
                 private function securityErrorHandler(event:SecurityErrorEvent):void
                 {
 					var evt:ErrorEvent = new ErrorEvent("onDocumentLoadedError");
-					evt.text = event.text;
+					if(_inputBytes.length<1000){
+						if(_inputBytes.toString().indexOf("Error:")>=0){
+							evt.text = _inputBytes.toString();
+						}
+					}else
+						evt.text = event.text;
+					
 					dispatchEvent(evt);
                 }
         }
