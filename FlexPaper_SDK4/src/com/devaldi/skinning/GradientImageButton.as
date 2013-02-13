@@ -18,12 +18,14 @@ along with FlexPaper.  If not, see <http://www.gnu.org/licenses/>.
 
 package com.devaldi.skinning
 {
+	import flash.display.GradientType;
 	import flash.events.Event;
 	import flash.filters.*;
-	import flash.display.GradientType;
-	import mx.controls.Button;
-	import mx.events.*;
 	import flash.geom.Matrix;
+	
+	import mx.events.*;
+	
+	import mx.controls.Button;
 	
 	public class GradientImageButton extends Button
 	{

@@ -1,23 +1,26 @@
 <?xml version="1.0" encoding="utf-8"?>
-<mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml" 
-		 width="100%" 
-		 height="100%" 
-		 verticalGap="0" 
-		 xmlns:fp="com.devaldi.controls.flexpaper.*" 
-		 xmlns:ct="com.devaldi.controls.*" 
-		 xmlns:st="com.devaldi.skinning.*" 
-		 borderColor="#8a8a8a" 
-		 verticalScrollPolicy="off" 
-		 horizontalScrollPolicy="off"
+<s:VGroup xmlns:mx="http://www.adobe.com/2006/mxml"
+		  xmlns:s="library://ns.adobe.com/flex/spark"
+		  width="100%" 
+		  height="100%" 
+		  gap="0"
+		  xmlns:fp="com.devaldi.controls.flexpaper.*" 
+		  xmlns:ct="com.devaldi.controls.*" 
+		  xmlns:st="com.devaldi.skinning.*" 
 		 
 		 addedToStage="bindStageEvents(event)"
-		 creationComplete="Init()"
-		 preinitialize="preInit()">
+		 preinitialize="preInit()"
+		 creationComplete="viewercreationCompleteHandler(event)">
 	<mx:Script>
 		<![CDATA[
+			import com.devaldi.controls.CadViewPlugin;
+			import com.devaldi.controls.SinglePagePlugin;
 			import com.devaldi.controls.TwoPagePlugin;
+			import com.devaldi.controls.flexpaper.resources.LicenseKey;
 			import com.devaldi.controls.flexpaper.resources.MenuIcons;
+			import com.devaldi.controls.flexpaper.utils.MacMouseWheelHandler;
 			import com.devaldi.controls.flexpaper.utils.StreamUtil;
+			import com.devaldi.controls.flexpaper.utils.VersionHandler;
 			import com.devaldi.events.CurrentPageChangedEvent;
 			import com.devaldi.events.CursorModeChangedEvent;
 			import com.devaldi.events.DocumentLoadedEvent;
@@ -33,7 +36,10 @@
 			import flash.desktop.Clipboard;
 			import flash.desktop.ClipboardFormats;
 			
+			import mx.controls.Alert;
+			import mx.core.Application;
 			import mx.core.UITextField;
+			import mx.events.FlexEvent;
 			import mx.graphics.ImageSnapshot;
 			import mx.managers.BrowserManager;
 			import mx.managers.IBrowserManager;
@@ -43,7 +49,34 @@
 			public var Scale:Number = 1;
 			
 			[Bindable]
-			public var SwfFile:String = "";
+			public function get SwfFile():String {
+				return viewer.SwfFile;
+			}
+			
+			public function set SwfFile(s:String):void {
+				try{
+					if(Key == null || (Key!=null && Key.length == 0)){
+						try{Key = getUrlParamaters()["key"];}catch(e:*){}
+					}
+					
+					if(LicenseKey.validate(loaderURL,VersionHandler.version(),Key,true)){
+						
+						if(StreamUtil.DocLoader==null)
+							viewer.DocLoader = new AVM2Loader(StreamUtil.getExecutionContext(),StreamUtil.ProgressiveLoading);
+						else 
+							viewer.DocLoader = StreamUtil.DocLoader;
+					}
+					
+					viewer.DocLoader.addEventListener("onDocumentLoadedError",onLoadedError);					
+				}catch(e:Error){
+					Alert.show(e.message,"Error");
+				}
+				
+				this.viewer.SwfFile = s;
+			}
+			
+			[Bindable]
+			public var JSONFile:String = "";
 			
 			[Bindable]
 			public var SearchServiceUrl:String = "";
@@ -106,28 +139,48 @@
 			public var SearchMatchAll:Boolean = false;
 			
 			[Bindable]
-			public var BitmapBasedRendering:Boolean = false;
+			public var AutoAdjustPrintSize:Boolean = true;
+			
+			[Bindable]
+			public var PrintPaperAsBitmap:Boolean = false;
+			
+			[Bindable]
+			public var EncodeURI:Boolean = true;
+			
+			[Bindable]
+			public var PrintEnabled:Boolean = false;
+			
+			public static var Key:String = "";
+			public static var loaderURL:String = "";
 			
 			private var _fixedWidth:Number = -1;
 			private var _fixedHeight:Number = -1;
 			private var prd:PrintRangeDialog;
 			private var _twopage:TwoPagePlugin;
+			private var _singlepage:SinglePagePlugin;
+			private var _cadpage:CadViewPlugin;
 			protected var _browserManager:IBrowserManager;
+			private var _documentLoadedFirst:Boolean = false;
+			private var _stageinitialized:Boolean = false;
 			
 			public dynamic function get viewer():com.devaldi.controls.flexpaper.Viewer{return null;}
 			
 			private function preInit():void{
 				_twopage = new TwoPagePlugin();
+				_singlepage = new SinglePagePlugin();
+				_cadpage = new CadViewPlugin();
 				
 				if(Viewer.ViewModeExtList==null)
 					Viewer.ViewModeExtList = new Array();
 				
 				Viewer.ViewModeExtList[Viewer.ViewModeExtList.length] = _twopage;
+				Viewer.ViewModeExtList[Viewer.ViewModeExtList.length] = _singlepage;
+				Viewer.ViewModeExtList[Viewer.ViewModeExtList.length] = _cadpage;
+				
+				if(ExternalInterface.available){
+					ExternalInterface.call(MacMouseWheelHandler.eb_mouseWheelEventHandler_jscode);
+				}
 			}
-			
-			private function Init():void{
-				_browserManager = BrowserManager.getInstance();
-			}	
 			
 			private function bindStageEvents(e:Event):void{
 				stage.removeEventListener(FullScreenEvent.FULL_SCREEN, fullScreenRedraw);
@@ -158,6 +211,18 @@
 				}
 			}
 			
+			private function viewercreationCompleteHandler(e:FlexEvent):void{
+				if(_documentLoadedFirst && !_stageinitialized){
+					dispatchEvent(new DocumentLoadedEvent(DocumentLoadedEvent.DOCUMENT_LOADED,viewer.numPages));
+					if(StartAtPage!=1&&!isNaN(StartAtPage)&&StartAtPage>0){viewer.gotoPage(StartAtPage);}
+					flash.utils.setTimeout(function():void{
+						if(StartAtPage!=1&&!isNaN(StartAtPage)&&StartAtPage>0){viewer.gotoPage(StartAtPage);StartAtPage=-1;}
+					},1000);
+				}
+				
+				_stageinitialized = true;
+			}
+			
 			public function setViewerFocus():void{
 				viewer.setPaperFocus();	
 			}
@@ -166,12 +231,16 @@
 				return viewer.currPage;
 			}
 			
+			public function getTotalPages():Number{
+				return viewer.numPages;
+			}
+			
 			public function nextPage():void{
-				return viewer.gotoPage(viewer.currPage+1);
+				viewer.mvNext();
 			}		
 			
 			public function prevPage():void{
-				return viewer.gotoPage(viewer.currPage-1);
+				return viewer.mvPrev();
 			}
 			
 			public function get PluginList():Array{
@@ -206,12 +275,21 @@
 				}
 			}
 			
+			public function printPaperRange(range:String):void{
+				viewer.printPaperRange(range);
+			}
+			
+			
 			protected function printHandler(event:Event):void{
-				if(prd.PrintRange != "" && prd.validated){
-					viewer.printPaperRange(prd.PrintRange);
-				}else if(prd.validated){
-					viewer.printPaper();
-				}
+				
+				flash.utils.setTimeout(function():void{
+					if(prd.PrintRange != "" && prd.validated){
+						viewer.printPaperRange(prd.PrintRange);
+					}else if(prd.validated){
+						viewer.printPaper();
+					}
+				},1000);
+				
 			}
 			
 			private function fullScreenRedraw(event:FullScreenEvent):void{
@@ -227,7 +305,7 @@
 					viewer.PaperVisible = true;
 				}
 				
-				TrueFullScreenActive = event.fullScreen && !FullScreenAsMaxWindow;
+				TrueFullScreenActive = event.fullScreen && !FullScreenAsMaxWindow && this.stage.displayState != "fullScreenInteractive";
 			}
 			
 			private function viewerKeyDown(event:KeyboardEvent):void{
@@ -253,11 +331,18 @@
 						}
 						
 						switch (this.stage.displayState) {
+							case "fullScreenInteractive":
+								this.stage.displayState = StageDisplayState.NORMAL;
+								break;
 							case StageDisplayState.FULL_SCREEN:
 								this.stage.displayState = StageDisplayState.NORMAL;
 								break;
 							default:
-								this.stage.displayState = StageDisplayState.FULL_SCREEN;
+								try{
+									this.stage.displayState = "fullScreenInteractive";
+								}catch(e:*){
+									this.stage.displayState = StageDisplayState.FULL_SCREEN;
+								}
 								break;
 						}
 					}else{
@@ -268,6 +353,12 @@
 						uv.ZoomTransition = ZoomTransition;
 						uv.ZoomTime = ZoomTime;
 						uv.ZoomInterval = ZoomInterval;
+						uv.MinZoomSize = MinZoomSize;
+						uv.EncodeURI = EncodeURI;
+						uv.AutoAdjustPrintSize = AutoAdjustPrintSize;
+						uv.PrintPaperAsBitmap = PrintPaperAsBitmap;
+						uv.MaxZoomSize = MaxZoomSize;
+						uv.SearchMatchAll = SearchMatchAll;
 						uv.FitPageOnLoad = viewer.FitMode == FitModeEnum.FITHEIGHT;
 						uv.FitWidthOnLoad = viewer.FitMode == FitModeEnum.FITWIDTH;
 						uv.ViewModeToolsVisible = ViewModeToolsVisible;
@@ -278,8 +369,9 @@
 						uv.ProgressiveLoading = ProgressiveLoading;
 						uv.FullScreenAsMaxWindow = FullScreenAsMaxWindow;
 						uv.localeChain = resourceManager.localeChain;
+						uv.key = Key;
 						ur.data = uv;
-						navigateToURL(ur,"FlexPaperFullScreen");
+						navigateToURL(ur,"_top");
 					}
 				} catch (err:SecurityError) {
 					
@@ -339,7 +431,16 @@
 			}
 			
 			protected function documentLoadedHandler(event:Event):void{
-				dispatchEvent(event);
+				if(_stageinitialized){
+					dispatchEvent(event);
+					
+					if(StartAtPage!=1&&!isNaN(StartAtPage)&&StartAtPage>0){viewer.gotoPage(StartAtPage);}
+					flash.utils.setTimeout(function():void{
+						if(StartAtPage!=1&&!isNaN(StartAtPage)&&StartAtPage>0){viewer.gotoPage(StartAtPage);StartAtPage=-1;}
+					},1000);
+				}else{
+					_documentLoadedFirst = true;
+				}
 			}	
 			
 			protected function pageLoadedEventHandler(event:Event):void{
@@ -370,6 +471,10 @@
 				viewer.switchMode(mode);
 			}
 			
+			public function rotate():void{
+				viewer.rotate();
+			}
+			
 			public function setCurrentCursor(cursor:String):void{
 				if(cursor=="TextSelectorCursor"){
 					viewer.TextSelectEnabled = true;
@@ -387,18 +492,43 @@
 				viewer.SwfFile = s;
 			}
 			
+			public dynamic function loadFromBytes(b:ByteArray):void{
+				viewer.loadFromBytes(b);
+			}
+			
+			private function getUrlParamaters():Dictionary
+			{
+				var urlParams:Dictionary = new Dictionary();
+				
+				if (ExternalInterface.available)
+				{
+					var fullUrl:String = ExternalInterface.call('eval', 'document.location.href');
+					var paramStr:String = fullUrl.split('?')[1];
+					if (paramStr != null)
+					{
+						var params:Array = paramStr.split('&');
+						for (var i:int=0; i < params.length; i++)
+						{
+							var kv:Array = params[i].split('=');
+							urlParams[kv[0]] = kv[1];
+						}
+					}
+				}
+				else
+				{
+					urlParams = Application.application.parameters;
+				}
+				
+				return urlParams;
+			}
+			
 			override protected function createChildren():void {
 				super.createChildren();
 				
 				if(viewer==null)
 					return;
 				
-				if(StreamUtil.DocLoader==null)
-					viewer.DocLoader = new AVM2Loader(StreamUtil.getExecutionContext(),StreamUtil.ProgressiveLoading);
-				else 
-					viewer.DocLoader = StreamUtil.DocLoader;
-				
-				viewer.DocLoader.addEventListener("onDocumentLoadedError",onLoadedError);
+				_browserManager = BrowserManager.getInstance();
 			}
 			
 			protected function onLoadedError(event:ErrorEvent):void{
@@ -422,4 +552,4 @@
 			}
 		]]>
 	</mx:Script>
-</mx:VBox>
+</s:VGroup>
