@@ -1292,7 +1292,7 @@ package com.devaldi.controls.flexpaper
 					if(_viewMode != ViewModeEnum.TILE){
 						if(_pluginList!=null){
 							for(pl=0;pl<_pluginList.length;pl++){
-								if(_currentExtViewMode!=null && _currentExtViewMode.Name == "TwoPage"){
+								if(_currentExtViewMode!=null && ViewMode == "TwoPage"){
 									if(checkIsVisible(i)){
 										_pluginList[pl].drawSelf(i,(i % 2 == 0)?_pageList[0]:_pageList[1],_scale);
 									}
