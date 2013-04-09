@@ -2024,10 +2024,18 @@ package com.devaldi.controls.flexpaper
 		}
 		
 		public function searchTextByJSONFile(text:String):void{
+			var provideAbstracts:Boolean = false;
+			
 			if(prevSearchText != text){
 				searchPageIndex = -1;
 				prevSearchText = text;
 				searchIndex = -1;
+				
+				// kick off the extraction process for abstracts as a separate async operation 
+				if(ProvideSearchAbstracts){
+					_searchAbstracts = new Array();
+					provideAbstracts = true;
+				}
 			}
 			
 			if(_selectionMarker!=null && _selectionMarker.parent !=null){
@@ -2072,6 +2080,10 @@ package com.devaldi.controls.flexpaper
 							_jsonPageData = com.adobe.serialization.json.JSON.decode(evt.result.toString());
 							performSearchTextByJSON(text);
 						}
+						
+						if(provideAbstracts){
+							provideJSONSearchAbstracts(text);
+						}
 					});
 					serve.addEventListener(FaultEvent.FAULT,function searchByJSONFault(evt:FaultEvent):void {
 						_jsonPageDataFault = json_unescaped;
@@ -2092,6 +2104,44 @@ package com.devaldi.controls.flexpaper
 					performSearchTextBySplitJSON(text);
 				}else{
 					performSearchTextByJSON(text);
+				}
+				
+				if(provideAbstracts){
+					provideJSONSearchAbstracts(text);
+				}
+			}
+		}
+		
+		private function provideJSONSearchAbstracts(text:String):void{
+			return; // todo: finish implementing
+			
+			if(JSONFileSplit()){
+				
+			}else{
+				var spi:int = 1;
+				var si:int = -1;
+				var searchBlob:String = "";
+				
+				while((spi -1) < numPages && ((_searchAbstracts!=null && _searchAbstracts.length<500)||_searchAbstracts==null)){
+					var dataIndex:int = getJsonPageIndex(searchPageIndex);
+					
+					if(_jsonPageData[spi]!=null){
+						searchBlob = getCurrentJSONSearchBlob(spi-1);
+						
+						// convert non-breaking space into space
+						for(var c:int=0;c<searchBlob.length;c++){
+							if(searchBlob.charCodeAt(c) == 160){
+								searchBlob = searchBlob.substr(0,c)+" "+searchBlob.substr(c+1);
+							}
+						}
+						
+						si = searchBlob.toLowerCase().indexOf(text.toLowerCase(),si);
+						
+						if(si==-1)
+							spi++;
+						else
+							si++;
+					}
 				}
 			}
 		}
