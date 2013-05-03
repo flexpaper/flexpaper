@@ -69,7 +69,19 @@ package com.devaldi.controls
 			return viewer.PageList[pn].textSnapshot as TextSnapshot;
 		}
 		
+		public function getNormalizationHeight(pageIndex:Number):Number{
+			return viewer.libMC.height;	
+		}
+		
+		public function getNormalizationWidth(pageIndex:Number):Number{
+			return viewer.libMC.width;
+		}
+		
 		public function setTextSelectMode(pn:Number):void{
+			
+		}
+		
+		public function unsetTextSelectMode(pn:Number):void{
 			
 		}
 		

@@ -16,19 +16,26 @@ You should have received a copy of the GNU General Public License
 along with FlexPaper.  If not, see <http://www.gnu.org/licenses/>.	
 */
 
-package com.devaldi.controls.flexpaper
+package com.devaldi.events
 {
-	public class SearchShapeMarker extends ShapeMarker
+	import flash.events.Event;
+	
+	public class SearchAbstractsDownloadedEvent extends Event
 	{
-		public var searchPhrase:String = "";
-		public var initialized:Boolean = true;
-		public var searchIndex:int = -1;
+		public static const SEARCHABSTRACT_DOWNLOADED:String = "onSearchAbstractsDownloaded";
+		public var endIndex:Number;
 		public var searchText:String = "";
-		public var occurance:int = 1;
 		
-		public function SearchShapeMarker()
-		{
-			super.isSearchMarker = true;
+		public function SearchAbstractsDownloadedEvent(type:String,s:Number, st:String){
+			super(type);
+			endIndex=s;
+			searchText=st;
 		}
+		
+		// Override the inherited clone() method.
+		override public function clone():Event {
+			return new SearchAbstractsDownloadedEvent(type, endIndex, searchText);
+		}
+		
 	}
 }

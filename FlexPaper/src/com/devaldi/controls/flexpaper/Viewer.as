@@ -15,7 +15,7 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with FlexPaper.  If not, see <http://www.gnu.org/licenses/>.	
 */  
-
+ 
 package com.devaldi.controls.flexpaper
 {
 	import caurina.transitions.Tweener;
@@ -37,10 +37,14 @@ package com.devaldi.controls.flexpaper
 	import com.devaldi.events.ErrorLoadingPageEvent;
 	import com.devaldi.events.ExternalLinkClickedEvent;
 	import com.devaldi.events.FitModeChangedEvent;
+	import com.devaldi.events.InteractionElementCreatedEvent;
+	import com.devaldi.events.InteractionElementDeletedEvent;
+	import com.devaldi.events.InteractionElementEditedEvent;
 	import com.devaldi.events.InternalLinkClickedEvent;
 	import com.devaldi.events.PageLoadedEvent;
 	import com.devaldi.events.PageLoadingEvent;
 	import com.devaldi.events.ScaleChangedEvent;
+	import com.devaldi.events.SearchAbstractsDownloadedEvent;
 	import com.devaldi.events.SelectionCreatedEvent;
 	import com.devaldi.events.SwfLoadedEvent;
 	import com.devaldi.events.ViewModeChangedEvent;
@@ -76,6 +80,8 @@ package com.devaldi.controls.flexpaper
 	import flash.system.ApplicationDomain;
 	import flash.system.LoaderContext;
 	import flash.system.System;
+	import flash.text.TextField;
+	import flash.text.TextFormat;
 	import flash.text.TextSnapshot;
 	import flash.ui.Keyboard;
 	import flash.ui.Mouse;
@@ -85,10 +91,13 @@ package com.devaldi.controls.flexpaper
 	import flash.utils.setTimeout;
 	
 	import mx.containers.Canvas;
+	import mx.controls.Button;
 	import mx.controls.Image;
 	import mx.core.Container;
 	import mx.core.UIComponent;
+	import mx.events.DragEvent;
 	import mx.events.FlexEvent;
+	import mx.managers.DragManager;
 	import mx.managers.PopUpManager;
 	import mx.resources.ResourceManager;
 	import mx.rpc.events.FaultEvent;
@@ -116,6 +125,10 @@ package com.devaldi.controls.flexpaper
 	[Event(name="onSelectionCreated", type="com.devaldi.events.SelectionCreatedEvent")]
 	[Event(name="onDocumentPrinted", type="com.devaldi.events.DocumentPrintedEvent")]
 	[Event(name="onErrorLoadingPage", type="com.devaldi.events.ErrorLoadingPageEvent")]
+	[Event(name="onSearchAbstractsDownloaded", type="com.devaldi.events.SearchAbstractsDownloadedEvent")]
+	[Event(name="onInteractionElementCreated", type="com.devaldi.events.InteractionElementCreatedEvent")]
+	[Event(name="onInteractionElementEdited", type="com.devaldi.events.InteractionElementEditedEvent")]
+	[Event(name="onInteractionElementDeleted", type="com.devaldi.events.InteractionElementDeletedEvent")]
 	
 	public class Viewer extends Canvas
 	{
@@ -156,6 +169,8 @@ package com.devaldi.controls.flexpaper
 		private var _zoomInterval:Number = 0;
 		private var _inputBytes:ByteArray;
 		private var _textSelectEnabled:Boolean = false;
+		private var _drawingInteractionEnabled:Boolean = false;
+		private var _designMode:Boolean = false;
 		private var _cursorsEnabled:Boolean = true;
 		private var _grabCursorID:Number = 0;
 		private var _grabbingCursorID:Number = 0;
@@ -175,9 +190,15 @@ package com.devaldi.controls.flexpaper
 		private var _skinImg:Bitmap = new MenuIcons.SMALL_TRANSPARENT();
 		private var _skinImgc:Bitmap = new MenuIcons.SMALL_TRANSPARENT_COLOR();
 		private var _skinImgDo:Image;
+		private var _currentInteractionObject:ITextSelectableDisplayObject = null;
+		private var _stdsize:Number = 1000;
 		
 		public function Viewer(){
 			super();
+		}
+		
+		public function get SwfContainer():Canvas{
+			return _swfContainer;
 		}
 		
 		public function get BusyLoading():Boolean {
@@ -323,7 +344,35 @@ package com.devaldi.controls.flexpaper
 		[Bindable]
 		public function get TextSelectEnabled():Boolean {
 			return _textSelectEnabled;
-		}	
+		}
+		
+		[Bindable]
+		public function get DrawingInteractionEnabled():Boolean{
+			return _drawingInteractionEnabled;
+		}
+		
+		public function set DrawingInteractionEnabled(b1:Boolean):void{
+			_drawingInteractionEnabled = b1;
+			
+			if(systemManager){
+				if(!b1){					
+					if(_paperContainer)
+						_paperContainer.DragEnabled = true;
+				}else{
+					if(_paperContainer)
+						_paperContainer.DragEnabled = false;
+				}
+			}
+		}
+		
+		[Bindable]
+		public function get DesignMode():Boolean{
+			return _designMode;
+		}
+		
+		public function set DesignMode(b1:Boolean):void{
+			_designMode = b1;
+		}
 		
 		[Bindable]
 		public function get CursorsEnabled():Boolean {
@@ -725,6 +774,8 @@ package com.devaldi.controls.flexpaper
 		
 		[Bindable]
 		public function get JSONFile():String{
+			if(_jsonFile!=null&&_jsonFile.length==0){return null;}
+			
 			return _jsonFile;
 		}
 		
@@ -955,7 +1006,9 @@ package com.devaldi.controls.flexpaper
 			if(_docLoader!=null && _docLoader.IsSplit){
 				event.target.loader.loading = false;
 				
-				if(event.target.loader.content!=null && event.target.loader.content is MovieClip){event.target.loader.content.stop();}
+				if(event.target.loader.content!=null && event.target.loader.content is MovieClip){
+					event.target.loader.content.stop();
+				}
 				
 				for(var i:int=0;i<_docLoader.LoaderList.length;i++){
 					if(_docLoader.LoaderList[i].loading){
@@ -978,7 +1031,9 @@ package com.devaldi.controls.flexpaper
 				
 				repaint();
 			}else{ // normal file approach
-				if(event.target.loader.content!=null){event.target.loader.content.stop();}
+				if(event.target.loader.content!=null){
+					event.target.loader.content.stop();
+				}
 				
 				if(!ProgressiveLoading || (ProgressiveLoading && _libMC.framesLoaded == _libMC.totalFrames)){
 					for(var i:int=0;i<_docLoader.LoaderList.length;i++){
@@ -1225,15 +1280,15 @@ package com.devaldi.controls.flexpaper
 								//searchTextByService(prevSearchText)
 							//}
 							
-							if(_selectionMarker!=null)
-								CurrExtViewMode.renderSelection(i,_selectionMarker);
+							if(_interactionMarker!=null)
+								CurrExtViewMode.renderSelection(i,_interactionMarker);
 						}
 						
-						if((_viewMode == ViewModeEnum.PORTRAIT) && _selectionMarker != null){
-							if(i+1 == searchPageIndex && _selectionMarker.parent != _pageList[i]){
-								_pageList[i].addChildAt(_selectionMarker,_pageList[i].numChildren);
-							}else if(i+1 == searchPageIndex && _selectionMarker.parent == _pageList[i]){
-								_pageList[i].setChildIndex(_selectionMarker,_pageList[i].numChildren -1);
+						if((_viewMode == ViewModeEnum.PORTRAIT) && _interactionMarker != null){
+							if(i+1 == searchPageIndex && _interactionMarker.parent != _pageList[i]){
+								_pageList[i].addChildAt(_interactionMarker,_pageList[i].numChildren);
+							}else if(i+1 == searchPageIndex && _interactionMarker.parent == _pageList[i]){
+								_pageList[i].setChildIndex(_interactionMarker,_pageList[i].numChildren -1);
 							}
 						}
 						
@@ -1489,8 +1544,10 @@ package com.devaldi.controls.flexpaper
 		private function displayContainerrolloverHandler(event:MouseEvent):void{
 			
 			if(_viewMode==ViewModeEnum.PORTRAIT||(UsingExtViewMode && CurrExtViewMode.supportsTextSelect)){
-				if(TextSelectEnabled && CursorsEnabled){
+				if(TextSelectEnabled && CursorsEnabled && !DrawingInteractionEnabled){
 					Mouse.cursor = FlexPaperCursorManager.TEXT_SELECT_CURSOR;
+				}else if(DrawingInteractionEnabled && CursorsEnabled){
+					Mouse.cursor = FlexPaperCursorManager.ADDELEMENT_CURSOR;
 				}else if(CursorsEnabled){
 					resetCursor();
 				}
@@ -1503,8 +1560,10 @@ package com.devaldi.controls.flexpaper
 				if(CursorsEnabled)
 					Mouse.cursor = flash.ui.MouseCursor.AUTO;
 				
-				if(TextSelectEnabled && CursorsEnabled){
+				if(TextSelectEnabled && CursorsEnabled && !DrawingInteractionEnabled){
 					Mouse.cursor = FlexPaperCursorManager.TEXT_SELECT_CURSOR;
+				}else if(DrawingInteractionEnabled && CursorsEnabled){
+					Mouse.cursor = FlexPaperCursorManager.ADDELEMENT_CURSOR;
 				}else if(CursorsEnabled && !(event.target is IFlexPaperPluginControl) || (CursorsEnabled && event.target.parent !=null && event.target.parent.parent !=null && event.target.parent.parent is IFlexPaperPluginControl)){
 					resetCursor();
 				}
@@ -1515,7 +1574,7 @@ package com.devaldi.controls.flexpaper
 		}
 		
 		private function displayContainerDoubleClickHandler(event:MouseEvent):void{
-			if(TextSelectEnabled){
+			if(TextSelectEnabled||DrawingInteractionEnabled){
 				return;
 			}
 			if(ViewMode == ViewModeEnum.PORTRAIT)
@@ -1531,8 +1590,10 @@ package com.devaldi.controls.flexpaper
 				if(CursorsEnabled)
 					Mouse.cursor = flash.ui.MouseCursor.AUTO;
 				
-				if(TextSelectEnabled && CursorsEnabled){
+				if(TextSelectEnabled && CursorsEnabled && !DrawingInteractionEnabled){
 					Mouse.cursor = FlexPaperCursorManager.TEXT_SELECT_CURSOR;
+				}else if(DrawingInteractionEnabled && CursorsEnabled){
+					Mouse.cursor = FlexPaperCursorManager.ADDELEMENT_CURSOR;
 				}else if(CursorsEnabled){
 					Mouse.cursor = FlexPaperCursorManager.GRABBING;
 				}
@@ -1751,10 +1812,10 @@ package com.devaldi.controls.flexpaper
 		}
 		
 		public function deleteSelectionMarker():void{
-			if(_selectionMarker!=null&&_selectionMarker.parent!=null){
-				_selectionMarker.parent.removeChild(_selectionMarker);
+			if(_interactionMarker!=null&&_interactionMarker.parent!=null){
+				_interactionMarker.parent.removeChild(_interactionMarker);
 				
-				_selectionMarker = null;
+				_interactionMarker = null;
 			}
 		}
 		
@@ -1798,7 +1859,7 @@ package com.devaldi.controls.flexpaper
 					_pageList[pl].removeEventListener(MouseEvent.MOUSE_OVER,dupImageMoverHandler);
 					_pageList[pl].removeEventListener(MouseEvent.MOUSE_OUT,dupImageMoutHandler);
 					_pageList[pl].removeEventListener(MouseEvent.CLICK,dupImageClickHandler);
-					_pageList[pl].removeEventListener(MouseEvent.MOUSE_DOWN,textSelectorMouseDownHandler);
+					_pageList[pl].removeEventListener(MouseEvent.MOUSE_DOWN,documentInteractionHandler);
 					
 					if(_pageList[pl].parent!=null){
 						_pageList[pl].removeAllChildren();
@@ -1969,7 +2030,7 @@ package com.devaldi.controls.flexpaper
 		public var snap:TextSnapshot;
 		private var searchIndex:int = -1;		
 		private var searchPageIndex:int = -1;
-		private var _selectionMarker:ShapeMarker;
+		private var _interactionMarker:ShapeMarker;
 		public var prevSearchText:String = "";
 		private var prevYsave:Number=-1;
 		private var _markList:Array;
@@ -1980,11 +2041,11 @@ package com.devaldi.controls.flexpaper
 		}
 		
 		public function get SelectionMarker():ShapeMarker{
-			return _selectionMarker;
+			return _interactionMarker;
 		}
 		
 		public function set SelectionMarker(sm:ShapeMarker):void{
-			_selectionMarker = sm;
+			_interactionMarker = sm;
 		}
 		
 		public function get SearchPageIndex():int {
@@ -2014,6 +2075,8 @@ package com.devaldi.controls.flexpaper
 		
 		private var _jsonPageData:Object = null;
 		private var _jsonPageDataFault:String = "";
+		private var _abstracts_spi:int = 1;
+		private var _abstracts_lastaccessedfile:String = "";
 		
 		public function get JSONPageData():Object{
 			return _jsonPageData;
@@ -2030,6 +2093,7 @@ package com.devaldi.controls.flexpaper
 				searchPageIndex = -1;
 				prevSearchText = text;
 				searchIndex = -1;
+				_abstracts_spi = 1;
 				
 				// kick off the extraction process for abstracts as a separate async operation 
 				if(ProvideSearchAbstracts){
@@ -2038,9 +2102,9 @@ package com.devaldi.controls.flexpaper
 				}
 			}
 			
-			if(_selectionMarker!=null && _selectionMarker.parent !=null){
-				_selectionMarker.parent.removeChild(_selectionMarker);
-				_selectionMarker=null;
+			if(_interactionMarker!=null && _interactionMarker.parent !=null){
+				_interactionMarker.parent.removeChild(_interactionMarker);
+				_interactionMarker=null;
 			}
 			
 			var outOfRange:Boolean = getJsonPageIndex(searchPageIndex) == -1;
@@ -2066,7 +2130,12 @@ package com.devaldi.controls.flexpaper
 						
 						dispatchEvent(new Event("onDownloadSearchResultCompleted"));
 						if(JSONFileSplit()){
-							var jsonData = com.adobe.serialization.json.JSON.decode(evt.result.toString());
+							var jsonDataString:String = evt.result.toString();
+							if(jsonDataString.indexOf("(")==0){// remove jsonp params
+								jsonDataString = jsonDataString.substr(1,jsonDataString.length-2);
+							}
+							
+							var jsonData = com.adobe.serialization.json.JSON.decode(jsonDataString);
 							
 							if(_jsonPageData==null)
 								_jsonPageData = new Array(parseInt(jsonData[0].pages));
@@ -2113,20 +2182,19 @@ package com.devaldi.controls.flexpaper
 		}
 		
 		private function provideJSONSearchAbstracts(text:String):void{
-			return; // todo: finish implementing
-			
-			if(JSONFileSplit()){
-				
-			}else{
-				var spi:int = 1;
+			//if(JSONFileSplit()){
+				//todo: implement.
+			//}else{
 				var si:int = -1;
 				var searchBlob:String = "";
+				var abstractsadded:Boolean = false;
+				var occurance:int = 1;
 				
-				while((spi -1) < numPages && ((_searchAbstracts!=null && _searchAbstracts.length<500)||_searchAbstracts==null)){
+				while(_abstracts_spi < numPages && ((_searchAbstracts!=null && _searchAbstracts.length<500)||_searchAbstracts==null)){
 					var dataIndex:int = getJsonPageIndex(searchPageIndex);
 					
-					if(_jsonPageData[spi]!=null){
-						searchBlob = getCurrentJSONSearchBlob(spi-1);
+					if(_jsonPageData[_abstracts_spi]!=null){
+						searchBlob = getCurrentJSONSearchBlob(_abstracts_spi-1);
 						
 						// convert non-breaking space into space
 						for(var c:int=0;c<searchBlob.length;c++){
@@ -2137,13 +2205,76 @@ package com.devaldi.controls.flexpaper
 						
 						si = searchBlob.toLowerCase().indexOf(text.toLowerCase(),si);
 						
-						if(si==-1)
-							spi++;
-						else
+						var sm:SearchShapeMarker = new SearchShapeMarker();
+						sm.isSearchMarker = true;
+						sm.PageIndex = _abstracts_spi;
+						sm.initialized = false;
+						sm.searchText = text;
+						sm.searchIndex = si;
+						sm.occurance = occurance;
+						
+						if(si>0){
+							_searchAbstracts[_searchAbstracts.length] = new Object();
+							_searchAbstracts[_searchAbstracts.length-1].pageNumber = _abstracts_spi;
+							_searchAbstracts[_searchAbstracts.length-1].SearchMarker = sm;
+							_searchAbstracts[_searchAbstracts.length-1].text = searchBlob.substr((si-50>0)?si-50:0,(si+75<searchBlob.length)?si+75:searchBlob.length);
+							_searchAbstracts[_searchAbstracts.length-1].text = TextMapUtil.checkUnicodeIntegrity(_searchAbstracts[_searchAbstracts.length-1].text,null,_libMC);
+							abstractsadded = true;
+						}
+						
+						if(si==-1){
+							_abstracts_spi++;
+							occurance = 1;
+						}
+						else{
 							si++;
+							occurance++;
+						}
+						
+					}else{
+						var json_unescaped = unescape(JSONFile);
+						var tmpUrl:String = (json_unescaped.indexOf("{page}")>-1)?json_unescaped.replace("{page}",(_abstracts_spi+1) + (10 - (_abstracts_spi+1) % 10)):json_unescaped;
+						
+						if(JSONFileSplit() && getJsonPageIndex(_abstracts_spi+1) == -1 && _abstracts_lastaccessedfile != tmpUrl){
+							//spi++;
+							
+							var serve:HTTPService = new HTTPService();
+							
+							serve.url = _abstracts_lastaccessedfile = tmpUrl;
+							serve.method = "GET";
+							serve.resultFormat = "text";
+							serve.addEventListener("result",function searchByJSONResult(evt:ResultEvent):void {
+								
+								var jsonDataString:String = evt.result.toString();
+								if(jsonDataString.indexOf("(")==0){// remove jsonp params
+									jsonDataString = jsonDataString.substr(1,jsonDataString.length-2);
+								}
+								
+								var jsonData = com.adobe.serialization.json.JSON.decode(jsonDataString);
+								
+								if(_jsonPageData==null)
+									_jsonPageData = new Array(parseInt(jsonData[0].pages));
+								
+								for(var i:int=0;i<jsonData.length;i++){
+									_jsonPageData[parseInt(jsonData[i].number)-1] = jsonData[i];
+								}
+								
+								provideJSONSearchAbstracts(text);
+							});
+							serve.send();
+						}
+						
+						if(JSONFileSplit()){
+							dispatchEvent(new SearchAbstractsDownloadedEvent(SearchAbstractsDownloadedEvent.SEARCHABSTRACT_DOWNLOADED,_abstracts_spi,text));
+						}
+						
+						return;
 					}
 				}
-			}
+				
+				if(abstractsadded)
+					dispatchEvent(new SearchAbstractsDownloadedEvent(SearchAbstractsDownloadedEvent.SEARCHABSTRACT_DOWNLOADED,_abstracts_spi,text));dispatchEvent(new SearchAbstractsDownloadedEvent(SearchAbstractsDownloadedEvent.SEARCHABSTRACT_DOWNLOADED,_abstracts_spi,text));
+//			}
 		}
 		
 		private function getCurrentJSONSearchBlob(dataIndex:int):String{
@@ -2230,7 +2361,7 @@ package com.devaldi.controls.flexpaper
 				if(!UsingExtViewMode)
 					snap = _pageList[searchPageIndex-1].textSnapshot;
 				else{
-					CurrExtViewMode.setTextSelectMode(searchPageIndex-1);
+					//CurrExtViewMode.setTextSelectMode(searchPageIndex-1);
 					snap = CurrExtViewMode.getPageTextSnapshot(searchPageIndex-1);
 					if(snap==null){snap = _pageList[searchPageIndex-1].textSnapshot;}
 				}
@@ -2244,23 +2375,27 @@ package com.devaldi.controls.flexpaper
 				var tri:Array;
 				
 				if(searchIndex > 0){ // found a new match
-					_selectionMarker = new ShapeMarker();
-					_selectionMarker.isSearchMarker = true;
-					_selectionMarker.graphics.beginFill(SearchMatchColor,0.3);
+					_interactionMarker = new ShapeMarker();
+					_interactionMarker.isSearchMarker = true;
+					_interactionMarker.graphics.beginFill(SearchMatchColor,0.3);
 					
 					tri = snap.getTextRunInfo(searchIndex,searchIndex+text.length-1);
 					if(tri.length>0){
 						prevYsave = tri[0].matrix_ty;
-						drawCurrentSelection(SearchMatchColor,_selectionMarker,tri);
+						drawCurrentSelection(SearchMatchColor,_interactionMarker,tri);
 					}
 					
 					if(prevYsave>0){
-						_selectionMarker.graphics.endFill();
+						_interactionMarker.graphics.endFill();
 						_adjGotoPage = (ViewMode==ViewModeEnum.PORTRAIT)?(prevYsave) * _scale - 50:0;
 						gotoPage(searchPageIndex);
 					}
 					
 					searchIndex = searchIndex + text.length;
+					
+					if(UsingExtViewMode)
+						CurrExtViewMode.unsetTextSelectMode(searchPageIndex-1);
+					
 				}else{
 					_jsonSearchMatchIndex = -1;
 					searchPageIndex = searchPageIndex + 1;
@@ -2311,18 +2446,18 @@ package com.devaldi.controls.flexpaper
 					var tri:Array;
 					
 					if(searchIndex > 0){ // found a new match
-						_selectionMarker = new ShapeMarker();
-						_selectionMarker.isSearchMarker = true;
-						_selectionMarker.graphics.beginFill(SearchMatchColor,0.3);
+						_interactionMarker = new ShapeMarker();
+						_interactionMarker.isSearchMarker = true;
+						_interactionMarker.graphics.beginFill(SearchMatchColor,0.3);
 						
 						tri = snap.getTextRunInfo(searchIndex,searchIndex+text.length-1);
 						if(tri.length>0){
 							prevYsave = tri[0].matrix_ty;
-							drawCurrentSelection(SearchMatchColor,_selectionMarker,tri);
+							drawCurrentSelection(SearchMatchColor,_interactionMarker,tri);
 						}
 						
 						if(prevYsave>0){
-							_selectionMarker.graphics.endFill();
+							_interactionMarker.graphics.endFill();
 							_adjGotoPage = (ViewMode==ViewModeEnum.PORTRAIT)?(prevYsave) * _scale - 50:0;
 							gotoPage(searchPageIndex);
 						}
@@ -2378,9 +2513,9 @@ package com.devaldi.controls.flexpaper
 		private var _searchExtracts:Array;
 		
 		public function searchTextByService(text:String):void{
-			if(_selectionMarker!=null && _selectionMarker.parent !=null){
-				_selectionMarker.parent.removeChild(_selectionMarker);
-				_selectionMarker=null;
+			if(_interactionMarker!=null && _interactionMarker.parent !=null){
+				_interactionMarker.parent.removeChild(_interactionMarker);
+				_interactionMarker=null;
 			}
 			
 			if(prevSearchText != text){
@@ -2391,7 +2526,7 @@ package com.devaldi.controls.flexpaper
 				prevSearchIndexList = new Array();
 			}
 			
-			if(_selectionMarker!=null && _selectionMarker.parent != null){_selectionMarker.parent.removeChild(_selectionMarker);}
+			if(_interactionMarker!=null && _interactionMarker.parent != null){_interactionMarker.parent.removeChild(_interactionMarker);}
 			
 			if(searchPageIndex == -1){
 				searchPageIndex = currPage;
@@ -2435,18 +2570,18 @@ package com.devaldi.controls.flexpaper
 						var tri:Array;
 						
 						if(searchIndex > 0){ // found a new match
-							_selectionMarker = new ShapeMarker();
-							_selectionMarker.isSearchMarker = true;
-							_selectionMarker.graphics.beginFill(SearchMatchColor,0.3);
+							_interactionMarker = new ShapeMarker();
+							_interactionMarker.isSearchMarker = true;
+							_interactionMarker.graphics.beginFill(SearchMatchColor,0.3);
 							
 							tri = snap.getTextRunInfo(searchIndex,searchIndex+text.length-1);
 							if(tri.length>0){
 								prevYsave = tri[0].matrix_ty;
-								drawCurrentSelection(SearchMatchColor,_selectionMarker,tri);
+								drawCurrentSelection(SearchMatchColor,_interactionMarker,tri);
 							}
 							
 							if(prevYsave>0){
-								_selectionMarker.graphics.endFill();
+								_interactionMarker.graphics.endFill();
 								_adjGotoPage = (ViewMode==ViewModeEnum.PORTRAIT)?(prevYsave) * _scale - 50:0;
 								gotoPage(searchPageIndex);
 							}
@@ -2517,14 +2652,14 @@ package com.devaldi.controls.flexpaper
 			
 			if(text.length==0){return;}
 			text = text.toLowerCase();
-			
-			if(_docLoader.IsSplit && SearchServiceUrl!=null && SearchServiceUrl.length>0)
-				return searchTextByService(text);
-			
+
 			if(JSONFile != null && _jsonPageDataFault != JSONFile && _docLoader.IsSplit){
 				SearchMatchAll = false;
 				return searchTextByJSONFile(text);
 			}
+			
+			if(_docLoader.IsSplit && SearchServiceUrl!=null && SearchServiceUrl.length>0)
+				return searchTextByService(text);
 			
 			var tri:Array;
 			
@@ -2532,6 +2667,11 @@ package com.devaldi.controls.flexpaper
 
 				if(UsingExtViewMode){
 					CurrExtViewMode.clearSearch();
+				}
+				
+				if(ProvideSearchAbstracts && (JSONFile != null && JSONFile.length>0)){ 
+					_searchAbstracts = new Array();
+					provideJSONSearchAbstracts(text);
 				}
 
 				searchIndex = -1;
@@ -2546,7 +2686,12 @@ package com.devaldi.controls.flexpaper
 						if(_markList!=null){
 							for(var i:int=0;i<_markList.length;i++){
 								if(_markList[i]!=null && _markList[i].parent !=null){
-									_markList[i].parent.removeChild(_markList[i]);
+									for(var ic:int=0;ic<_markList[i].numChildren;ic++){
+										if(_markList[i].getChildAt(ic) is SearchShapeMarker){
+											_markList[i].removeChild(ic);
+										}
+									}
+									//_markList[i].parent.removeChild(_markList[i]);
 								}						
 							}
 						}
@@ -2563,11 +2708,11 @@ package com.devaldi.controls.flexpaper
 						return;
 					}
 					
-					if(ProvideSearchAbstracts){
+					if(ProvideSearchAbstracts && JSONFile==null){
 						_searchAbstracts = new Array();						
 					}
 					
-					while((spi -1) < _libMC.framesLoaded && ((_searchAbstracts!=null && _searchAbstracts.length<500)||_searchAbstracts==null)){ // limit the amount of searchabstracts returned to avoid timeout
+					while((spi -1) < _libMC.framesLoaded && ((_searchAbstracts!=null && _searchAbstracts.length<500)||_searchAbstracts==null) && JSONFile==null){ // limit the amount of searchabstracts returned to avoid timeout
 						_libMC.gotoAndStop(spi);
 						
 						snap = _libMC.textSnapshot;
@@ -2586,7 +2731,7 @@ package com.devaldi.controls.flexpaper
 							tri = snap.getTextRunInfo(si,si+text.length-1);
 							drawCurrentSelection(SearchMatchColor,sm,tri,false,0.25);
 							
-							if(ProvideSearchAbstracts){
+							if(ProvideSearchAbstracts && JSONFile==null){
 								_searchAbstracts[_searchAbstracts.length] = new Object();
 								_searchAbstracts[_searchAbstracts.length-1].pageNumber = sm.PageIndex;
 								_searchAbstracts[_searchAbstracts.length-1].SearchMarker = sm;
@@ -2607,13 +2752,17 @@ package com.devaldi.controls.flexpaper
 							si++;
 					}
 					
+					if(_searchAbstracts!=null && _searchAbstracts.length>0){
+						dispatchEvent(new SearchAbstractsDownloadedEvent(SearchAbstractsDownloadedEvent.SEARCHABSTRACT_DOWNLOADED,spi,text));	
+					}
+					
 					if(_searchAbstracts!=null && _searchAbstracts.length>=500){
 						dispatchEvent(new Event("onMaxSearchResultsExceeded"));
 					}
 				}
 			}
 			
-			if(_selectionMarker!=null && _selectionMarker.parent != null){_selectionMarker.parent.removeChild(_selectionMarker);}
+			if(_interactionMarker!=null && _interactionMarker.parent != null){_interactionMarker.parent.removeChild(_interactionMarker);}
 			
 			// start searching from the current page
 			if(searchPageIndex == -1){
@@ -2641,18 +2790,18 @@ package com.devaldi.controls.flexpaper
 				//searchIndex = searchString(snap.getText(0,snap.charCount),text,searchIndex);
 				
 				if(searchIndex > 0){ // found a new match
-					_selectionMarker = new ShapeMarker();
-					_selectionMarker.isSearchMarker = true;
-					_selectionMarker.graphics.beginFill(SearchMatchColor,0.3);
+					_interactionMarker = new ShapeMarker();
+					_interactionMarker.isSearchMarker = true;
+					_interactionMarker.graphics.beginFill(SearchMatchColor,0.3);
 					
 					tri = snap.getTextRunInfo(searchIndex,searchIndex+text.length-1);
 					if(tri.length>0){
 						prevYsave = tri[0].matrix_ty;
-						drawCurrentSelection(SearchMatchColor,_selectionMarker,tri);
+						drawCurrentSelection(SearchMatchColor,_interactionMarker,tri);
 					}
 					
 					if(prevYsave>0){
-						_selectionMarker.graphics.endFill();
+						_interactionMarker.graphics.endFill();
 						_adjGotoPage = (ViewMode==ViewModeEnum.PORTRAIT)?(prevYsave) * _scale - 50:0;
 						gotoPage(searchPageIndex);
 						break;
@@ -2720,6 +2869,10 @@ package com.devaldi.controls.flexpaper
 			serve.resultFormat = "e4x"
 			serve.addEventListener("result",highlightResult);
 			serve.send();
+		}
+		
+		public function initMarkList():void{
+			_markList = new Array(numPages);
 		}
 		
 		private function highlightResult(evt:ResultEvent):void {
@@ -2803,7 +2956,7 @@ package com.devaldi.controls.flexpaper
 			di.addEventListener(MouseEvent.MOUSE_OVER,dupImageMoverHandler,false,0,true);
 			di.addEventListener(MouseEvent.MOUSE_OUT,dupImageMoutHandler,false,0,true);
 			di.addEventListener(MouseEvent.CLICK,dupImageClickHandler,false,0,true);
-			di.addEventListener(MouseEvent.MOUSE_DOWN,textSelectorMouseDownHandler,false,0,true);
+			di.addEventListener(MouseEvent.MOUSE_DOWN,documentInteractionHandler,false,0,true);
 			
 			if(_pluginList!=null)
 				for(var pl:int=0;pl<_pluginList.length;pl++)
@@ -2815,7 +2968,7 @@ package com.devaldi.controls.flexpaper
 		}	
 		
 		private function textSelectorDoubleClickHandler(event:MouseEvent):void{
-			if(_selectionMarker!=null&&_selectionMarker.parent!=null){_selectionMarker.parent.removeChild(_selectionMarker);_selectionMarker=null;}
+			if(_interactionMarker!=null&&_interactionMarker.parent!=null){_interactionMarker.parent.removeChild(_interactionMarker);_interactionMarker=null;}
 			
 			try{
 				if(event.target is ITextSelectableDisplayObject){
@@ -2879,40 +3032,59 @@ package com.devaldi.controls.flexpaper
 			//snap.setSelected(_firstHitIndex,hitIndex,true);
 		}
 		
-		private function textSelectorMouseDownHandler(event:MouseEvent):void{
-			if(!TextSelectEnabled){return;}
-			if(_selectionMarker!=null&&_selectionMarker.parent!=null){_selectionMarker.parent.removeChild(_selectionMarker);_selectionMarker=null;}
+		private function documentInteractionHandler(event:MouseEvent):void{
+			if(DrawingInteractionEnabled && !TextSelectEnabled){
+				_isInteracting = true;
+				
+				systemManager.addEventListener(
+					MouseEvent.MOUSE_DOWN, drawingInteractionDownHandler, true,0,true);
+				
+				systemManager.addEventListener(
+					MouseEvent.MOUSE_MOVE, drawingInteractionMoveHandler, true,0,true);
+				
+				systemManager.addEventListener(
+					MouseEvent.MOUSE_UP, drawingInteractionMouseUpHandler, true,0,true);
+				
+				systemManager.stage.addEventListener(
+					Event.MOUSE_LEAVE, drawingInteractionMouseLeaveHandler);
+				
+				drawingInteractionDownHandler(event);
+			}
 			
-			try{
-				if(event.target is ITextSelectableDisplayObject){
-					(event.target as ITextSelectableDisplayObject).setTextSelectMode();
-					_selectionMc = (event.target as ITextSelectableDisplayObject).getMovieClip(); 
-				}
-				else if(!(event.target.content is MovieClip)){
-					if(!(event.target is MovieClip)){
-						return;
-					}else{
-						_selectionMc = (event.target as MovieClip);
+			if(TextSelectEnabled){
+				if(_interactionMarker!=null&&_interactionMarker.parent!=null){_interactionMarker.parent.removeChild(_interactionMarker);_interactionMarker=null;}
+				
+				try{
+					if(event.target is ITextSelectableDisplayObject){
+						(event.target as ITextSelectableDisplayObject).setTextSelectMode();
+						_selectionMc = (event.target as ITextSelectableDisplayObject).getMovieClip(); 
 					}
-				}else{
-					_selectionMc = (event.target.content as MovieClip);
-				}
-			}catch (e:*) {return;}
-			
-			_currentlySelectedText = "";
-			_firstHitIndex = -1;
-			_lastHitIndex = -1;
-			_currentSelectionPage = -1;
-			snap = _selectionMc.textSnapshot;
-			
-			systemManager.addEventListener(
-				MouseEvent.MOUSE_MOVE, textSelectorMoveHandler, true,0,true);
-			
-			systemManager.addEventListener(
-				MouseEvent.MOUSE_UP, textSelectorMouseUpHandler, true,0,true);
-			
-			systemManager.stage.removeEventListener(
-				Event.MOUSE_LEAVE, textSelectorMouseLeaveHandler);
+					else if(!(event.target.content is MovieClip)){
+						if(!(event.target is MovieClip)){
+							return;
+						}else{
+							_selectionMc = (event.target as MovieClip);
+						}
+					}else{
+						_selectionMc = (event.target.content as MovieClip);
+					}
+				}catch (e:*) {return;}
+				
+				_currentlySelectedText = "";
+				_firstHitIndex = -1;
+				_lastHitIndex = -1;
+				_currentSelectionPage = -1;
+				snap = _selectionMc.textSnapshot;
+				
+				systemManager.addEventListener(
+					MouseEvent.MOUSE_MOVE, textSelectorMoveHandler, true,0,true);
+				
+				systemManager.addEventListener(
+					MouseEvent.MOUSE_UP, textSelectorMouseUpHandler, true,0,true);
+				
+				systemManager.stage.removeEventListener(
+					Event.MOUSE_LEAVE, textSelectorMouseLeaveHandler);
+			}
 		}
 		
 		private var _firstHitIndex:int = -1;
@@ -2963,6 +3135,337 @@ package com.devaldi.controls.flexpaper
 			_tri = a;
 		}
 		
+		private function drawingInteractionDownHandler(event:MouseEvent):void{
+			if(event.target is ITextSelectableDisplayObject && event.target != _interactionMarker){
+				_currentInteractionObject = (event.target as ITextSelectableDisplayObject);
+				_selectionMc = (event.target as ITextSelectableDisplayObject).getMovieClip();
+				
+				if(_interactionMarker!=null && _interactionMarker.parent!=null){
+					_interactionMarker.graphics.clear();
+					_interactionMarker.parent.removeChild(_interactionMarker);
+				}
+				
+				_interactionMarker = new ShapeMarker();
+				_interactionMarker.flagged = false;
+				
+				if(_currentInteractionObject is DupLoader){
+					_interactionMarker.PageIndex = ((_currentInteractionObject as DupLoader).parent as DupImage).dupIndex;
+					searchPageIndex = _interactionMarker.PageIndex;
+				}else{
+					_interactionMarker.PageIndex = _currentInteractionObject.getPageIndex();
+					searchPageIndex = _currentInteractionObject.getPageIndex();
+				}
+				
+				_drawingEndingPointX = -1;
+				_drawingEndingPointY = -1;
+				
+				repositionPapers();
+				
+				_drawingStartingPointX = _interactionMarker.mouseX;
+				_drawingStartingPointY = _interactionMarker.mouseY;
+				_interactionMarker.minX = _drawingStartingPointX;
+				_interactionMarker.minY = _drawingStartingPointX;
+				
+			}else if(event.target!=_interactionMarker){
+				_currentInteractionObject = null;
+//				_drawingStartingPointX = -1;
+//				_drawingStartingPointY = -1;				
+//				_isInteracting = false;
+			}
+		}
+		
+		private var _drawingStartingPointX:Number = -1;
+		private var _drawingStartingPointY:Number = -1;
+		private var _drawingEndingPointX:Number = -1;
+		private var _drawingEndingPointY:Number = -1;
+		private var _interactionElementSaveText:TextField = null;
+		private var _interactionElementDeleteText:TextField = null;
+		private var _isInteracting:Boolean = false;
+		
+		
+		
+		private function drawingInteractionMoveHandler(event:MouseEvent):void{
+//			if(_selectionMc==null){return;}
+//			var drawx3:int=-1;var drawy3:int=-1;
+//			
+//			drawx3 = normalizeX(_selectionMc.mouseX);
+//			drawy3 = normalizeY(_selectionMc.mouseY);
+						
+			systemManager.removeEventListener(
+				MouseEvent.MOUSE_DOWN, drawingInteractionDownHandler, true);
+			
+			systemManager.removeEventListener(
+				MouseEvent.MOUSE_MOVE, drawingInteractionMoveHandler, true);
+			
+			systemManager.removeEventListener(
+				MouseEvent.MOUSE_UP, drawingInteractionMouseUpHandler, true);
+			
+			systemManager.stage.removeEventListener(
+				Event.MOUSE_LEAVE, drawingInteractionMouseLeaveHandler);
+			
+			systemManager.addEventListener(MouseEvent.MOUSE_UP, drawingInteractionMouseUpHandler);
+			
+			if(_interactionMarker!=null)
+				_interactionMarker.addEventListener(Event.ENTER_FRAME, enterFrameEventListener);
+		}
+		
+		private function enterFrameEventListener(e:Event):void
+		{
+			if(_interactionMarker.isDragging){return;}
+			if(_interactionMarker.mouseX==_drawingStartingPointX||_interactionMarker.mouseY==_drawingStartingPointY){return;}
+			if(!_isInteracting){return;}
+			if(_currentInteractionObject==null){return;}
+			if(_drawingStartingPointX==-1||_drawingStartingPointY==-1){return;}
+			
+			_interactionMarker.graphics.clear();
+			_interactionMarker.graphics.lineStyle(1,0x72e6ff,0.8);
+			_interactionMarker.graphics.moveTo(_drawingStartingPointX,_drawingStartingPointY);
+			_interactionMarker.graphics.lineTo(_interactionMarker.mouseX, _drawingStartingPointY);
+			_interactionMarker.graphics.lineTo(_interactionMarker.mouseX, _interactionMarker.mouseY);
+			_interactionMarker.graphics.lineTo(_drawingStartingPointX, _interactionMarker.mouseY);
+			_interactionMarker.graphics.lineTo(_drawingStartingPointX, _drawingStartingPointY);
+			
+			_interactionMarker.graphics.beginFill(0x72e6ff,0.4);
+			_interactionMarker.graphics.drawRect(_drawingStartingPointX+1,_drawingStartingPointY+1,_interactionMarker.mouseX-_drawingStartingPointX-2,_interactionMarker.mouseY-_drawingStartingPointY-2);
+			_interactionMarker.graphics.endFill();
+			_interactionMarker.flagged = true;
+		}
+		
+		private function drawingInteractionMouseUpHandler(event:MouseEvent):void{
+			stopDrawingInteraction();
+		}
+		
+		private function drawingInteractionMouseLeaveHandler(event:MouseEvent):void{
+			stopDrawingInteraction();
+		}
+		
+		private function stopDrawingInteraction():void{
+			if(_interactionMarker!=null && _interactionMarker.flagged){
+				_interactionMarker.removeEventListener(Event.ENTER_FRAME, enterFrameEventListener);
+				systemManager.removeEventListener(MouseEvent.MOUSE_UP, drawingInteractionMouseUpHandler);
+				
+				if(_drawingEndingPointX == -1){
+					_drawingEndingPointX = _interactionMarker.mouseX;
+					_drawingEndingPointY = _interactionMarker.mouseY;
+					_interactionMarker.maxX = _drawingEndingPointX;
+					_interactionMarker.maxY = _drawingEndingPointY;
+					
+					if(_drawingStartingPointX>_drawingEndingPointX){
+						var tmp:Number=_drawingEndingPointX;
+						_drawingEndingPointX = _drawingStartingPointX;
+						_drawingStartingPointX = tmp;
+					}
+					
+					if(_drawingStartingPointY>_drawingEndingPointY){
+						var tmp:Number=_drawingEndingPointY;
+						_drawingEndingPointY = _drawingStartingPointY;
+						_drawingStartingPointY = tmp;
+					}
+				}
+				
+				drawCurrentInteractionActions(_interactionMarker,_drawingEndingPointX,_drawingEndingPointY);
+				
+				_interactionMarker.addEventListener(MouseEvent.ROLL_OVER, function(me:MouseEvent){
+					drawCurrentInteractionActions(_interactionMarker,_drawingEndingPointX,_drawingEndingPointY);
+				});
+				
+				_interactionMarker.addEventListener(MouseEvent.ROLL_OUT, function(me:MouseEvent){
+					drawCurrentInteractionBox();
+				});
+				
+				_interactionMarker.addEventListener(MouseEvent.MOUSE_DOWN, function(me:MouseEvent){
+					_interactionMarker.startDrag();
+					_interactionMarker.isDragging = true;
+				});
+				_interactionMarker.addEventListener(MouseEvent.MOUSE_UP, function(me:MouseEvent){
+					_interactionMarker.stopDrag();
+					_interactionMarker.isDragging = false;
+				});
+			}
+			
+
+			_isInteracting = false;
+		}
+		
+		public function clearCurrentInteractionActions():void{
+			if(_interactionElementSaveText!=null&&_interactionElementSaveText.parent!=null){_interactionElementSaveText.parent.removeChild(_interactionElementSaveText);}			
+			if(_interactionElementDeleteText!=null&&_interactionElementDeleteText.parent!=null){_interactionElementDeleteText.parent.removeChild(_interactionElementDeleteText);}			
+		}
+		
+		public function drawCurrentInteractionActions(marker:ShapeMarker, endPointX:Number, endPointY:Number, editing:Boolean=true):void{
+			var _this:Viewer = this;
+			var scaleDiff:Number = Number(Scale);if(scaleDiff>2){scaleDiff=2;}
+			
+			var boxWidth:Number = 60 / scaleDiff;
+			var boxHeight:Number = 20 / scaleDiff;
+			var fontSize:Number = 13 / scaleDiff;
+			var boxX:Number = endPointX - boxWidth
+			var boxY:Number = endPointY;
+			var textSaveMargin:Number = 13 / scaleDiff;
+			var textDelMargin:Number = 4 / scaleDiff;
+			var textY:Number = endPointY+(0.7/scaleDiff);
+			
+			if(editing)
+				drawCurrentInteractionBox();
+			else{
+				if(_interactionElementSaveText!=null&&_interactionElementSaveText.parent!=null){_interactionElementSaveText.parent.removeChild(_interactionElementSaveText);}			
+				if(_interactionElementDeleteText!=null&&_interactionElementDeleteText.parent!=null){_interactionElementDeleteText.parent.removeChild(_interactionElementDeleteText);}
+			}
+			
+			if(editing){
+				// Save field background
+				marker.graphics.beginFill(0x000000,0.7);
+				marker.graphics.lineStyle(1,0x000000,0.7);
+				marker.graphics.drawRect(boxX,boxY,boxWidth,boxHeight);
+				marker.graphics.endFill();
+				
+				// Delete field background
+				marker.graphics.beginFill(0x000000,0.7);
+				marker.graphics.lineStyle(1,0x000000,0.7);
+				marker.graphics.drawRect(boxX-boxWidth-3,boxY,boxWidth,boxHeight);
+				marker.graphics.endFill();
+				
+				if(_interactionElementSaveText==null || (_interactionElementSaveText!=null && _interactionElementSaveText.parent!=marker)){
+					_interactionElementSaveText = new TextField();
+					marker.addChild(_interactionElementSaveText);
+					_interactionElementSaveText.text = "Save";
+					_interactionElementSaveText.selectable = false;
+					_interactionElementSaveText.setTextFormat(new TextFormat("Arial",fontSize,0xffffff,false));
+					_interactionElementSaveText.x = boxX+textSaveMargin;
+					_interactionElementSaveText.y = textY;
+					_interactionElementSaveText.width = boxWidth;
+					_interactionElementSaveText.addEventListener(MouseEvent.CLICK,function(mce:MouseEvent):void{
+						var refwidth:Number = (UsingExtViewMode)?CurrExtViewMode.getNormalizationWidth(marker.PageIndex-1):libMC.width;
+						var refheight:Number = (UsingExtViewMode)?CurrExtViewMode.getNormalizationHeight(marker.PageIndex-1):libMC.height;
+						
+						marker.minNormX = normalizeX(marker.minX,refwidth,refheight);
+						marker.minNormY = normalizeY(marker.minY,refwidth,refheight);
+						marker.maxNormX = normalizeX(marker.maxX,refwidth,refheight);
+						marker.maxNormY = normalizeY(marker.maxY,refwidth,refheight);
+						
+						_this.dispatchEvent(new InteractionElementCreatedEvent(InteractionElementCreatedEvent.INTERACTIONELEMENT_CREATED,marker));
+						mce.stopImmediatePropagation();
+						
+						marker.parent.removeChild(marker);
+						_interactionMarker = null;
+						_isInteracting = false;
+					});
+				}
+				
+				if(_interactionElementDeleteText==null || (_interactionElementDeleteText!=null && _interactionElementDeleteText.parent!=marker)){
+					_interactionElementDeleteText = new TextField();
+					marker.addChild(_interactionElementDeleteText);
+					_interactionElementDeleteText.text = "Remove";
+					_interactionElementDeleteText.selectable = false;
+					_interactionElementDeleteText.setTextFormat(new TextFormat("Arial",fontSize,0xffffff,false));
+					_interactionElementDeleteText.x = boxX-boxWidth-3+textDelMargin;
+					_interactionElementDeleteText.y = textY;
+					_interactionElementDeleteText.width = boxWidth;
+					_interactionElementDeleteText.addEventListener(MouseEvent.CLICK,function(mce:MouseEvent):void{
+						marker.parent.removeChild(marker);
+						_interactionMarker = null;
+						_isInteracting = false;
+					});
+				}
+			}else{
+				// Edit field background
+				marker.graphics.beginFill(0x000000,0.7);
+				marker.graphics.lineStyle(1,0x000000,0.7);
+				marker.graphics.drawRect(boxX,boxY,boxWidth,boxHeight);
+				marker.graphics.endFill();
+				
+				// Delete field background
+				marker.graphics.beginFill(0x000000,0.7);
+				marker.graphics.lineStyle(1,0x000000,0.7);
+				marker.graphics.drawRect(boxX-boxWidth-3,boxY,boxWidth,boxHeight);
+				marker.graphics.endFill();
+				
+				if(_interactionElementSaveText==null || (_interactionElementSaveText!=null && _interactionElementSaveText.parent!=marker)){
+					_interactionElementSaveText = new TextField();
+					marker.addChild(_interactionElementSaveText);
+					_interactionElementSaveText.text = "Edit";
+					_interactionElementSaveText.selectable = false;
+					_interactionElementSaveText.setTextFormat(new TextFormat("Arial",fontSize,0xffffff,false));
+					_interactionElementSaveText.x = boxX+textSaveMargin;
+					_interactionElementSaveText.y = textY;
+					_interactionElementSaveText.width = boxWidth;
+					_interactionElementSaveText.addEventListener(MouseEvent.CLICK,function(mce:MouseEvent):void{
+						_this.dispatchEvent(new InteractionElementEditedEvent(InteractionElementEditedEvent.INTERACTIONELEMENT_EDITED,marker));
+						
+						mce.stopImmediatePropagation();
+						
+						marker.parent.removeChild(marker);
+						_interactionMarker = null;
+						_isInteracting = false;
+					});
+				}
+				
+				if(_interactionElementDeleteText==null || (_interactionElementDeleteText!=null && _interactionElementDeleteText.parent!=marker)){
+					_interactionElementDeleteText = new TextField();
+					marker.addChild(_interactionElementDeleteText);
+					_interactionElementDeleteText.text = "Remove";
+					_interactionElementDeleteText.selectable = false;
+					_interactionElementDeleteText.setTextFormat(new TextFormat("Arial",fontSize,0xffffff,false));
+					_interactionElementDeleteText.x = boxX-boxWidth-3+textDelMargin;
+					_interactionElementDeleteText.y = textY;
+					_interactionElementDeleteText.width = boxWidth;
+					_interactionElementDeleteText.addEventListener(MouseEvent.CLICK,function(mce:MouseEvent):void{
+						_this.dispatchEvent(new InteractionElementDeletedEvent(InteractionElementDeletedEvent.INTERACTIONELEMENT_DELETE,marker));
+						
+						mce.stopImmediatePropagation();
+						
+						marker.parent.removeChild(marker);
+						_interactionMarker = null;
+						_isInteracting = false;
+					});
+				}
+			}
+		}
+		
+		public function denormalizeX(x:Number,refwidth:Number,refHeight:Number):Number{
+			return (x/(this._stdsize * (refwidth/refHeight)))*refwidth;
+		}
+		
+		public function denormalizeY(y:Number,refHeight:Number):Number{
+			return (y/this._stdsize) * refHeight;
+		}
+		
+		public function normalizeX(x:Number,refwidth:Number,refheight:Number):Number{
+			return ((refwidth - (refwidth - (x* (refwidth/refheight))))/refwidth) * this._stdsize;
+		}
+		
+		public function normalizeY(y:Number,refwidth:Number,refheight:Number):Number{
+			return ((refheight - (refheight - y))/refheight) * this._stdsize;
+		}
+		
+		private function drawCurrentInteractionBox():void{
+			if(_drawingStartingPointX==-1||_drawingStartingPointY==-1||_drawingEndingPointX==-1||_drawingEndingPointY==-1){return;}
+			
+			if(_interactionElementSaveText!=null && _interactionElementSaveText.parent == _interactionMarker){
+				_interactionMarker.removeChild(_interactionElementSaveText);
+				_interactionElementSaveText = null;
+			}
+			
+			if(_interactionElementDeleteText!=null && _interactionElementDeleteText.parent == _interactionMarker){
+				_interactionMarker.removeChild(_interactionElementDeleteText);
+				_interactionElementDeleteText = null;
+			}
+			
+			if(_interactionMarker!=null){
+				_interactionMarker.graphics.clear();
+				_interactionMarker.graphics.lineStyle(1,0x72e6ff,0.8);
+				_interactionMarker.graphics.moveTo(_drawingStartingPointX,_drawingStartingPointY);
+				_interactionMarker.graphics.lineTo(_drawingEndingPointX, _drawingStartingPointY);
+				_interactionMarker.graphics.lineTo(_drawingEndingPointX, _drawingEndingPointY);
+				_interactionMarker.graphics.lineTo(_drawingStartingPointX, _drawingEndingPointY);
+				_interactionMarker.graphics.lineTo(_drawingStartingPointX, _drawingStartingPointY);
+				
+				_interactionMarker.graphics.beginFill(0x72e6ff,0.4);
+				_interactionMarker.graphics.drawRect(_drawingStartingPointX+1,_drawingStartingPointY+1,_drawingEndingPointX-_drawingStartingPointX-2,_drawingEndingPointY-_drawingStartingPointY-2);
+				_interactionMarker.graphics.endFill();
+			}
+		}
+		
 		private function textSelectorMoveHandler(event:MouseEvent):void{
 			event.stopImmediatePropagation();
 			
@@ -2992,7 +3495,7 @@ package com.devaldi.controls.flexpaper
 				snap.setSelected(hitIndex,_firstHitIndex,true);
 			}
 			
-			if(_selectionMarker!=null&&_selectionMarker.parent!=null){_selectionMarker.parent.removeChild(_selectionMarker);}
+			if(_interactionMarker!=null&&_interactionMarker.parent!=null){_interactionMarker.parent.removeChild(_interactionMarker);}
 			
 			if(_docLoader.IsSplit){
 				if(_selectionMc.parent is ITextSelectableDisplayObject){
@@ -3165,20 +3668,20 @@ package com.devaldi.controls.flexpaper
 			_tri = snap.getTextRunInfo(_firstHitIndex,_lastHitIndex-1);
 			
 			if(_currentSelectionPage>0){
-				if(_selectionMarker!=null&&_selectionMarker.parent!=null){_selectionMarker.parent.removeChild(_selectionMarker);}
+				if(_interactionMarker!=null&&_interactionMarker.parent!=null){_interactionMarker.parent.removeChild(_interactionMarker);}
 				
-				_selectionMarker = new ShapeMarker();
-				_selectionMarker.isSearchMarker = false;
-				_selectionMarker.PageIndex = _currentSelectionPage;
-				drawCurrentSelection(_selectionColor,_selectionMarker,_tri);
+				_interactionMarker = new ShapeMarker();
+				_interactionMarker.isSearchMarker = false;
+				_interactionMarker.PageIndex = _currentSelectionPage;
+				drawCurrentSelection(_selectionColor,_interactionMarker,_tri);
 				
 				if(unselect)
 					snap.setSelected(_firstHitIndex,_lastHitIndex,false);
 
 				if(UsingExtViewMode){
-					CurrExtViewMode.renderSelection(_currentSelectionPage-1,_selectionMarker);
+					CurrExtViewMode.renderSelection(_currentSelectionPage-1,_interactionMarker);
 				}else{
-					_pageList[_currentSelectionPage-1].addChildAt(_selectionMarker,_pageList[_selectionMc.currentFrame-1].numChildren);
+					_pageList[_currentSelectionPage-1].addChildAt(_interactionMarker,_pageList[_selectionMc.currentFrame-1].numChildren);
 				}
 			}else{
 				return;
@@ -3242,8 +3745,10 @@ package com.devaldi.controls.flexpaper
 				if(event.target is flash.display.SimpleButton || event.target is mx.core.SpriteAsset || (event.target is IFlexPaperPluginControl) || (event.target.parent !=null && event.target.parent.parent !=null && event.target.parent.parent is IFlexPaperPluginControl)){
 					Mouse.cursor = flash.ui.MouseCursor.AUTO;
 				}else{
-					if(TextSelectEnabled && CursorsEnabled){
+					if(TextSelectEnabled && CursorsEnabled && !DrawingInteractionEnabled){
 						Mouse.cursor = FlexPaperCursorManager.TEXT_SELECT_CURSOR;	
+					}else if(DrawingInteractionEnabled && CursorsEnabled){
+						Mouse.cursor = FlexPaperCursorManager.ADDELEMENT_CURSOR
 					}else if(CursorsEnabled){
 						resetCursor();
 					}
@@ -3363,6 +3868,7 @@ package com.devaldi.controls.flexpaper
 				if(!_splitpjPrecaching){
 					dispatchEvent(new DocumentPrintedEvent(DocumentPrintedEvent.DOCUMENT_PRINTED));
 					_splitpj.send();
+					unsetPluginsForPrint();
 					repositionPapers();
 				}else{
 					_splitpjPrecacheFinalized=true;
@@ -3379,9 +3885,9 @@ package com.devaldi.controls.flexpaper
 					if(AutoAdjustPrintSize){
 						
 						if((_splitpj.pageHeight/pageToPrint.height) < 1 && (_splitpj.pageHeight/pageToPrint.height) < (_splitpj.pageWidth/pageToPrint.width))
-							pageToPrint.scaleX = pageToPrint.scaleY = (_splitpj.pageHeight/pageToPrint.height);
+							_swfContainer.transform.matrix = MatrixTransformer.transform(new Matrix(1, 0, 0, 1),(_splitpj.pageHeight/pageToPrint.height)*100,(_splitpj.pageHeight/pageToPrint.height)*100);
 						else if((_splitpj.pageWidth/pageToPrint.width) < 1)
-							pageToPrint.scaleX = pageToPrint.scaleY = (_splitpj.pageWidth/pageToPrint.width);
+							_swfContainer.transform.matrix = MatrixTransformer.transform(new Matrix(1, 0, 0, 1),(_splitpj.pageWidth/pageToPrint.width)*100,(_splitpj.pageWidth/pageToPrint.width)*100);
 					}
 					
 					if((_swfContainer.getChildAt(0) as UIComponent).numChildren>0)
@@ -3426,11 +3932,13 @@ package com.devaldi.controls.flexpaper
 					_libMC.scaleX = _libMC.scaleY = 1;
 					
 					if(AutoAdjustPrintSize){
-						if((pj.pageHeight/_libMC.height) < 1 && (pj.pageHeight/_libMC.height) < (pj.pageWidth/_libMC.width))
-							_libMC.scaleX = _libMC.scaleY = (pj.pageHeight/_libMC.height);
+						if((pj.pageHeight/_libMC.height) < 1 && (pj.pageHeight/_libMC.height) < (pj.pageWidth/_libMC.width)){
+							_swfContainer.transform.matrix = MatrixTransformer.transform(new Matrix(1, 0, 0, 1),(pj.pageHeight/_libMC.height)*100,(pj.pageHeight/_libMC.height)*100);
+						}
 						
-						if((pj.pageWidth/_libMC.width) < 1)
-							_libMC.scaleX = _libMC.scaleY = (pj.pageWidth/_libMC.width);
+						if((pj.pageWidth/_libMC.width) < 1){
+							_swfContainer.transform.matrix = MatrixTransformer.transform(new Matrix(1, 0, 0, 1),(pj.pageWidth/_libMC.width)*100,(pj.pageWidth/_libMC.width)*100);
+						}
 					}
 					
 					if(_libMC.currentFrame==i+1){
@@ -3444,11 +3952,13 @@ package com.devaldi.controls.flexpaper
 				}
 				
 				if(AutoAdjustPrintSize){
-					if((pj.pageHeight/_libMC.height) < 1 && (pj.pageHeight/_libMC.height) < (pj.pageWidth/_libMC.width))
-						_libMC.scaleX = _libMC.scaleY = (pj.pageHeight/_libMC.height);
+					if((pj.pageHeight/_libMC.height) < 1 && (pj.pageHeight/_libMC.height) < (pj.pageWidth/_libMC.width)){
+						_swfContainer.transform.matrix = MatrixTransformer.transform(new Matrix(1, 0, 0, 1),(pj.pageHeight/_libMC.height)*100,(pj.pageHeight/_libMC.height)*100);
+					}
 					
-					if((pj.pageWidth/_libMC.width) < 1)
-						_libMC.scaleX = _libMC.scaleY = (pj.pageWidth/_libMC.width);
+					if((pj.pageWidth/_libMC.width) < 1){
+						_swfContainer.transform.matrix = MatrixTransformer.transform(new Matrix(1, 0, 0, 1),(pj.pageWidth/_libMC.width)*100,(pj.pageWidth/_libMC.width)*100);
+					}
 				}
 				
 				preparePluginsForPrint(pj,i);
@@ -3456,6 +3966,8 @@ package com.devaldi.controls.flexpaper
 				pj.send();
 				dispatchEvent(new DocumentPrintedEvent(DocumentPrintedEvent.DOCUMENT_PRINTED));
 			}
+			
+			unsetPluginsForPrint();
 			
 			_libMC.scaleX = _libMC.scaleY = 1;
 			_libMC.alpha = 0;
@@ -3471,7 +3983,14 @@ package com.devaldi.controls.flexpaper
 				
 				for(var pl:int=0;pl<_pluginList.length;pl++){
 					_pluginList[pl].drawSelf(pageNumber,_swfContainer,(pj.pageHeight/_libMC.height));
+					_pluginList[pl].prepareForPrint();
 				}
+			}
+		}
+		
+		private function unsetPluginsForPrint():void{
+			for(var pl:int=0;pl<_pluginList.length;pl++){
+				_pluginList[pl].unsetFromPrint();
 			}
 		}
 		
@@ -3533,14 +4052,17 @@ package com.devaldi.controls.flexpaper
 				
 				var i:int=0;
 				_libMC.gotoAndStop(i+1);
+				
 				while(_libMC.totalFrames > _libMC.currentFrame){
 					_libMC.scaleX = _libMC.scaleY = 1;
 					
 					if(AutoAdjustPrintSize){
-						if((pj.pageHeight/_libMC.height) < 1 && (pj.pageHeight/_libMC.height) < (pj.pageWidth/_libMC.width))
-							_libMC.scaleX = _libMC.scaleY = (pj.pageHeight/_libMC.height);
-						else if((pj.pageWidth/_libMC.width) < 1)
-							_libMC.scaleX = _libMC.scaleY = (pj.pageWidth/_libMC.width);
+						if((pj.pageHeight/_libMC.height) < 1 && (pj.pageHeight/_libMC.height) < (pj.pageWidth/_libMC.width)){
+							_swfContainer.transform.matrix = MatrixTransformer.transform(new Matrix(1, 0, 0, 1),(pj.pageHeight/_libMC.height)*100,(pj.pageHeight/_libMC.height)*100);
+						}
+						else if((pj.pageWidth/_libMC.width) < 1){
+							_swfContainer.transform.matrix = MatrixTransformer.transform(new Matrix(1, 0, 0, 1),(pj.pageWidth/_libMC.width)*100,(pj.pageWidth/_libMC.width)*100);
+						}
 					}
 
 					if(_libMC.currentFrame==i+1){
@@ -3564,6 +4086,8 @@ package com.devaldi.controls.flexpaper
 				pj.send();
 				dispatchEvent(new DocumentPrintedEvent(DocumentPrintedEvent.DOCUMENT_PRINTED));
 			}
+			
+			unsetPluginsForPrint();
 			
 			_libMC.scaleX = _libMC.scaleY = 1;
 			_libMC.alpha = 0;

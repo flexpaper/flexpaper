@@ -34,7 +34,10 @@ package com.devaldi.controls.flexpaper
 		function translatePageNumber(pn:Number):Number;
 		function getPageTextSnapshot(pn:Number):TextSnapshot;
 		function setTextSelectMode(pn:Number):void;
+		function unsetTextSelectMode(pn:Number):void;
 		function clearSearch():void;
 		function disposeViewMode():void;
+		function getNormalizationHeight(pageIndex:Number):Number;
+		function getNormalizationWidth(pageIndex:Number):Number;
 	}
 }
