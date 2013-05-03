@@ -60,6 +60,10 @@
     <classEntry path="com.devaldi.controls.flexpaper.utils.ResourceUtil"/>
     <classEntry path="com.devaldi.controls.flexpaper.utils.FlexPaperCursorManager"/>
     <classEntry path="com.devaldi.controls.CadViewPlugin"/>
+    <classEntry path="com.devaldi.events.SearchAbstractsDownloadedEvent"/>
+    <classEntry path="com.devaldi.events.InteractionElementCreatedEvent"/>
+    <classEntry path="com.devaldi.events.InteractionElementEditedEvent"/>
+    <classEntry path="com.devaldi.events.InteractionElementDeletedEvent"/>
   </includeClasses>
   <includeResources/>
   <namespaceManifests/>

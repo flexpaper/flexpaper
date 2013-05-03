@@ -19,6 +19,7 @@ along with FlexPaper.  If not, see <http://www.gnu.org/licenses/>.
 package com.devaldi.streaming
 {
 	import flash.display.Loader;
+	import flash.display.MovieClip;
 	import flash.events.Event;
 	import flash.net.URLRequest;
 	import flash.net.URLStream;
@@ -26,7 +27,7 @@ package com.devaldi.streaming
 	import flash.utils.ByteArray;
 	import flash.utils.Endian;
 	
-	public class DupLoader extends flash.display.Loader
+	public class DupLoader extends flash.display.Loader implements ITextSelectableDisplayObject
 	{
 		public static var parentLoader:IDocumentLoader;
 		public var stream:URLStream;
@@ -63,6 +64,22 @@ package com.devaldi.streaming
 				_ctx = context;
 				stream.load(request);
 			}
+		}
+		
+		public function getMovieClip():MovieClip{
+			return this.content as MovieClip;
+		}
+		
+		public function getPageIndex():int{
+			return this.pageStartIndex+1;
+		}
+		
+		public function setTextSelectMode():void{
+			
+		}
+		
+		public function unSetTextSelectMode():void{
+			
 		}
 	}
 }

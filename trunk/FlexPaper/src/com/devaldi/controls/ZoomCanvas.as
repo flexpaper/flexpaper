@@ -18,11 +18,12 @@ along with FlexPaper.  If not, see <http://www.gnu.org/licenses/>.
 
 package com.devaldi.controls
 {
-import flash.geom.*;
-import flash.utils.getDefinitionByName;
-import mx.containers.Canvas;
 import flash.events.Event;
 import flash.events.MouseEvent;
+import flash.geom.*;
+import flash.utils.getDefinitionByName;
+
+import mx.containers.Canvas;
         
 /**
  * ZoomCanvas; Provides basic center zooming functionality.
@@ -36,7 +37,8 @@ public class ZoomCanvas extends Canvas {
 	  private var lVscrollPos:Number;
 	  private var lHscrollPos:Number;
 	  private var _childrenDoDrag:Boolean = true;
-	
+	  private var _dragEnabled:Boolean = true;
+	  
 	  public function ZoomCanvas() {
 	   		super();
 	  }
@@ -47,6 +49,14 @@ public class ZoomCanvas extends Canvas {
 			this.addEventListener(MouseEvent.MOUSE_DOWN, startDragging);
 	  }
 	
+	  public function get DragEnabled():Boolean{
+		  return _dragEnabled;
+	  }
+	  
+	  public function set DragEnabled(b1:Boolean):void{
+		  _dragEnabled = b1;
+	  }
+
 	  public function get childrenDoDrag():Boolean {
         	return this._childrenDoDrag;
       }
@@ -57,6 +67,8 @@ public class ZoomCanvas extends Canvas {
 	  
  	  protected function startDragging(event:MouseEvent):void
       {
+		  if(!DragEnabled){return;}
+		  
 			if(event.target.parent == this.verticalScrollBar ||
 			        event.target.parent == this.horizontalScrollBar) {
 			                return;
@@ -89,6 +101,8 @@ public class ZoomCanvas extends Canvas {
 
       private function systemManager_mouseMoveHandler(event:MouseEvent):void
 	  {
+		  if(!DragEnabled){return;}
+		  
 		    event.stopImmediatePropagation();
 		    
 		    this.verticalScrollPosition = lVscrollPos - (event.stageY - rY);

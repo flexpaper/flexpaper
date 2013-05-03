@@ -32,6 +32,10 @@ package com.devaldi.controls.flexpaper.utils
 		public static const GRAB:String 				= "handGrab";
 		public static const GRABBING:String 			= "handGrabbing";				
 		public static const TEXT_SELECT_CURSOR:String   = "textSelectCursor";
+		public static const ADDELEMENT_CURSOR:String 	= "addElementCursor";
+		
+		[Embed('assets/cursor-addelement.png')]
+		public static const CURSOR_ADDELEMENT_IMAGE:Class;
 		
 		public function CursorManager() {
 			
@@ -64,6 +68,13 @@ package com.devaldi.controls.flexpaper.utils
 			mcd3.hotSpot = new Point(0,0);
 			mcd3.data = c3;
 			Mouse.registerCursor(TEXT_SELECT_CURSOR, mcd3);
+			
+			var c4:Vector.<BitmapData> = new Vector.<BitmapData>(1,true);
+			c4[0] = new CURSOR_ADDELEMENT_IMAGE().bitmapData;
+			var mcd4:MouseCursorData = new MouseCursorData();
+			mcd4.hotSpot = new Point(8,8);
+			mcd4.data = c4;
+			Mouse.registerCursor(ADDELEMENT_CURSOR, mcd4);
 		}
 	}
 }

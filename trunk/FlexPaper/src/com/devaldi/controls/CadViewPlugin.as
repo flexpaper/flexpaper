@@ -60,6 +60,18 @@ package com.devaldi.controls
 			
 		}
 		
+		public function getNormalizationHeight(pageIndex:Number):Number{
+			return viewer.libMC.height;	
+		}
+		
+		public function getNormalizationWidth(pageIndex:Number):Number{
+			return viewer.libMC.width;
+		}
+		
+		public function unsetTextSelectMode(pn:Number):void{
+			
+		}
+		
 		public function CadViewPlugin()
 		{
 		}

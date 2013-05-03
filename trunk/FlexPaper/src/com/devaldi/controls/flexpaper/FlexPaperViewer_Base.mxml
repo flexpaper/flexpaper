@@ -31,6 +31,9 @@
 			import com.devaldi.events.ErrorLoadingPageEvent;
 			import com.devaldi.events.ExternalLinkClickedEvent;
 			import com.devaldi.events.FitModeChangedEvent;
+			import com.devaldi.events.InteractionElementCreatedEvent;
+			import com.devaldi.events.InteractionElementDeletedEvent;
+			import com.devaldi.events.InteractionElementEditedEvent;
 			import com.devaldi.events.ScaleChangedEvent;
 			import com.devaldi.events.ViewModeChangedEvent;
 			import com.devaldi.streaming.AVM2Loader;
@@ -547,6 +550,19 @@
 				request.data = imageByteArray;
 				loader.load( request );
 			}
+			
+			protected function onInteractionElementCreatedHandler(event:InteractionElementCreatedEvent):void{
+				dispatchEvent(event);
+			}
+			
+			protected function onInteractionElementDeletedHandler(event:InteractionElementDeletedEvent):void{
+				dispatchEvent(event);	
+			}
+			
+			protected function onInteractionElementEditedHandler(event:InteractionElementEditedEvent):void{
+				dispatchEvent(event);
+			}
+				
 		]]>
 	</mx:Script>
 </mx:VBox>

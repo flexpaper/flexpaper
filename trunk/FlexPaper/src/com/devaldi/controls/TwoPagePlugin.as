@@ -56,6 +56,10 @@ package com.devaldi.controls
 			
 		}
 		
+		public function unsetTextSelectMode(pn:Number):void{
+			
+		}
+		
 		public function getPageTextSnapshot(pn:Number):TextSnapshot{
 			return viewer.PageList[pn].textSnapshot as TextSnapshot;
 		}
@@ -83,6 +87,14 @@ package com.devaldi.controls
 			if(i==0 || i==1){
 				viewer.DisplayContainer.addChild(o);
 			}
+		}
+		
+		public function getNormalizationHeight(pageIndex:Number):Number{
+			return viewer.libMC.height;	
+		}
+		
+		public function getNormalizationWidth(pageIndex:Number):Number{
+			return viewer.libMC.width;
 		}
 		
 		public function renderPage(i:Number):void{

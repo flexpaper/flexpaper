@@ -16,19 +16,23 @@ You should have received a copy of the GNU General Public License
 along with FlexPaper.  If not, see <http://www.gnu.org/licenses/>.	
 */
 
-package com.devaldi.controls.flexpaper
+package com.devaldi.events
 {
-	public class SearchShapeMarker extends ShapeMarker
+	import com.devaldi.controls.flexpaper.ShapeMarker;
+	import flash.events.Event;
+	
+	public class InteractionElementCreatedEvent extends Event
 	{
-		public var searchPhrase:String = "";
-		public var initialized:Boolean = true;
-		public var searchIndex:int = -1;
-		public var searchText:String = "";
-		public var occurance:int = 1;
+		public static const INTERACTIONELEMENT_CREATED:String = "onInteractionElementCreated";
+		public var Marker:ShapeMarker;
 		
-		public function SearchShapeMarker()
-		{
-			super.isSearchMarker = true;
+		public function InteractionElementCreatedEvent(type:String,sm:ShapeMarker){
+			Marker = sm;
+			super(type);
+		}
+		
+		override public function clone():Event {
+			return new InteractionElementCreatedEvent(type, Marker);
 		}
 	}
 }
