@@ -2374,7 +2374,7 @@ package com.devaldi.controls.flexpaper
 				
 				var tri:Array;
 				
-				if(searchIndex > 0){ // found a new match
+				if(searchIndex >= 0){ // found a new match
 					_interactionMarker = new ShapeMarker();
 					_interactionMarker.isSearchMarker = true;
 					_interactionMarker.graphics.beginFill(SearchMatchColor,0.3);
@@ -2445,7 +2445,7 @@ package com.devaldi.controls.flexpaper
 					
 					var tri:Array;
 					
-					if(searchIndex > 0){ // found a new match
+					if(searchIndex >= 0){ // found a new match
 						_interactionMarker = new ShapeMarker();
 						_interactionMarker.isSearchMarker = true;
 						_interactionMarker.graphics.beginFill(SearchMatchColor,0.3);
@@ -2723,7 +2723,7 @@ package com.devaldi.controls.flexpaper
 						}
 						//si = searchString(snap.getText(0,snap.charCount),text,si);
 						
-						if(si>0){
+						if(si>=0){
 							var sm:SearchShapeMarker = new SearchShapeMarker();
 							sm.isSearchMarker = true;
 							sm.PageIndex = spi;
@@ -2789,7 +2789,7 @@ package com.devaldi.controls.flexpaper
 				//searchIndex = snap.getText(0,snap.charCount).toLowerCase().indexOf(text,(searchIndex==-1?0:searchIndex));
 				//searchIndex = searchString(snap.getText(0,snap.charCount),text,searchIndex);
 				
-				if(searchIndex > 0){ // found a new match
+				if(searchIndex >= 0){ // found a new match
 					_interactionMarker = new ShapeMarker();
 					_interactionMarker.isSearchMarker = true;
 					_interactionMarker.graphics.beginFill(SearchMatchColor,0.3);
