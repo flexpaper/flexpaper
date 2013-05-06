@@ -1222,10 +1222,10 @@ package com.devaldi.controls.flexpaper
 											if((_performSearchOnPageLoad && _pendingSearchPage == _pageList[i].dupIndex)||(SearchMatchAll && prevSearchText.length>0)){
 												_performSearchOnPageLoad = false;
 												
-												if(SearchServiceUrl!=null && SearchServiceUrl.length>0)
-													searchTextByService(prevSearchText);
-												else if(JSONFile!=null)
+												if(JSONFile!=null)
 													searchTextByJSONFile(prevSearchText);
+												else if(SearchServiceUrl!=null && SearchServiceUrl.length>0)
+													searchTextByService(prevSearchText);
 												
 											}
 										}	
