@@ -3164,7 +3164,7 @@ package com.devaldi.controls.flexpaper
 				_drawingStartingPointX = _interactionMarker.mouseX;
 				_drawingStartingPointY = _interactionMarker.mouseY;
 				_interactionMarker.minX = _drawingStartingPointX;
-				_interactionMarker.minY = _drawingStartingPointX;
+				_interactionMarker.minY = _drawingStartingPointY;
 				
 			}else if(event.target!=_interactionMarker){
 				_currentInteractionObject = null;
@@ -3232,11 +3232,13 @@ package com.devaldi.controls.flexpaper
 		}
 		
 		private function drawingInteractionMouseUpHandler(event:MouseEvent):void{
+			event.stopImmediatePropagation();
 			stopDrawingInteraction();
 		}
 		
 		private function drawingInteractionMouseLeaveHandler(event:MouseEvent):void{
 			stopDrawingInteraction();
+			event.stopImmediatePropagation();
 		}
 		
 		private function stopDrawingInteraction():void{
@@ -3262,11 +3264,20 @@ package com.devaldi.controls.flexpaper
 						_drawingStartingPointY = tmp;
 					}
 				}
+				var refwidth:Number = (UsingExtViewMode)?CurrExtViewMode.getNormalizationWidth(_interactionMarker.PageIndex-1):libMC.width;
+				var refheight:Number = (UsingExtViewMode)?CurrExtViewMode.getNormalizationHeight(_interactionMarker.PageIndex-1):libMC.height;
 				
-				drawCurrentInteractionActions(_interactionMarker,_drawingEndingPointX,_drawingEndingPointY);
+				_interactionMarker.minNormX = normalizeX(_interactionMarker.minX,refwidth,refheight);
+				_interactionMarker.minNormY = normalizeY(_interactionMarker.minY,refwidth,refheight);
+				_interactionMarker.maxNormX = normalizeX(_interactionMarker.maxX,refwidth,refheight);
+				_interactionMarker.maxNormY = normalizeY(_interactionMarker.maxY,refwidth,refheight);
+				
+				dispatchEvent(new InteractionElementCreatedEvent(InteractionElementCreatedEvent.INTERACTIONELEMENT_CREATED,_interactionMarker));
+				
+				drawCurrentInteractionActions(_interactionMarker,_drawingEndingPointX,_drawingEndingPointY, false);
 				
 				_interactionMarker.addEventListener(MouseEvent.ROLL_OVER, function(me:MouseEvent){
-					drawCurrentInteractionActions(_interactionMarker,_drawingEndingPointX,_drawingEndingPointY);
+					drawCurrentInteractionActions(_interactionMarker,_drawingEndingPointX,_drawingEndingPointY, false);
 				});
 				
 				_interactionMarker.addEventListener(MouseEvent.ROLL_OUT, function(me:MouseEvent){
@@ -3338,14 +3349,6 @@ package com.devaldi.controls.flexpaper
 						var refwidth:Number = (UsingExtViewMode)?CurrExtViewMode.getNormalizationWidth(marker.PageIndex-1):libMC.width;
 						var refheight:Number = (UsingExtViewMode)?CurrExtViewMode.getNormalizationHeight(marker.PageIndex-1):libMC.height;
 						
-						marker.minNormX = normalizeX(marker.minX,refwidth,refheight);
-						marker.minNormY = normalizeY(marker.minY,refwidth,refheight);
-						marker.maxNormX = normalizeX(marker.maxX,refwidth,refheight);
-						marker.maxNormY = normalizeY(marker.maxY,refwidth,refheight);
-						
-						_this.dispatchEvent(new InteractionElementCreatedEvent(InteractionElementCreatedEvent.INTERACTIONELEMENT_CREATED,marker));
-						mce.stopImmediatePropagation();
-						
 						marker.parent.removeChild(marker);
 						_interactionMarker = null;
 						_isInteracting = false;
@@ -3391,12 +3394,7 @@ package com.devaldi.controls.flexpaper
 					_interactionElementSaveText.width = boxWidth;
 					_interactionElementSaveText.addEventListener(MouseEvent.CLICK,function(mce:MouseEvent):void{
 						_this.dispatchEvent(new InteractionElementEditedEvent(InteractionElementEditedEvent.INTERACTIONELEMENT_EDITED,marker));
-						
 						mce.stopImmediatePropagation();
-						
-						marker.parent.removeChild(marker);
-						_interactionMarker = null;
-						_isInteracting = false;
 					});
 				}
 				
@@ -3411,15 +3409,18 @@ package com.devaldi.controls.flexpaper
 					_interactionElementDeleteText.width = boxWidth;
 					_interactionElementDeleteText.addEventListener(MouseEvent.CLICK,function(mce:MouseEvent):void{
 						_this.dispatchEvent(new InteractionElementDeletedEvent(InteractionElementDeletedEvent.INTERACTIONELEMENT_DELETE,marker));
-						
 						mce.stopImmediatePropagation();
-						
-						marker.parent.removeChild(marker);
-						_interactionMarker = null;
-						_isInteracting = false;
 					});
 				}
 			}
+		}
+		
+		public function clearInteractionMarker():void{
+			if(_interactionMarker!=null && _interactionMarker.parent!=null)
+				_interactionMarker.parent.removeChild(_interactionMarker);
+			
+			_interactionMarker = null;
+			_isInteracting = false;
 		}
 		
 		public function denormalizeX(x:Number,refwidth:Number,refHeight:Number):Number{
