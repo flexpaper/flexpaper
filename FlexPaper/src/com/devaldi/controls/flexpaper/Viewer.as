@@ -65,6 +65,7 @@ package com.devaldi.controls.flexpaper
 	import flash.display.Shape;
 	import flash.display.SimpleButton;
 	import flash.display.Sprite;
+	import flash.display3D.IndexBuffer3D;
 	import flash.events.Event;
 	import flash.events.IOErrorEvent;
 	import flash.events.KeyboardEvent;
@@ -78,6 +79,7 @@ package com.devaldi.controls.flexpaper
 	import flash.printing.PrintJob;
 	import flash.printing.PrintJobOptions;
 	import flash.system.ApplicationDomain;
+	import flash.system.Capabilities;
 	import flash.system.LoaderContext;
 	import flash.system.System;
 	import flash.text.TextField;
@@ -91,10 +93,13 @@ package com.devaldi.controls.flexpaper
 	import flash.utils.setTimeout;
 	
 	import mx.containers.Canvas;
+	import mx.controls.Alert;
 	import mx.controls.Button;
 	import mx.controls.Image;
+	import mx.controls.SWFLoader;
 	import mx.core.Container;
 	import mx.core.UIComponent;
+	import mx.effects.Fade;
 	import mx.events.DragEvent;
 	import mx.events.FlexEvent;
 	import mx.managers.DragManager;
@@ -150,6 +155,7 @@ package com.devaldi.controls.flexpaper
 		private var _fitMode:String = FitModeEnum.FITNONE ; 
 		public static var InitViewMode:String = ViewModeEnum.PORTRAIT;
 		private var _scrollToPage:Number = 0;
+		private var _initPageNumber:Number = 0;
 		private var _numPages:Number = 0;
 		private var _currPage:Number = 0;
 		private var _tweencount:Number = 0;
@@ -187,14 +193,24 @@ package com.devaldi.controls.flexpaper
 		private var _autoAdjustPrintSize:Boolean = true;
 		private var _pendingSearchPage:int = -1;
 		private var _printPaperAsBitmap:Boolean = false;
+		private var _draggingMarker:ShapeMarker;
 		private var _skinImg:Bitmap = new MenuIcons.SMALL_TRANSPARENT();
 		private var _skinImgc:Bitmap = new MenuIcons.SMALL_TRANSPARENT_COLOR();
 		private var _skinImgDo:Image;
 		private var _currentInteractionObject:ITextSelectableDisplayObject = null;
 		private var _stdsize:Number = 1000;
+		private var _base:UIComponent;
 		
 		public function Viewer(){
 			super();
+		}
+		
+		public function get Base():UIComponent{
+			return _base;
+		}
+		
+		public function set Base(uic:UIComponent):void{
+			_base = uic;
 		}
 		
 		public function get SwfContainer():Canvas{
@@ -253,7 +269,16 @@ package com.devaldi.controls.flexpaper
 		[Bindable]
 		public function get FitMode():String {
 			return _fitMode;
-		}	
+		}
+		
+		public function set InitPageNumber(n:Number):void{
+			_initPageNumber = n;
+		}
+		
+		[Bindable]
+		public function get InitPageNumber():Number{
+			return _initPageNumber;
+		}
 		
 		public function set ViewMode(s:String):void {
 			if(s!=_viewMode){
@@ -749,22 +774,24 @@ package com.devaldi.controls.flexpaper
 					_docLoader.stream.addEventListener(ProgressEvent.PROGRESS, onLoadProgress,false,0,true);
 				}
 				
-				_paperContainer.verticalScrollPosition = 0;
-				createDisplayContainer();
-				
-				// Changing the SWF file causes the component to invalidate.
-				invalidateProperties();
-				invalidateSize();
-				invalidateDisplayList();	
-				
-				if(_swfFile.length>0 && pagesSplit){
-					_loadTimer = new Timer(100);
-					_loadTimer.addEventListener("timer",loadtimer);
+				if(s!="devaldiGCdummy"){
+					_paperContainer.verticalScrollPosition = 0;
+					createDisplayContainer();
 					
-					_docLoader.load(new URLRequest(getSwfFilePerPage(_swfFile,1)),StreamUtil.getExecutionContext()); //new URLRequest(decodeURI(_swfFile))
+					// Changing the SWF file causes the component to invalidate.
+					invalidateProperties();
+					invalidateSize();
+					invalidateDisplayList();	
+				
+					if(_swfFile.length>0 && pagesSplit){
+						_loadTimer = new Timer(100);
+						_loadTimer.addEventListener("timer",loadtimer);
+						
+						_docLoader.load(new URLRequest(getSwfFilePerPage(_swfFile,1)),StreamUtil.getExecutionContext()); //new URLRequest(decodeURI(_swfFile))
+					}
+					else if(_swfFile.length > 0 && !pagesSplit)
+						_docLoader.load(new URLRequest(_swfFile),StreamUtil.getExecutionContext());
 				}
-				else if(_swfFile.length > 0 && !pagesSplit)
-					_docLoader.load(new URLRequest(_swfFile),StreamUtil.getExecutionContext());
 			}
 			
 			if(ExternalInterface.available){
@@ -1025,8 +1052,8 @@ package com.devaldi.controls.flexpaper
 					dispatchEvent(new PageLoadedEvent(PageLoadedEvent.PAGE_LOADED,event.target.loader.pageStartIndex));
 
 				if(!bFound){
-					if(_fitPageOnLoad&&((_paperContainer.height / _libMC.height)>0)){FitMode = FitModeEnum.FITHEIGHT;_fitPageOnLoad=false;_scrollToPage=1;_pscale=_scale;}
-					if(_fitWidthOnLoad&&((_paperContainer.width / _libMC.width)>0)){FitMode = FitModeEnum.FITWIDTH;_fitWidthOnLoad=false;_scrollToPage=1;_pscale=_scale;}
+					if(_fitPageOnLoad&&((_paperContainer.height / _libMC.height)>0)){FitMode = FitModeEnum.FITHEIGHT;_fitPageOnLoad=false;_scrollToPage=InitPageNumber;_pscale=_scale;}
+					if(_fitWidthOnLoad&&((_paperContainer.width / _libMC.width)>0)){FitMode = FitModeEnum.FITWIDTH;_fitWidthOnLoad=false;_scrollToPage=InitPageNumber;_pscale=_scale;}
 				}
 				
 				repaint();
@@ -1048,8 +1075,8 @@ package com.devaldi.controls.flexpaper
 				
 				if(!bFound){
 					_bbusyloading = false;
-					if(_fitPageOnLoad){FitMode = FitModeEnum.FITHEIGHT;_fitPageOnLoad=false;_scrollToPage=1;_pscale=_scale;}
-					if(_fitWidthOnLoad){FitMode = FitModeEnum.FITWIDTH;_fitWidthOnLoad=false;_scrollToPage=1;_pscale=_scale;}
+					if(_fitPageOnLoad){FitMode = FitModeEnum.FITHEIGHT;_fitPageOnLoad=false;_scrollToPage=InitPageNumber;_pscale=_scale;}
+					if(_fitWidthOnLoad){FitMode = FitModeEnum.FITWIDTH;_fitWidthOnLoad=false;_scrollToPage=InitPageNumber;_pscale=_scale;}
 					_displayContainer.visible = true;
 					
 					if(	_libMC.framesLoaded == _libMC.totalFrames  && _frameLoadCount != _libMC.framesLoaded){
@@ -1327,6 +1354,12 @@ package com.devaldi.controls.flexpaper
 						
 						if(UsingExtViewMode && _markList[i] != null){
 							CurrExtViewMode.renderMark(_markList[i],i);
+						}else if(!UsingExtViewMode && _markList[i] !=null && _docLoader.LoaderList[uloaderidx].loaded && !_bbusyloading){
+							for(var ic:int=0;ic<_markList[i].numChildren;ic++){
+								if((_markList[i].getChildAt(ic) is IFlexPaperPluginControl) && !((_markList[i].getChildAt(ic) as IFlexPaperPluginControl).isInitialized)){
+									initMarker(_markList[i].getChildAt(ic) as ShapeMarker,_libMC);
+								}
+							}
 						}
 						
 						loaderidx++;
@@ -1359,6 +1392,293 @@ package com.devaldi.controls.flexpaper
 					}
 				}
 			}			
+		}
+		
+		public function initMarker(marker:ShapeMarker,parent:*):void{
+			var _viewer:Viewer = this;
+			
+			if(marker is LinkMarker){
+				var _this:LinkMarker = (marker as LinkMarker);
+				var _thissprite:Sprite = new Sprite();
+				_this.addChild(_thissprite);
+				
+				_this.minNormX 	= _this.linkX;
+				_this.minNormY 	= _this.linkY;
+				_this.maxNormX 	= _this.linkEndX;
+				_this.maxNormY 	= _this.linkEndY;
+				
+				_this.linkX 	= denormalizeX(_this.linkX,parent.width,parent.height);
+				_this.linkY 	= denormalizeY(_this.linkY,parent.height);
+				_this.linkEndX 	= denormalizeX(_this.linkEndX,parent.width,parent.height);
+				_this.linkEndY 	= denormalizeY(_this.linkEndY,parent.height);
+				
+				marker.graphics.beginFill(0x72e6ff,0);
+				marker.graphics.drawRect(_this.linkX,_this.linkY,_this.linkEndX-_this.linkX,_this.linkEndY-_this.linkY);
+				marker.width =  _this.linkEndX - _this.linkX;
+				marker.height =  _this.linkEndY - _this.linkY;
+				
+				if(_this.allowinteractions){
+					if(DesignMode){
+						_thissprite.graphics.clear();
+						_thissprite.graphics.beginFill(0x72e6ff,0.2);
+						_thissprite.graphics.drawRect(_this.linkX,_this.linkY,_this.linkEndX-_this.linkX,_this.linkEndY-_this.linkY);
+					}
+				}
+				
+				marker.addEventListener(MouseEvent.ROLL_OVER, function(e:MouseEvent):void{
+					marker = _this = (e.target as LinkMarker);
+					_thissprite = ((e.target as LinkMarker).getChildAt(0) as Sprite);
+					
+					_thissprite.graphics.clear();
+					_thissprite.graphics.beginFill(0x72e6ff,0.4);
+					_thissprite.graphics.drawRect(_this.linkX,_this.linkY,_this.linkEndX-_this.linkX,_this.linkEndY-_this.linkY);
+					
+					// if in design mod show buttons
+					if(DesignMode && _this.allowinteractions){
+						marker.graphics.clear();
+						marker.graphics.beginFill(0x72e6ff,0);
+						marker.graphics.drawRect(_this.linkX,_this.linkY,_this.linkEndX-_this.linkX,_this.linkEndY-_this.linkY);
+						drawCurrentInteractionActions(marker,_this.linkEndX,_this.linkEndY,false);
+					}
+				});
+				
+				
+				marker.addEventListener(MouseEvent.ROLL_OUT, function(e:MouseEvent):void{
+					marker = _this = (e.target as LinkMarker);
+					_thissprite = ((e.target as LinkMarker).getChildAt(0) as Sprite);
+					
+					_thissprite.graphics.clear();
+					clearCurrentInteractionActions();
+					
+					if(DesignMode && _this.allowinteractions){
+						marker.graphics.clear();
+						marker.graphics.beginFill(0x72e6ff,0.2);
+						marker.graphics.drawRect(_this.linkX,_this.linkY,_this.linkEndX-_this.linkX,_this.linkEndY-_this.linkY);
+					}else{
+						marker.graphics.clear();
+						marker.graphics.beginFill(0x72e6ff,0);
+						marker.graphics.drawRect(_this.linkX,_this.linkY,_this.linkEndX-_this.linkX,_this.linkEndY-_this.linkY);
+					}
+				});
+				
+				marker.addEventListener(MouseEvent.CLICK, function(e:MouseEvent):void{
+					if(_this.href.indexOf("actionGoTo:")==0){
+						gotoPage(Number(_this.href.substr(11)));
+					}else{
+						flash.net.navigateToURL(new URLRequest(_this.href));
+					}
+				});
+				
+				_this.isInitialized = true;
+			}
+			
+			if((marker is ImageMarker || marker is VideoMarker) && !(marker as ImageMarker).loading){
+				var _img:ImageMarker = (marker as ImageMarker);
+				_img.loading = true;
+				
+				var _thissprite:Sprite = new Sprite();
+				_img.addChild(_thissprite);
+				
+				_img.minNormX 	= _img.imageX;
+				_img.minNormY 	= _img.imageY;
+				_img.maxNormX 	= _img.imageEndX;
+				_img.maxNormY 	= _img.imageEndY;
+				
+				_img.imageX 	= denormalizeX(_img.imageX,parent.width,parent.height);
+				_img.imageY 	= denormalizeY(_img.imageY,parent.height);
+				_img.imageEndX 	= denormalizeX(_img.imageEndX,parent.width,parent.height);
+				_img.imageEndY 	= denormalizeY(_img.imageEndY,parent.height);
+				
+				marker.x = _img.imageX;
+				marker.y = _img.imageY;
+				
+				if(!_img.keepaspect){
+					marker.graphics.beginFill(0x72e6ff,0);
+					marker.graphics.drawRect(-5,-5,_img.imageEndX-_img.imageX+10,_img.imageEndY-_img.imageY+10);
+					marker.width =  _img.imageEndX - _img.imageX;
+					marker.height =  _img.imageEndY - _img.imageY;
+				}
+				
+				var imgLoader:SWFLoader = new SWFLoader();
+				marker.addChild(imgLoader);
+				
+				imgLoader.addEventListener(Event.COMPLETE,function(e:Event):void{
+					marker = _img = (e.target.parent as ImageMarker);
+
+					_img.removeChild((e.target as SWFLoader));
+					_img.isInitialized = true;
+					_img.loading = false;
+					_img.bitmap = (imgLoader.content as Bitmap);
+					
+					if(_img.keepaspect){ // adjust height if needed								
+						_img.imageEndY = _img.imageY + ((_img.bitmap.height/_img.bitmap.width)*(_img.imageEndX-_img.imageX)); 
+						
+						marker.graphics.beginFill(0x72e6ff,0);
+						marker.graphics.drawRect(-5,-5,_img.imageEndX-_img.imageX+10,_img.imageEndY-_img.imageY+10);
+						imgLoader.height = marker.height =  _img.imageEndY - _img.imageY;
+						
+						if(_img.xmlNode)
+							_img.xmlNode.@height 	= normalizeY(_img.imageEndY,marker.parent.width,marker.parent.height) - normalizeY(_img.imageY,marker.parent.width,marker.parent.height);
+					}
+					
+					_img.drawImage();
+					
+					if(DesignMode){
+						_img.RightPanel.addEventListener(MouseEvent.MOUSE_MOVE, function(e:MouseEvent):void{
+							Mouse.cursor = FlexPaperCursorManager.RESIZE_HORIZONTAL_CURSOR;	
+						});
+						
+						_img.BottomPanel.addEventListener(MouseEvent.MOUSE_MOVE, function(e:MouseEvent):void{
+							Mouse.cursor = FlexPaperCursorManager.RESIZE_VERTICAL_CURSOR;
+						});
+						
+						_img.RightBottomPanel.addEventListener(MouseEvent.MOUSE_MOVE, function(e:MouseEvent):void{
+							Mouse.cursor = FlexPaperCursorManager.RESIZE_VERTICAL_HORIZONTAL_CURSOR;
+						});
+					}
+					
+					_img.addEventListener(MouseEvent.MOUSE_DOWN, function(e:MouseEvent):void{
+						if(DesignMode && (e.target is ImageMarker)){
+							marker = _img = (e.target as ImageMarker);
+							_draggingMarker = marker;
+							_img.dragging = true;
+						}  
+					});
+					
+					_img.RightPanel.addEventListener(MouseEvent.MOUSE_DOWN, function(e:MouseEvent):void{
+						if(DesignMode && (e.target.parent is ImageMarker)){
+							marker = _img = (e.target.parent as ImageMarker);
+							_draggingMarker = marker;
+							_img.resizeRight = true;
+							_img.resizing = true;
+						}
+					});
+					
+					_img.BottomPanel.addEventListener(MouseEvent.MOUSE_DOWN, function(e:MouseEvent):void{
+						if(DesignMode && (e.target.parent is ImageMarker)){
+							marker = _img = (e.target.parent as ImageMarker);
+							_draggingMarker = marker;
+							_img.resizeBottom = true;
+							_img.resizing = true;
+						}
+					});
+					
+					_img.RightBottomPanel.addEventListener(MouseEvent.MOUSE_DOWN, function(e:MouseEvent):void{
+						if(DesignMode && (e.target.parent is ImageMarker)){
+							marker = _img = (e.target.parent as ImageMarker);
+							_draggingMarker = marker;
+							_img.resizeRightBottom = true;
+							_img.resizing = true;
+						}
+					});
+					
+					marker.addEventListener(MouseEvent.ROLL_OVER, function(e:MouseEvent):void{
+						marker = _img = (e.target as ImageMarker);
+						_thissprite = ((e.target as ImageMarker).getChildAt(0) as Sprite);
+						
+						// if in design mod show buttons 
+						if(DesignMode && !_img.dragging && !_img.resizing){
+							_img.graphics.clear();
+							_img.graphics.beginFill(0x72e6ff,0.4);
+							_img.graphics.drawRect(-5,-5,_img.imageEndX-_img.imageX+10,_img.imageEndY-_img.imageY+10);
+							_img.drawImage(false);
+							
+							drawCurrentInteractionActions(marker,145,imgLoader.content.height*_img.bitmapScaleY,false);
+						}
+					});
+					marker.addEventListener(MouseEvent.ROLL_OUT, function(e:MouseEvent):void{
+						marker = _img = (e.target as ImageMarker);
+						_thissprite = ((e.target as ImageMarker).getChildAt(0) as Sprite);
+						
+						if(DesignMode && !_img.dragging && !_img.resizing){
+							clearCurrentInteractionActions();
+							_img.drawImage();
+						}
+					});
+					
+					if(marker is VideoMarker){
+						marker.addEventListener(MouseEvent.CLICK, function(e:MouseEvent):void{
+							marker = _img = (e.target as ImageMarker);
+							var vmarker:VideoMarker = marker as VideoMarker;
+							
+							if(!DesignMode){
+								var coveringCanvas:Canvas = new Canvas();
+								coveringCanvas.percentHeight = 100;
+								coveringCanvas.percentWidth = 100;
+								coveringCanvas.alpha = 0;
+								coveringCanvas.name = "coveringCanvas";
+								coveringCanvas.setStyle("backgroundColor",0x000000);
+								
+								Base.parent.addChildAt(coveringCanvas,Base.parent.numChildren);
+								
+								var fadeIn:Fade = new Fade(coveringCanvas);
+								fadeIn.duration = 300;
+								fadeIn.alphaTo = 0.8;
+								fadeIn.play();
+								
+								//get the video ID 
+								var params:Array = vmarker.VideoUrl.substr(vmarker.VideoUrl.indexOf("?")+1).split("&");
+								var videoId:String = "";
+								
+								for(var i:int=0;i<params.length;i++){
+									if(params[i].indexOf("v=")==0){
+										videoId = params[i].substr(2); 
+									}
+								}
+								
+								var yt:Youtube = new Youtube(_viewer);
+								yt.alpha = 1;
+								yt.setStyle("backgroundColor",0x000000);
+								yt.videoId = videoId;
+
+								yt.loader.contentLoaderInfo.addEventListener(Event.COMPLETE, function():void{
+									yt.x = (coveringCanvas.width / 2) - (480/2);
+									yt.y = (coveringCanvas.height / 2) - (270/2);
+									coveringCanvas.addChild(yt);
+									yt.play();
+									
+									//todo: add a white progress bar to the bottom?
+									var bttnClose:Image = new Image();
+									bttnClose.buttonMode = true;
+									bttnClose.source = MenuIcons.CLOSE_BUTTON;
+									bttnClose.x = yt.x + 480 - 10;
+									bttnClose.y = yt.y - 15;
+									
+									bttnClose.addEventListener(MouseEvent.CLICK, function(me:MouseEvent):void{
+										if(me.target.parent.hasOwnProperty("name") && me.target.parent.name == "coveringCanvas"){
+											if(me.target.parent.numChildren>0){
+												me.target.parent.getChildAt(0).stop();
+												me.target.parent.removeChildAt(0);
+											}
+											me.target.parent.parent.removeChild(me.target.parent);
+										}
+									});
+									
+									coveringCanvas.addChild(bttnClose);
+								});
+								
+								coveringCanvas.addEventListener(MouseEvent.CLICK,function(me:MouseEvent):void{
+									if(me.target.hasOwnProperty("name") && me.target.name == "coveringCanvas"){
+										if(me.target.numChildren>0){
+											me.target.getChildAt(0).stop();
+											me.target.removeChildAt(0);
+										}
+										me.target.parent.removeChild(me.target);
+									}
+								});
+							}
+						});
+					}
+				});
+				imgLoader.addEventListener(IOErrorEvent.IO_ERROR,function():void{ // if it fails don't try again
+					_img.isInitialized = true;
+				});
+				imgLoader.load(_img.src);		
+			}
+			
+			if(marker is VideoMarker){
+				new Youtube(this);
+			}
 		}
 		
 		private function padString(_str:String, _n:Number, _pStr:String):String
@@ -3787,6 +4107,8 @@ package com.devaldi.controls.flexpaper
 		private var _splitpjPrecaching:Boolean=false;
 		private var _splitpjrange:String="";
 		private var _splitpjPrecacheFinalized:Boolean=false;
+		private var _splitpjTotalPagesToPrint:int = 0;
+		private var _splitpjPageList:Array = new Array();
 		
 		private function printSplitPaper(start:Boolean=false,range:String="",precache:Boolean=false):void{
 			if(_splitpjPrecacheFinalized&&precache){return;}
@@ -3800,6 +4122,7 @@ package com.devaldi.controls.flexpaper
 				_splitpjPrecacheFinalized=false;
 				PopUpManager.addPopUp(_pp, this, true);
 				PopUpManager.centerPopUp(_pp);
+				_splitpjTotalPagesToPrint = 0;
 			}
 			
 			flash.utils.setTimeout(function():void{
@@ -3823,6 +4146,7 @@ package com.devaldi.controls.flexpaper
 						if(range == "Current"){
 							_splitpageNumList = new Array();
 							_splitpageNumList[currPage] = true;
+							_splitpjTotalPagesToPrint = 1;
 						}
 						else{
 							var splitpageNumListEntries:Array = range.split(",");
@@ -3839,7 +4163,11 @@ package com.devaldi.controls.flexpaper
 									_splitpageNumList[int(Number(splitpageNumListEntries[i].toString()))] = true;
 								}
 							}
+							
+							_splitpjTotalPagesToPrint = _splitpageNumList.length;
 						}
+					}else{
+						_splitpjTotalPagesToPrint = numPages;
 					}
 					
 					if(!precache){
@@ -3866,14 +4194,46 @@ package com.devaldi.controls.flexpaper
 
 				PopUpManager.removePopUp(_pp);
 				
-				if(!_splitpjPrecaching){
+				if(!_splitpjPrecaching && _splitpjprinted == _splitpjTotalPagesToPrint){
 					dispatchEvent(new DocumentPrintedEvent(DocumentPrintedEvent.DOCUMENT_PRINTED));
 					_splitpj.send();
 					unsetPluginsForPrint();
 					repositionPapers();
+					_splitpjPageList = new Array();
 				}else{
-					_splitpjPrecacheFinalized=true;
-					printSplitPaper(true,_splitpjrange,false);
+					if(flash.system.Capabilities.manufacturer.toString() != "Google Pepper"){
+						_splitpjPrecacheFinalized=true;
+						printSplitPaper(true,_splitpjrange,false); 	
+					}else{
+						_splitpj = new PrintJob();
+						_splitpjoptions = new PrintJobOptions();
+						_splitpjoptions.printAsBitmap = PrintPaperAsBitmap;
+						_splitpj.start();
+						
+						for(var pi:int = 0;pi<_splitpjPageList.length;pi++){
+							var pageToPrint:* = _splitpjPageList[pi];
+							
+							if(AutoAdjustPrintSize){
+								
+								if((_splitpj.pageHeight/pageToPrint.height) < 1 && (_splitpj.pageHeight/pageToPrint.height) < (_splitpj.pageWidth/pageToPrint.width))
+									_swfContainer.transform.matrix = MatrixTransformer.transform(new Matrix(1, 0, 0, 1),(_splitpj.pageHeight/pageToPrint.height)*100,(_splitpj.pageHeight/pageToPrint.height)*100);
+								else if((_splitpj.pageWidth/pageToPrint.width) < 1)
+									_swfContainer.transform.matrix = MatrixTransformer.transform(new Matrix(1, 0, 0, 1),(_splitpj.pageWidth/pageToPrint.width)*100,(_splitpj.pageWidth/pageToPrint.width)*100);
+							}
+							
+							if((_swfContainer.getChildAt(0) as UIComponent).numChildren>0)
+								(_swfContainer.getChildAt(0) as UIComponent).removeChildAt(0);
+							
+							(_swfContainer.getChildAt(0) as UIComponent).addChild(_splitpjPageList[pi]);
+							preparePluginsForPrint(_splitpj,pi);
+							_splitpj.addPage(_swfContainer,null,_splitpjoptions);
+						}
+						
+						_splitpj.send();
+						unsetPluginsForPrint();
+						repositionPapers();
+						_splitpjPageList = new Array();
+					}
 				}
 				
 			},100);	
@@ -3899,6 +4259,9 @@ package com.devaldi.controls.flexpaper
 					preparePluginsForPrint(_splitpj,_splitpjprinted);
 					_splitpj.addPage(_swfContainer,null,_splitpjoptions);
 				}catch(e:*){PopUpManager.removePopUp(_pp);}
+			}else{
+				// if pepperflash etc
+				_splitpjPageList[_splitpjPageList.length] = event.target.content; 
 			}
 			
 			_splitpjloading = false;
@@ -3990,8 +4353,10 @@ package com.devaldi.controls.flexpaper
 		}
 		
 		private function unsetPluginsForPrint():void{
-			for(var pl:int=0;pl<_pluginList.length;pl++){
-				_pluginList[pl].unsetFromPrint();
+			if(_pluginList!=null){
+				for(var pl:int=0;pl<_pluginList.length;pl++){
+					_pluginList[pl].unsetFromPrint();
+				}
 			}
 		}
 		
@@ -4113,6 +4478,146 @@ package com.devaldi.controls.flexpaper
 			filter.inner = false;
 			img.filters = [ filter ];           
 		}	
+		
+		public function addLink(page:Number, href:String, x:Number, y:Number, linkwidth:Number, linkheight:Number,allowinteractions:Boolean=true):LinkMarker{
+			if(MarkList==null){ 
+				initMarkList();
+			}
+			
+			if(MarkList[page-1]==null){
+				MarkList[page-1] = new UIComponent();
+			}
+			
+			var lm:LinkMarker = new LinkMarker();
+			lm.linkX = x;
+			lm.linkY = y;
+			lm.linkEndX = x+linkwidth;
+			lm.linkEndY = y+linkheight;
+			lm.href = href;
+			lm.allowinteractions = allowinteractions;
+			
+			lm.PageIndex = page;
+			
+			MarkList[page-1].addChild(lm);
+			MarkList[page-1].setChildIndex(lm,0);
+			
+			return lm;
+		}
+		
+		public function removeLink(page:Number, href:String, x:Number, y:Number, linkwidth:Number, linkheight:Number):void{
+			var container:DupImage = _pageList[page-1];
+			var sm:UIComponent;
+			
+			for(var i:int=0;i<container.numChildren;i++){
+				if(container.getChildAt(i) is UIComponent){
+					sm = container.getChildAt(i) as UIComponent;
+					
+					for(var si:int=0;si<sm.numChildren;si++){
+						if(sm.getChildAt(si) is LinkMarker){
+							var lm:LinkMarker = sm.getChildAt(si) as LinkMarker;
+							
+							if(lm.href == href && lm.minNormX == x && lm.minNormY == y){
+								sm.removeChild(lm);
+							}
+						}
+					}
+				}
+			}
+		}	
+		
+		public function removeImage(page:Number, x:Number, y:Number, imagewidth:Number, imageheight:Number):void{
+			var container:DupImage = _pageList[page-1];
+			var sm:UIComponent;
+			
+			for(var i:int=0;i<container.numChildren;i++){
+				if(container.getChildAt(i) is UIComponent){
+					sm = container.getChildAt(i) as UIComponent;
+					
+					for(var si:int=0;si<sm.numChildren;si++){
+						if(sm.getChildAt(si) is ImageMarker){
+							var lm:ImageMarker = sm.getChildAt(si) as ImageMarker;
+							
+							if(lm.minNormX == x && lm.minNormY == y){
+								sm.removeChild(lm);
+							}
+						}
+					}
+				}
+			}
+		}
+		
+		public function addImage(page:Number, src:String, x:Number, y:Number, imagewidth:Number, imageheight:Number, keepaspectratio:Boolean, node:XML):ImageMarker{
+			if(MarkList==null){
+				initMarkList();
+			}
+			
+			if(MarkList[page-1]==null){
+				MarkList[page-1] = new UIComponent();
+			}
+			
+			var im:ImageMarker = new ImageMarker();
+			im.keepaspect = keepaspectratio;
+			im.imageX = x;
+			im.imageY = y;
+			im.imageEndX = x+imagewidth;
+			im.imageEndY = y+imageheight;
+			im.src = src;
+			im.PageIndex = page;
+			im.xmlNode = node;
+			
+			MarkList[page-1].addChild(im);
+			MarkList[page-1].setChildIndex(im,0);	
+			
+			return im;
+		}
+		
+		public function addVideo(page:Number, previewImagePath:String, url:String, x:Number, y:Number, videowidth:Number, videoheight:Number, keepaspectratio:Boolean, node:XML):VideoMarker{
+			if(MarkList==null){
+				initMarkList();
+			}
+			
+			if(MarkList[page-1]==null){
+				MarkList[page-1] = new UIComponent();
+			}
+			
+			var im:VideoMarker = new VideoMarker();
+			im.keepaspect = keepaspectratio;
+			im.imageX = x; 
+			im.imageY = y;
+			im.imageEndX = x+videowidth;
+			im.imageEndY = y+videoheight;
+			im.src = previewImagePath;
+			im.VideoUrl = url;
+			im.PageIndex = page;
+			im.xmlNode = node;
+			
+			MarkList[page-1].addChild(im);
+			MarkList[page-1].setChildIndex(im,0);
+			
+			return im;
+		}
+		
+		public function removeVideo(page:Number, x:Number, y:Number, videowidth:Number, videoheight:Number):void{
+			var container:DupImage = _pageList[page-1];
+			
+			var sm:UIComponent;
+			
+			for(var i:int=0;i<container.numChildren;i++){
+				if(container.getChildAt(i) is UIComponent){
+					sm = container.getChildAt(i) as UIComponent;
+					
+					for(var si:int=0;si<sm.numChildren;si++){
+						if(sm.getChildAt(si) is VideoMarker){
+							var lm:VideoMarker = sm.getChildAt(si) as VideoMarker;
+							
+							if(lm.minNormX == x && lm.minNormY == y){
+								sm.removeChild(lm);
+							}
+						}
+					}
+				}
+			}
+		}
 		
 	}
 }

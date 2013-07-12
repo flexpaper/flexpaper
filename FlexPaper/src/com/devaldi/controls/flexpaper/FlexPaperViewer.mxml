@@ -174,7 +174,7 @@ along with FlexPaper.  If not, see <http://www.gnu.org/licenses/>.
 				slidPctScale.value = Number(paper1.Scale);
 			}
 						
-			public override function loadSwf(s:String):void{
+			public override function loadSwf(s:String, context:LoaderContext=null):void{
 				bttnInfo.visible = false;
 				spin1.visible = true;
 				lblProgress.text = "";
@@ -262,6 +262,10 @@ along with FlexPaper.  If not, see <http://www.gnu.org/licenses/>.
 			   onPageLoading="pageLoadingEventHandler(event)"
 			   onErrorLoadingPage="errorLoadingPageEventHandler(event)"
 			   
+			   onInteractionElementCreated="onInteractionElementCreatedHandler(event)"
+			   onInteractionElementDeleted="onInteractionElementDeletedHandler(event)"
+			   onInteractionElementEdited="onInteractionElementEditedHandler(event)"
+			   
 			   SwfFile="{SwfFile}"
 			   JSONFile="{JSONFile}"
 			   
@@ -279,6 +283,8 @@ along with FlexPaper.  If not, see <http://www.gnu.org/licenses/>.
 			   EncodeURI="{EncodeURI}"
 			   AutoAdjustPrintSize="{AutoAdjustPrintSize}"
 			   PrintPaperAsBitmap="{PrintPaperAsBitmap}"
+			   InitPageNumber="{StartAtPage}"
+			   DesignMode="{DesignMode}"
 			   
 			   addedToStage="MacMouseWheelHandler.init(stage)" 
 			   height="100%" width="100%" borderStyle="solid"  tabIndex="0" />							

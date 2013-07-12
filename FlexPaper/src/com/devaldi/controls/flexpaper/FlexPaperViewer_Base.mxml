@@ -132,6 +132,9 @@
 			[Bindable]
 			public var PrintEnabled:Boolean = false;
 			
+			[Bindable] 
+			public var DesignMode:Boolean = false;
+			
 			public static var Key:String = "";
 			public static var loaderURL:String = "";
 			
@@ -190,6 +193,10 @@
 					var cmi_print:ContextMenuItem = new ContextMenuItem(resourceManager.getString("FlexPaper", "Print") + " ...");
 					cmi_print.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, printPaper);
 					contextMenu.customItems.push(cmi_print);
+				}
+				
+				if(viewer!=null){
+					viewer.Base = this;
 				}
 			}
 			
@@ -470,12 +477,59 @@
 				return spct;
 			}
 			
-			public dynamic function loadSwf(s:String):void{
+			public dynamic function loadSwf(s:String, context:LoaderContext=null):void{
+				StreamUtil.setExecutionContext(context);
 				viewer.SwfFile = s;
 			}
 			
 			public dynamic function loadFromBytes(b:ByteArray, context:LoaderContext=null):void{
 				viewer.loadFromBytes(b,context);
+			}
+			
+			public dynamic function setDrawingInteractionMode(b1:Boolean):void{
+				viewer.DrawingInteractionEnabled = b1;
+			}
+			
+			public dynamic function addLink(page:Number,href:String, x:Number, y:Number, linkwidth:Number, linkheight:Number,allowinteractions:Boolean=true):LinkMarker{
+				var lm:LinkMarker = viewer.addLink(page,href,x,y,linkwidth,linkheight,allowinteractions);
+				viewer.clearInteractionMarker();
+				viewer.repositionPapers();
+				
+				return lm;
+			}
+			
+			public dynamic function removeLink(page:Number,href:String, x:Number, y:Number, linkwidth:Number, linkheight:Number):void{
+				viewer.removeLink(page,href,x,y,linkwidth,linkheight);
+				viewer.clearInteractionMarker();
+				viewer.repositionPapers();
+			}
+			
+			public dynamic function addImage(page:Number,imagePath:String, x:Number, y:Number, imagewidth:Number, imageheight:Number, keepaspectratio:Boolean, node:XML):ImageMarker{
+				var im:ImageMarker = viewer.addImage(page,imagePath,x,y,imagewidth,imageheight,keepaspectratio,null);
+				viewer.clearInteractionMarker();
+				viewer.repositionPapers();
+				
+				return im;
+			}
+			
+			public dynamic function removeImage(page:Number, x:Number, y:Number, imagewidth:Number, imageheight:Number):void{
+				viewer.removeImage(page,x,y,imagewidth,imageheight);
+				viewer.clearInteractionMarker();
+				viewer.repositionPapers();
+			}
+			
+			public dynamic function addVideo(page:Number, previewImagePath:String, url:String, x:Number, y:Number, videowidth:Number, videoheight:Number, keepaspectratio:Boolean, node:XML):VideoMarker{
+				var vm:VideoMarker = viewer.addVideo(page,previewImagePath,url,x,y,videowidth,videoheight,keepaspectratio,null);
+				viewer.clearInteractionMarker();
+				viewer.repositionPapers();
+				
+				return vm;
+			}
+			
+			public dynamic function removeVideo(page:Number, x:Number, y:Number, videowidth:Number, videoheight:Number):void{
+				viewer.removeVideo(page,x,y,videowidth,videoheight);
+				viewer.clearInteractionMarker();
+				viewer.repositionPapers();
 			}
 			
 			private function getUrlParamaters():Dictionary

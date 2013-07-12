@@ -21,6 +21,7 @@ BeInteractive! (www.be-interactive.org)
 
 package com.devaldi.streaming
 {
+        import com.devaldi.controls.flexpaper.resources.MenuIcons;
         import com.devaldi.events.SwfLoadedEvent;
         
         import flash.display.DisplayObject;
@@ -190,10 +191,16 @@ package com.devaldi.streaming
 					confirmBytesLoaded();
 				}
                 
-                public function load(request:URLRequest, loaderCtx:LoaderContext):void
+                public function load(request:URLRequest, context:LoaderContext):void
                 {
+					if(context!=null){
+						_loaderCtx = context;
+					}
+					
 					//resetURLStream();
-					flash.system.Security.allowDomain(request.url);
+					if(com.devaldi.controls.flexpaper.resources.MenuIcons.PreviewMode!=true)
+						flash.system.Security.allowDomain(request.url);
+					
 					_attempts++;					
 					_request = request;
                     _stream.load(request);
