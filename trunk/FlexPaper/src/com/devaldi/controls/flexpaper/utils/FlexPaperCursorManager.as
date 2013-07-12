@@ -33,11 +33,23 @@ package com.devaldi.controls.flexpaper.utils
 		public static const GRABBING:String 			= "handGrabbing";				
 		public static const TEXT_SELECT_CURSOR:String   = "textSelectCursor";
 		public static const ADDELEMENT_CURSOR:String 	= "addElementCursor";
+		public static const RESIZE_HORIZONTAL_CURSOR:String 				= "resizeHorizontallyCursor";
+		public static const RESIZE_VERTICAL_CURSOR:String 					= "resizeVerticallyCursor";
+		public static const RESIZE_VERTICAL_HORIZONTAL_CURSOR:String 		= "resizeVerticallyHorizontallyCursor";
 		
 		[Embed('assets/cursor-addelement.png')]
 		public static const CURSOR_ADDELEMENT_IMAGE:Class;
 		
-		public function CursorManager() {
+		[Embed('assets/horizontal_size_cursor.gif')]
+		public static const CURSOR_RESIZE_HORIZONTAL_IMAGE:Class;
+		
+		[Embed('assets/vertical_size_cursor.gif')]
+		public static const CURSOR_RESIZE_VERTICAL_IMAGE:Class;		
+		
+		[Embed('assets/horizontal_vertical_size_cursor.png')]
+		public static const CURSOR_RESIZE_VERTICAL_HORIZONTAL_IMAGE:Class;		
+		
+		public function CursorManager() { 
 			
 		}
 		
@@ -75,6 +87,29 @@ package com.devaldi.controls.flexpaper.utils
 			mcd4.hotSpot = new Point(8,8);
 			mcd4.data = c4;
 			Mouse.registerCursor(ADDELEMENT_CURSOR, mcd4);
+			
+			
+			var c6:Vector.<BitmapData> = new Vector.<BitmapData>(1,true);
+			c6[0] = new CURSOR_RESIZE_HORIZONTAL_IMAGE().bitmapData;
+			var mcd6:MouseCursorData = new MouseCursorData();
+			mcd6.hotSpot = new Point(8,8);
+			mcd6.data = c6;
+			Mouse.registerCursor(RESIZE_HORIZONTAL_CURSOR, mcd6);
+			
+			var c5:Vector.<BitmapData> = new Vector.<BitmapData>(1,true);
+			c5[0] = new CURSOR_RESIZE_VERTICAL_IMAGE().bitmapData;
+			var mcd5:MouseCursorData = new MouseCursorData();
+			mcd5.hotSpot = new Point(8,8);
+			mcd5.data = c5;
+			Mouse.registerCursor(RESIZE_VERTICAL_CURSOR, mcd5);
+			
+			var c5:Vector.<BitmapData> = new Vector.<BitmapData>(1,true);
+			c5[0] = new CURSOR_RESIZE_VERTICAL_HORIZONTAL_IMAGE().bitmapData;
+			var mcd5:MouseCursorData = new MouseCursorData();
+			mcd5.hotSpot = new Point(8,8);
+			mcd5.data = c5;
+			Mouse.registerCursor(RESIZE_VERTICAL_HORIZONTAL_CURSOR, mcd5);
+			
 		}
 	}
 }

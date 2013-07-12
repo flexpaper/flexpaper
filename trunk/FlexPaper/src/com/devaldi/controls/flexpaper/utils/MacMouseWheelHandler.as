@@ -131,13 +131,13 @@ package com.devaldi.controls.flexpaper.utils
 							eb.mouseOver = false;
 							
 							/// Mouse move detection for mouse wheel support
-							function _mousemove(event) {
+							function _mousemovemac(event) {
 								eb.mouseOver = event && event.target && (event.target == swf);
 							}
 		
 							/// Mousewheel support
-							var _mousewheel = function(event) {
-								if(!eb.wheelHandlerEnabled){return true;}
+							var _mousewheelmac = function(event) {
+								//if(!eb.wheelHandlerEnabled){return true;}
 			
 								try{
 									if(!swf.hasFocus()){return true;}
@@ -170,17 +170,11 @@ package com.devaldi.controls.flexpaper.utils
 		
 							// install mouse listeners
 							if(typeof window.addEventListener != 'undefined') {
-								window.addEventListener('DOMMouseScroll', _mousewheel, false);
-								window.addEventListener('DOMMouseMove', _mousemove, false);
+								window.addEventListener('DOMMouseScroll', _mousewheelmac, false);
 							}
-							window.onmousewheel = document.onmousewheel = _mousewheel;
-							
-							if(eb.browser.mozilla){
-								window.onmousemove = document.onmousemove = _mousemove;
-							}
-			
-							window.addEventListener("mousemove",_mousemove);
-							document.addEventListener("mousemove",_mousemove);
+							window.onmousewheel = document.onmousewheel = _mousewheelmac;
+							document.addEventListener("mousemove",_mousemovemac);
+							jQuery(document).bind('mousemove',_mousemovemac);
 			
 						}else if(swf && !eb.platform.mac){
 							eb.mouseOver = false;
@@ -192,7 +186,7 @@ package com.devaldi.controls.flexpaper.utils
 							
 							var _handleWheel = function(event){
 								try{
-									if(!eb.wheelHandlerEnabled){return true;}
+									// if(!eb.wheelHandlerEnabled){return true;}
 			
 									if(!swf.hasFocus()){return true;}
 										swf.setViewerFocus(true);
@@ -232,6 +226,8 @@ package com.devaldi.controls.flexpaper.utils
 
 							if (window.attachEvent) 
 								window.attachEvent("onmousewheel", _handleWheel);
+			
+							jQuery(document).bind('mousemove',_mousemove);
 						}
 					}	
 				}

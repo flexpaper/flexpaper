@@ -109,8 +109,10 @@ package com.devaldi.controls
 		}
 		
 		private function viewerSizeChanged(evt:Event):void{
-			_imgPreview.width = viewer.width/5; _imgPreview.height = _imgPreview.width / (viewer.width/viewer.height);
-			_imgPreview.x = viewer.width-_imgPreview.width - 22; _imgPreview.y = viewer.height-_imgPreview.height - 22;
+			if(_imgPreview!=null && viewer!=null){
+				_imgPreview.width = viewer.width/5; _imgPreview.height = _imgPreview.width / (viewer.width/viewer.height);
+				_imgPreview.x = viewer.width-_imgPreview.width - 22; _imgPreview.y = viewer.height-_imgPreview.height - 22;
+			}
 		}
 		
 		var move:Move;

@@ -27,5 +27,10 @@ package com.devaldi.controls.flexpaper.utils
 			}
 			return loaderCtx; 
 		}
+		
+		public static function setExecutionContext(context:LoaderContext):void{
+			if(context!=null)
+				loaderCtx = context;
+		}
 	}
 }
