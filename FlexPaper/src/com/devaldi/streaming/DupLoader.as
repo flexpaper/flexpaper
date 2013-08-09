@@ -71,7 +71,7 @@ package com.devaldi.streaming
 		}
 		
 		public function getPageIndex():int{
-			return this.pageStartIndex+1;
+			return this.pageStartIndex;
 		}
 		
 		public function setTextSelectMode():void{
