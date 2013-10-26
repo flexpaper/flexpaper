@@ -56,6 +56,9 @@
 			
 			[Bindable]
 			public var SwfFile:String = "";
+			
+			[Bindable]
+			public var PDFFile:String = "";
 
 			[Bindable]
 			public var JSONFile:String = "";
@@ -134,6 +137,9 @@
 			
 			[Bindable] 
 			public var DesignMode:Boolean = false;
+			
+			[Bindable] 
+			public var Signature:String = null;
 			
 			public static var Key:String = "";
 			public static var loaderURL:String = "";
@@ -251,6 +257,23 @@
 				stage.focus = e.target as InteractiveObject;
 			}
 			
+			public function downloadPaper(e:Event):void{
+				try{
+					var fileName:String = PDFFile;
+					
+					if(fileName.indexOf("[*,2]")>0){
+						var map = (fileName.substr(fileName.indexOf("[*,"),fileName.indexOf("]")-fileName.indexOf("[*,")+1));
+						var padding = parseInt(map.substr(map.indexOf(",")+1,map.indexOf("]")-2));
+						fileName = fileName.replace(map,viewer.padString(viewer.currPage.toString(),padding,"0"));
+					}else if(fileName.indexOf("[*,2,true]")>0){
+						fileName = fileName.replace("_[*,2,true]","");
+					}
+					
+					navigateToURL(new URLRequest(fileName),"_blank");
+				
+				}catch(e:*){}
+			}
+			
 			public function printPaper(e:Event):void{
 				if(!ReadOnly){
 					if(PrintDialogEnabled){
@@ -298,7 +321,7 @@
 			}
 			
 			private function viewerKeyDown(event:KeyboardEvent):void{
-				if(event.keyCode == Keyboard.SPACE && !(event.target is mx.core.UITextField)){
+				if(event.keyCode == Keyboard.SPACE && !(event.target is mx.core.UITextField) && !DesignMode){
 					viewer.mvNext();
 				}
 			}

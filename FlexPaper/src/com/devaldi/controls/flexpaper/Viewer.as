@@ -1681,7 +1681,7 @@ package com.devaldi.controls.flexpaper
 			}
 		}
 		
-		private function padString(_str:String, _n:Number, _pStr:String):String
+		public function padString(_str:String, _n:Number, _pStr:String):String
 		{
 			var _rtn:String = _str;
 			if ((_pStr == null) || (_pStr.length < 1))
@@ -2991,6 +2991,7 @@ package com.devaldi.controls.flexpaper
 				
 				if(ProvideSearchAbstracts && (JSONFile != null && JSONFile.length>0)){ 
 					_searchAbstracts = new Array();
+					_abstracts_spi = 1;
 					provideJSONSearchAbstracts(text);
 				}
 
