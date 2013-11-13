@@ -42,6 +42,7 @@
 			import flash.desktop.Clipboard;
 			import flash.desktop.ClipboardFormats;
 			
+			import mx.collections.ArrayCollection;
 			import mx.controls.Alert;
 			import mx.core.Application;
 			import mx.core.UITextField;
@@ -588,6 +589,15 @@
 					return;
 				
 				_browserManager = BrowserManager.getInstance();
+				
+				if(loaderURL!=null && loaderURL.length>0){
+					var parturl:String = loaderURL;
+					if(parturl.toLowerCase().indexOf("://")>=0){
+						parturl = parturl.substr(0,parturl.indexOf("/",8));
+					}
+						
+					StreamUtil.loaderURL = parturl
+				}
 				
 				try{
 					if(Key == null || (Key!=null && Key.length == 0)){

@@ -26,6 +26,8 @@ package com.devaldi.streaming
 	import flash.system.LoaderContext;
 	import flash.utils.ByteArray;
 	import flash.utils.Endian;
+	import com.devaldi.controls.flexpaper.resources.MenuIcons;
+	import flash.system.SecurityDomain;
 	
 	public class DupLoader extends flash.display.Loader implements ITextSelectableDisplayObject
 	{
@@ -38,10 +40,17 @@ package com.devaldi.streaming
 		public var callbackData:Object = null;
 		private var _ctx:LoaderContext;
 		private var _inputBytes:ByteArray;
+		import com.devaldi.controls.flexpaper.utils.StreamUtil;
+		
+		public function DupLoader():void{
+			
+		}
 		
 		public function resetURLStream():void{
-			stream = new URLStream();
-			stream.addEventListener(Event.COMPLETE, streamCompleteHandler,false,0,true);
+			if(com.devaldi.controls.flexpaper.resources.MenuIcons.PreviewMode!=true){
+				stream = new URLStream();
+				stream.addEventListener(Event.COMPLETE, streamCompleteHandler,false,0,true);
+			}
 		}
 		
 		private function streamCompleteHandler(event:Event):void{
@@ -54,10 +63,22 @@ package com.devaldi.streaming
 			
 			flash.utils.setTimeout(function():void{
 				loadBytes(_inputBytes,_ctx);
-			},500);
+			},200);
 		}
 		
 		public override function load(request:URLRequest, context:LoaderContext=null):void{
+			
+			// check for cross domain
+			if((request.url.toLowerCase().indexOf("http://")>=0 ||
+				request.url.toLowerCase().indexOf("https://")>=0) &&
+				
+				request.url.toLowerCase().indexOf(StreamUtil.loaderURL.toLowerCase())==-1){ 
+				resetURLStream();
+			}
+			
+			if(com.devaldi.controls.flexpaper.resources.MenuIcons.PreviewMode!=true)
+				flash.system.Security.allowDomain(request.url);
+			
 			if(stream==null){
 				super.load(request,context);
 			}else{
