@@ -48,6 +48,7 @@ package com.devaldi.streaming
 		public var NeedsFitting:Boolean = false;
 		public var RoleModelWidth:Number = 0;
 		public var RoleModelHeight:Number = 0;
+		public var RoleModelScale:Number = 1;
 		public static var paperSource:DisplayObject; 
 		private var _skinImgl:Bitmap = new MenuIcons.LOGO_SMALL();
 		private var loadImg:Bitmap;
@@ -269,8 +270,8 @@ package com.devaldi.streaming
 			
 			if(child is DupLoader && NeedsFitting){
 				if((child as DupLoader).content!=null && ((child as DupLoader).content.width != RoleModelWidth || (child as DupLoader).content.height != RoleModelHeight)){
-					this.width = (child as DupLoader).content.width * scaleX;
-					this.height = (child as DupLoader).content.height * scaleY;
+					this.width = (child as DupLoader).content.width * RoleModelScale;
+					this.height = (child as DupLoader).content.height * RoleModelScale;
 				}
 				NeedsFitting = false;
 			}

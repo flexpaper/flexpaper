@@ -1260,6 +1260,12 @@ package com.devaldi.controls.flexpaper
 								}
 								
 							}else if(ViewMode == ViewModeEnum.TILE && _pageList[i].source == null && (numPagesLoaded >= _pageList[i].dupIndex||_docLoader.IsSplit)){
+								if(_docLoader.IsSplit)
+									uloaderidx = finduloaderIdx(_pageList[i].dupIndex);
+								
+								if(!_docLoader.IsSplit || uloaderidx == -1)
+									uloaderidx = (i==_pageList.length-1&&loaderidx+3<_docLoader.LoaderList.length)?loaderidx+3:(loaderidx<_docLoader.LoaderList.length)?loaderidx:0;
+								
 								if(!_docLoader.IsSplit){
 									_libMC.gotoAndStop(_pageList[i].dupIndex);
 									_thumbData = new BitmapData(_libMC.width*_scale, _libMC.height*_scale, false, 0xFFFFFF);
@@ -1309,6 +1315,30 @@ package com.devaldi.controls.flexpaper
 							
 							if(_interactionMarker!=null)
 								CurrExtViewMode.renderSelection(i,_interactionMarker);
+						}else{
+							if(_interactionMarker!=null && _interactionMarker is SearchShapeMarker && !(_interactionMarker as SearchShapeMarker).initialized && SearchPageIndex == i+1){
+								//var snap:TextSnapshot = getPageTextSnapshot((_interactionMarker as SearchShapeMarker).PageIndex-1);
+								var snap:TextSnapshot = _pageList[(_interactionMarker as SearchShapeMarker).PageIndex-1].textSnapshot;
+								
+								if(snap!=null){
+									var flashBlob:String = snap.getText(0,snap.charCount);
+									//var si:int = ((marker as SearchShapeMarker).searchIndex);
+									var si:int = -1;
+									var text:String = ((_interactionMarker as SearchShapeMarker).searchText);
+									
+									for(var oi:int=0;oi<(_interactionMarker as SearchShapeMarker).occurance;oi++){
+										si = flashBlob.toLowerCase().indexOf(text.toLowerCase(),(si==-1?0:si+text.length));
+									}
+									
+									//si = flashBlob.toLowerCase().indexOf(text.toLowerCase(),(si==-1?0:si));
+									
+									var tri:Array = snap.getTextRunInfo(si,si+text.length-1);
+									if(tri.length>0){
+										drawCurrentSelection(SearchMatchColor,_interactionMarker,tri);
+										(_interactionMarker as SearchShapeMarker).initialized = true;
+									}
+								}
+							}
 						}
 						
 						if((_viewMode == ViewModeEnum.PORTRAIT) && _interactionMarker != null){
@@ -3273,6 +3303,7 @@ package com.devaldi.controls.flexpaper
 			di.NeedsFitting = DocLoader.IsSplit;
 			di.RoleModelHeight = _libMC.height;
 			di.RoleModelWidth = _libMC.width;
+			di.RoleModelScale = _scale;
 			//di.mouseChildren = false;
 			di.addEventListener(MouseEvent.MOUSE_OVER,dupImageMoverHandler,false,0,true);
 			di.addEventListener(MouseEvent.MOUSE_OUT,dupImageMoutHandler,false,0,true);

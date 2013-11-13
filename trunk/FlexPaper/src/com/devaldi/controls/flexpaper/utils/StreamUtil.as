@@ -4,12 +4,14 @@ package com.devaldi.controls.flexpaper.utils
 	
 	import flash.system.ApplicationDomain;
 	import flash.system.LoaderContext;
+	import flash.system.SecurityDomain;
 	
 	public class StreamUtil
 	{
 		private static var loaderCtx:LoaderContext;
 		public static var DocLoader:IDocumentLoader;
 		public static var ProgressiveLoading:Boolean;
+		public static var loaderURL:String = "";
 		
 		public static function getExecutionContext():LoaderContext{
 			if(loaderCtx == null){
