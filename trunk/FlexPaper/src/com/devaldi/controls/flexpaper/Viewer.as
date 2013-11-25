@@ -4161,7 +4161,7 @@ package com.devaldi.controls.flexpaper
 				if(start){
 					
 					if(precache)
-						_pp.ProcessingLabel.text = "Please wait.. precaching pages";
+						_pp.ProcessingLabel.text = "Please wait.. preparing to print";
 					else{
 						_pp.ProcessingLabel.text = "Setting up print";
 						_splitpj = new PrintJob();
