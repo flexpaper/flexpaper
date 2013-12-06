@@ -200,6 +200,7 @@ package com.devaldi.controls.flexpaper
 		private var _currentInteractionObject:ITextSelectableDisplayObject = null;
 		private var _stdsize:Number = 1000;
 		private var _base:UIComponent;
+		private var _linkColor:uint = 0x72e6ff;
 		
 		public function Viewer(){
 			super();
@@ -588,7 +589,17 @@ package com.devaldi.controls.flexpaper
 		
 		public function set FitPageOnLoad(b2:Boolean):void {
 			_fitPageOnLoad = b2;
-		}			
+		}
+		
+		[Bindable]
+		public function get LinkColor():uint {
+			return _linkColor;
+		}
+		
+		public function set LinkColor(c:uint):void {
+			_linkColor = c;
+		}
+		
 		
 		public function gotoPage(p:Number, adjGotoPage:int=0,interactive:Boolean=false):void{
 			if(adjGotoPage!=0){_adjGotoPage=adjGotoPage;}
@@ -1442,7 +1453,7 @@ package com.devaldi.controls.flexpaper
 				_this.linkEndX 	= denormalizeX(_this.linkEndX,parent.width,parent.height);
 				_this.linkEndY 	= denormalizeY(_this.linkEndY,parent.height);
 				
-				marker.graphics.beginFill(0x72e6ff,0);
+				marker.graphics.beginFill(LinkColor,0);
 				marker.graphics.drawRect(_this.linkX,_this.linkY,_this.linkEndX-_this.linkX,_this.linkEndY-_this.linkY);
 				marker.width =  _this.linkEndX - _this.linkX;
 				marker.height =  _this.linkEndY - _this.linkY;
@@ -1450,7 +1461,7 @@ package com.devaldi.controls.flexpaper
 				if(_this.allowinteractions){
 					if(DesignMode){
 						_thissprite.graphics.clear();
-						_thissprite.graphics.beginFill(0x72e6ff,0.2);
+						_thissprite.graphics.beginFill(LinkColor,0.2);
 						_thissprite.graphics.drawRect(_this.linkX,_this.linkY,_this.linkEndX-_this.linkX,_this.linkEndY-_this.linkY);
 					}
 				}
@@ -1460,13 +1471,13 @@ package com.devaldi.controls.flexpaper
 					_thissprite = ((e.target as LinkMarker).getChildAt(0) as Sprite);
 					
 					_thissprite.graphics.clear();
-					_thissprite.graphics.beginFill(0x72e6ff,0.4);
+					_thissprite.graphics.beginFill(LinkColor,0.4);
 					_thissprite.graphics.drawRect(_this.linkX,_this.linkY,_this.linkEndX-_this.linkX,_this.linkEndY-_this.linkY);
 					
 					// if in design mod show buttons
 					if(DesignMode && _this.allowinteractions){
 						marker.graphics.clear();
-						marker.graphics.beginFill(0x72e6ff,0);
+						marker.graphics.beginFill(LinkColor,0);
 						marker.graphics.drawRect(_this.linkX,_this.linkY,_this.linkEndX-_this.linkX,_this.linkEndY-_this.linkY);
 						drawCurrentInteractionActions(marker,_this.linkEndX,_this.linkEndY,false);
 					}
@@ -1482,11 +1493,11 @@ package com.devaldi.controls.flexpaper
 					
 					if(DesignMode && _this.allowinteractions){
 						marker.graphics.clear();
-						marker.graphics.beginFill(0x72e6ff,0.2);
+						marker.graphics.beginFill(LinkColor,0.2);
 						marker.graphics.drawRect(_this.linkX,_this.linkY,_this.linkEndX-_this.linkX,_this.linkEndY-_this.linkY);
 					}else{
 						marker.graphics.clear();
-						marker.graphics.beginFill(0x72e6ff,0);
+						marker.graphics.beginFill(LinkColor,0);
 						marker.graphics.drawRect(_this.linkX,_this.linkY,_this.linkEndX-_this.linkX,_this.linkEndY-_this.linkY);
 					}
 				});
@@ -1523,7 +1534,7 @@ package com.devaldi.controls.flexpaper
 				marker.y = _img.imageY;
 				
 				if(!_img.keepaspect){
-					marker.graphics.beginFill(0x72e6ff,0);
+					marker.graphics.beginFill(LinkColor,0);
 					marker.graphics.drawRect(-5,-5,_img.imageEndX-_img.imageX+10,_img.imageEndY-_img.imageY+10);
 					marker.width =  _img.imageEndX - _img.imageX;
 					marker.height =  _img.imageEndY - _img.imageY;
@@ -1543,7 +1554,7 @@ package com.devaldi.controls.flexpaper
 					if(_img.keepaspect){ // adjust height if needed								
 						_img.imageEndY = _img.imageY + ((_img.bitmap.height/_img.bitmap.width)*(_img.imageEndX-_img.imageX)); 
 						
-						marker.graphics.beginFill(0x72e6ff,0);
+						marker.graphics.beginFill(LinkColor,0);
 						marker.graphics.drawRect(-5,-5,_img.imageEndX-_img.imageX+10,_img.imageEndY-_img.imageY+10);
 						imgLoader.height = marker.height =  _img.imageEndY - _img.imageY;
 						
@@ -1959,13 +1970,17 @@ package com.devaldi.controls.flexpaper
 		}		
 		
 		private function wheelHandler(evt:MouseEvent):void {
-			_paperContainer.removeEventListener(MouseEvent.MOUSE_WHEEL, wheelHandler);
-			
-			var t:Timer = new Timer(1,1);
-			t.addEventListener("timer", addMouseScrollListener,false,0,true);
-			t.start();
-			
-			_paperContainer.dispatchEvent(evt.clone());
+			if(UsingExtViewMode)
+				CurrExtViewMode.handleMouseWheel(evt);
+			else{
+				_paperContainer.removeEventListener(MouseEvent.MOUSE_WHEEL, wheelHandler);
+				
+				var t:Timer = new Timer(1,1);
+				t.addEventListener("timer", addMouseScrollListener,false,0,true);
+				t.start();
+				
+				_paperContainer.dispatchEvent(evt.clone());
+			}
 		}
 		
 		private function addMouseScrollListener(e:Event):void {

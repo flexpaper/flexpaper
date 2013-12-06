@@ -57,6 +57,8 @@ package com.devaldi.streaming
 		public var BackgroundColor:uint = 0xffffff;
 		private var _rotationMatrix:Matrix;
 		public var loadedEventDispatched:Boolean = false;
+		private var BackgroundHeight:Number = -1;
+		private var BackgroundWidth:Number = -1;
 		
 		public function DupImage(){}
 		
@@ -270,8 +272,15 @@ package com.devaldi.streaming
 			
 			if(child is DupLoader && NeedsFitting){
 				if((child as DupLoader).content!=null && ((child as DupLoader).content.width != RoleModelWidth || (child as DupLoader).content.height != RoleModelHeight)){
-					this.width = (child as DupLoader).content.width * RoleModelScale;
-					this.height = (child as DupLoader).content.height * RoleModelScale;
+					//this.width = (child as DupLoader).content.width * scaleX;
+					//this.height = (child as DupLoader).content.height * scaleY;
+					//var dxdy:Number = this.width/this.height;
+					
+					//this.width = (child as DupLoader).content.width * RoleModelScale;
+					//this.height = (child as DupLoader).content.height * scaleY;
+					BackgroundHeight = (child as DupLoader).content.height * RoleModelScale;
+					BackgroundWidth = (child as DupLoader).content.width * RoleModelScale;
+					
 				}
 				NeedsFitting = false;
 			}
@@ -304,7 +313,7 @@ package com.devaldi.streaming
 
 			if(((_paperRotation!=90 && _paperRotation!=270)||_paperRotation==180)){
 				graphics.beginFill(BackgroundColor,(DrawBackground?1:0));
-				graphics.drawRect(0,0,w,h);
+				graphics.drawRect(0,0,((BackgroundWidth>0)?BackgroundWidth:w),((BackgroundHeight>0)?BackgroundHeight:h));
 			}else{
 				graphics.clear();
 			}

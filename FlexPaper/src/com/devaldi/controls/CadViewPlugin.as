@@ -453,6 +453,10 @@ package com.devaldi.controls
 			
 		}
 		
+		public function handleMouseWheel(event:MouseEvent):void{
+			
+		}
+		
 		public function handleMouseDown(event:MouseEvent):void{
 			
 		}

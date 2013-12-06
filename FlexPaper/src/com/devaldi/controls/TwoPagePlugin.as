@@ -258,6 +258,10 @@ package com.devaldi.controls
 			}
 		}
 		
+		public function handleMouseWheel(event:MouseEvent):void{
+			
+		}
+		
 		public function handleMouseUp(event:MouseEvent):void{
 			
 		}
