@@ -24,12 +24,13 @@ import flash.geom.*;
 import flash.utils.getDefinitionByName;
 
 import mx.containers.Canvas;
+import mx.managers.IFocusManagerComponent;
         
 /**
  * ZoomCanvas; Provides basic center zooming functionality.
  *             Use CenteringEnabled(true/false) to turn on and off.  
  */
-public class ZoomCanvas extends Canvas {
+public class ZoomCanvas extends Canvas implements IFocusManagerComponent {
   
 	  public var CenteringEnabled:Boolean = false;
 	  private var rX:Number;

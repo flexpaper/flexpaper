@@ -38,6 +38,7 @@ package com.devaldi.controls.flexpaper
 		function unsetTextSelectMode(pn:Number):void;
 		function clearSearch():void;
 		function disposeViewMode():void;
+		function repaintMarkers():void;
 		function getNormalizationHeight(pageIndex:Number):Number;
 		function getNormalizationWidth(pageIndex:Number):Number;
 	}

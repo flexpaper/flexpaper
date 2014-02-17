@@ -201,7 +201,7 @@ package com.devaldi.controls.flexpaper.utils
 										if(event.preventDefault)	event.preventDefault();
 										return true;
 									}
-									
+			
 									if(eb.mouseOver) {
 										var delta = 0;
 										if(event.wheelDelta)		delta = event.wheelDelta / (eb.browser.opera ? 12 : 120);

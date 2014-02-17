@@ -177,6 +177,7 @@ package com.devaldi.controls.flexpaper
 		private var _textSelectEnabled:Boolean = false;
 		private var _drawingInteractionEnabled:Boolean = false;
 		private var _designMode:Boolean = false;
+		private var _useLocalPath:Boolean = false;
 		private var _cursorsEnabled:Boolean = true;
 		private var _grabCursorID:Number = 0;
 		private var _grabbingCursorID:Number = 0;
@@ -401,6 +402,15 @@ package com.devaldi.controls.flexpaper
 		}
 		
 		[Bindable]
+		public function get UseLocalPath():Boolean{
+			return _useLocalPath;
+		}
+		
+		public function set UseLocalPath(b1:Boolean):void{
+			_useLocalPath = b1;
+		}
+		
+		[Bindable]
 		public function get CursorsEnabled():Boolean {
 			return _cursorsEnabled;
 		}	
@@ -598,8 +608,51 @@ package com.devaldi.controls.flexpaper
 		
 		public function set LinkColor(c:uint):void {
 			_linkColor = c;
+			
+			try{
+				if(UsingExtViewMode){
+					CurrExtViewMode.repaintMarkers();
+				}else{
+					repaintMarkers();
+				}
+			} catch (e:*) {}
 		}
 		
+		public function repaintMarkers():void{
+			
+			if(_pageList==null || (_pageList!=null && _pageList.length==0)){return;}
+			
+			for(var page:int=0;page<_pageList.length;page++){
+				var container:DupImage = _pageList[page];
+				var sm:UIComponent;
+				
+				if(container == null){return;}
+				
+				for(var i:int=0;i<container.numChildren;i++){
+					if(container.getChildAt(i) is UIComponent){
+						sm = container.getChildAt(i) as UIComponent;
+						
+						for(var si:int=0;si<sm.numChildren;si++){
+							if(sm.getChildAt(si) is LinkMarker){
+								var _this:LinkMarker = sm.getChildAt(si) as LinkMarker;
+								
+								if(_this.allowinteractions){
+									if(DesignMode){
+										var _thissprite:Sprite = ((_this).getChildAt(0) as Sprite);
+										
+										_thissprite.graphics.clear();
+										
+										_this.graphics.clear();
+										_this.graphics.beginFill(LinkColor,0.2);
+										_this.graphics.drawRect(_this.linkX,_this.linkY,_this.linkEndX-_this.linkX,_this.linkEndY-_this.linkY);
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		}
 		
 		public function gotoPage(p:Number, adjGotoPage:int=0,interactive:Boolean=false):void{
 			if(adjGotoPage!=0){_adjGotoPage=adjGotoPage;}
@@ -863,6 +916,7 @@ package com.devaldi.controls.flexpaper
 		public function rotate():void{
 			var rotatenum:int = getVisibleMidPage();
 			if(rotatenum<_pageList.length-1&&_pageList.length>2){rotatenum = rotatenum - 1;}
+			if(currPage == numPages-1){rotatenum = currPage - 1;}
 			
 			(_displayContainer.getChildAt(rotatenum) as DupImage).paperRotation = 90;
 		}
@@ -1506,8 +1560,14 @@ package com.devaldi.controls.flexpaper
 					if(_this.href.indexOf("actionGoTo:")==0){
 						gotoPage(Number(_this.href.substr(11)));
 					}else{
-						flash.net.navigateToURL(new URLRequest(_this.href));
+						if(_this.href.indexOf("http")==-1 && _this.href.indexOf("mailto")==-1 && _this.href.indexOf("/")!=0){
+							_this.href = "http://" + _this.href;
+						}
+						dispatchEvent(new ExternalLinkClickedEvent(ExternalLinkClickedEvent.EXTERNALLINK_CLICKED,_this.href));
 					}
+					/*else{
+						flash.net.navigateToURL(new URLRequest(_this.href));
+					}*/
 				});
 				
 				_this.isInitialized = true;
@@ -1636,6 +1696,19 @@ package com.devaldi.controls.flexpaper
 							_img.drawImage();
 						}
 					});
+					
+					if(marker is ImageMarker && (marker as ImageMarker).href!=null && (marker as ImageMarker).href.length>0){
+						marker.addEventListener(MouseEvent.CLICK, function(e:MouseEvent):void{
+							if(_this.href.indexOf("actionGoTo:")==0){
+								gotoPage(Number(_this.href.substr(11)));
+							}else{
+								if(_this.href.indexOf("http")==-1 && _this.href.indexOf("mailto")==-1 && _this.href.indexOf("/")!=0){
+									_this.href = "http://" + _this.href;
+								}
+								dispatchEvent(new ExternalLinkClickedEvent(ExternalLinkClickedEvent.EXTERNALLINK_CLICKED,_this.href));
+							}
+						});
+					}
 					
 					if(marker is VideoMarker){
 						marker.addEventListener(MouseEvent.CLICK, function(e:MouseEvent):void{
@@ -3631,13 +3704,13 @@ package com.devaldi.controls.flexpaper
 						_drawingStartingPointY = tmp;
 					}
 				}
-				var refwidth:Number = (UsingExtViewMode)?CurrExtViewMode.getNormalizationWidth(_interactionMarker.PageIndex-1):libMC.width;
-				var refheight:Number = (UsingExtViewMode)?CurrExtViewMode.getNormalizationHeight(_interactionMarker.PageIndex-1):libMC.height;
+				var refwidth:Number = (UsingExtViewMode)?CurrExtViewMode.getNormalizationWidth(_interactionMarker.PageIndex-1):((_selectionMc!=null)?_selectionMc.width:libMC.width);
+				var refheight:Number = (UsingExtViewMode)?CurrExtViewMode.getNormalizationHeight(_interactionMarker.PageIndex-1):((_selectionMc!=null)?_selectionMc.height:libMC.height);
 				
-				_interactionMarker.minNormX = normalizeX(_interactionMarker.minX,refwidth,refheight);
-				_interactionMarker.minNormY = normalizeY(_interactionMarker.minY,refwidth,refheight);
-				_interactionMarker.maxNormX = normalizeX(_interactionMarker.maxX,refwidth,refheight);
-				_interactionMarker.maxNormY = normalizeY(_interactionMarker.maxY,refwidth,refheight);
+				_interactionMarker.minNormX = normalizeX((_interactionMarker.minX<_interactionMarker.maxX?_interactionMarker.minX:_interactionMarker.maxX),refwidth,refheight);
+				_interactionMarker.minNormY = normalizeY((_interactionMarker.minY<_interactionMarker.maxY?_interactionMarker.minY:_interactionMarker.maxY),refwidth,refheight);
+				_interactionMarker.maxNormX = normalizeX((_interactionMarker.maxX>_interactionMarker.minX?_interactionMarker.maxX:_interactionMarker.minX),refwidth,refheight);
+				_interactionMarker.maxNormY = normalizeY((_interactionMarker.maxY>_interactionMarker.minY?_interactionMarker.maxY:_interactionMarker.minY),refwidth,refheight);
 				
 				dispatchEvent(new InteractionElementCreatedEvent(InteractionElementCreatedEvent.INTERACTIONELEMENT_CREATED,_interactionMarker));
 				
@@ -4225,6 +4298,10 @@ package com.devaldi.controls.flexpaper
 						_pp.ProcessingLabel.text = "Please wait..";
 				}
 				
+				if(precache){
+					_pp.ProcessingLabel.text = "Please wait.. preparing to print (page "+(_splitpjprinted+1)+"/"+(_splitpjTotalPagesToPrint)+")";
+				}
+				
 				while(_splitpjprinted<numPages){
 					if(!_splitpjloading){
 							if(_splitpageNumList==null || (_splitpageNumList!=null && _splitpageNumList[_splitpjprinted+1] != null)){
@@ -4593,7 +4670,7 @@ package com.devaldi.controls.flexpaper
 			}
 		}
 		
-		public function addImage(page:Number, src:String, x:Number, y:Number, imagewidth:Number, imageheight:Number, keepaspectratio:Boolean, node:XML):ImageMarker{
+		public function addImage(page:Number, src:String, x:Number, y:Number, imagewidth:Number, imageheight:Number, keepaspectratio:Boolean, href:String, node:XML):ImageMarker{
 			if(MarkList==null){
 				initMarkList();
 			}
