@@ -46,7 +46,7 @@ package com.devaldi.controls.flexpaper
 			
 			_viewer = v;
 			
-			if(!_viewer.DesignMode){
+			if(!_viewer.DesignMode && !_viewer.UseLocalPath){
 				Security.allowDomain("www.youtube.com");
 	        	Security.allowDomain("video-stats.video.google.com");
 			}

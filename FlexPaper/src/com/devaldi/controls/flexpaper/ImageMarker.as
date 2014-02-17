@@ -33,6 +33,8 @@ package com.devaldi.controls.flexpaper
 		public var bitmapScaleX:Number=1;
 		public var bitmapScaleY:Number=1;
 		
+		public var href:String="";
+		
 		public var RightPanel:Sprite;
 		public var LeftPanel:Sprite;
 		public var TopPanel:Sprite;

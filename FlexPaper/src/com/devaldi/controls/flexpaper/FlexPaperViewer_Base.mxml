@@ -22,6 +22,7 @@
 			import com.devaldi.controls.flexpaper.resources.LicenseKey;
 			import com.devaldi.controls.flexpaper.resources.MenuIcons;
 			import com.devaldi.controls.flexpaper.utils.MacMouseWheelHandler;
+			import com.devaldi.controls.flexpaper.utils.BlastedMouseWheelBlock;
 			import com.devaldi.controls.flexpaper.utils.StreamUtil;
 			import com.devaldi.controls.flexpaper.utils.VersionHandler;
 			import com.devaldi.events.CurrentPageChangedEvent;
@@ -139,8 +140,14 @@
 			[Bindable] 
 			public var DesignMode:Boolean = false;
 			
+			[Bindable]
+			public var UseLocalPath:Boolean = false;
+			
 			[Bindable] 
 			public var Signature:String = null;
+			
+			[Bindable] 
+			public var ElementId:String = null;
 			
 			public static var Key:String = "";
 			public static var loaderURL:String = "";
@@ -412,6 +419,10 @@
 			}
 			
 			protected function onViewModeChanged(event:ViewModeChangedEvent):void{
+				if(BlastedMouseWheelBlock.targetComponent!=null){
+					BlastedMouseWheelBlock.targetComponent = viewer.PaperContainer;
+				}
+				
 				dispatchEvent(event);
 			}
 			
@@ -528,8 +539,8 @@
 				viewer.repositionPapers();
 			}
 			
-			public dynamic function addImage(page:Number,imagePath:String, x:Number, y:Number, imagewidth:Number, imageheight:Number, keepaspectratio:Boolean, node:XML):ImageMarker{
-				var im:ImageMarker = viewer.addImage(page,imagePath,x,y,imagewidth,imageheight,keepaspectratio,null);
+			public dynamic function addImage(page:Number,imagePath:String, x:Number, y:Number, imagewidth:Number, imageheight:Number, keepaspectratio:Boolean, href:String, node:XML):ImageMarker{
+				var im:ImageMarker = viewer.addImage(page,imagePath,x,y,imagewidth,imageheight,keepaspectratio,href,null);
 				viewer.clearInteractionMarker();
 				viewer.repositionPapers();
 				

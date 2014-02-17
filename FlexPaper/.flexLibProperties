@@ -64,6 +64,7 @@
     <classEntry path="com.devaldi.events.InteractionElementCreatedEvent"/>
     <classEntry path="com.devaldi.events.InteractionElementEditedEvent"/>
     <classEntry path="com.devaldi.events.InteractionElementDeletedEvent"/>
+    <classEntry path="com.devaldi.controls.flexpaper.utils.BlastedMouseWheelBlock"/>
   </includeClasses>
   <includeResources/>
   <namespaceManifests/>

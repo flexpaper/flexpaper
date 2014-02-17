@@ -85,6 +85,10 @@ package com.devaldi.controls
 			
 		}
 		
+		public function repaintMarkers():void{
+			
+		}
+		
 		public function SinglePagePlugin()
 		{
 		}

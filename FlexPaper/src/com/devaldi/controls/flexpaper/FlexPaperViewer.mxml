@@ -41,6 +41,7 @@ along with FlexPaper.  If not, see <http://www.gnu.org/licenses/>.
 			import com.devaldi.controls.flexpaper.Viewer;
 			import com.devaldi.controls.flexpaper.resources.MenuIcons;
 			import com.devaldi.controls.flexpaper.utils.MacMouseWheelHandler;
+			import com.devaldi.controls.flexpaper.utils.BlastedMouseWheelBlock;
 			import com.devaldi.events.CurrentPageChangedEvent;
 			import com.devaldi.events.CursorModeChangedEvent;
 			import com.devaldi.events.DocumentLoadedEvent;
@@ -199,6 +200,18 @@ along with FlexPaper.  If not, see <http://www.gnu.org/licenses/>.
 				txtSearch.text = text;
 				super.searchText(text);				
 			}
+			
+			private function paperAddedToStageHandler(e:Event):void{
+				if(ExternalInterface.available){
+					var browser : String = ExternalInterface.call("function(){return navigator.appVersion+'-'+navigator.appName;}").toLowerCase();
+					
+					if(browser.indexOf("webkit")>0 && ElementId !=null && ElementId.length>0){
+						BlastedMouseWheelBlock.initialize(stage,paper1.PaperContainer,ElementId);
+					}else{
+						MacMouseWheelHandler.init(stage);
+					}	
+				}
+			}
 		]]>
 	</mx:Script>
 	<mx:Style source="styles/default.css" />
@@ -288,7 +301,7 @@ along with FlexPaper.  If not, see <http://www.gnu.org/licenses/>.
 					   InitPageNumber="{StartAtPage}"
 					   DesignMode="{DesignMode}"
 					   
-					   addedToStage="MacMouseWheelHandler.init(stage)" 
+					   addedToStage="paperAddedToStageHandler(event)" 
 					   height="100%" width="100%" borderStyle="solid"  tabIndex="0" />		
 		</mx:VBox>	
 	</mx:HBox>		

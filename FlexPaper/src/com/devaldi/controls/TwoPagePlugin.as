@@ -68,6 +68,10 @@ package com.devaldi.controls
 			
 		}	
 		
+		public function repaintMarkers():void{
+			
+		}
+		
 		public function get Name():String{
 			return "TwoPage";
 		}
