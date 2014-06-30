@@ -16,9 +16,12 @@ package com.devaldi.controls.flexpaper
 		public var imageEndX:Number=-1;
 		public var imageEndY:Number=-1;
 		public var src:String="";
+		public var hoversrc:String="";
+		
 		public var type:String="ImageMarker";
 		public var keepaspect:Boolean = true;
 		public var bitmap:Bitmap;
+		public var hoverbitmap:Bitmap;
 		public var loading:Boolean = false;
 		
 		public var dragging:Boolean = false;
@@ -29,6 +32,8 @@ package com.devaldi.controls.flexpaper
 		public var resizeBottom:Boolean = false;
 		public var resizeTop:Boolean = false;
 		public var resizeRightBottom:Boolean = false;
+		
+		public var hovering:Boolean = false;
 		
 		public var bitmapScaleX:Number=1;
 		public var bitmapScaleY:Number=1;
@@ -56,20 +61,23 @@ package com.devaldi.controls.flexpaper
 			if(clear)
 				graphics.clear();
 			
+			var targetBitmap:Bitmap = hovering?hoverbitmap:bitmap;
+			
 			if(resizing || dragging){
 				graphics.beginFill(0x72e6ff,0.4);
 				graphics.drawRect(-5,-5,imageEndX-imageX+10,imageEndY-imageY+10);
 			}
 			
 			var matrix:Matrix = new Matrix();
-			bitmapScaleX = (imageEndX-imageX)/bitmap.width;
-			bitmapScaleY = (imageEndY-imageY)/bitmap.height;
+			bitmapScaleX = (imageEndX-imageX)/targetBitmap.width;
+			bitmapScaleY = (imageEndY-imageY)/targetBitmap.height;
 			
 			matrix.scale(bitmapScaleX,bitmapScaleY);
 			matrix.tx = imageEndX-imageX;
 			matrix.ty = imageEndY-imageY;
 			
-			graphics.beginBitmapFill(bitmap.bitmapData,matrix,true);
+			graphics.beginBitmapFill(targetBitmap.bitmapData,matrix,true);
+			
 			graphics.drawRect(0,0,imageEndX-imageX-1,imageEndY-imageY-1);
 			graphics.endFill();
 			
