@@ -15,7 +15,7 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with FlexPaper.  If not, see <http://www.gnu.org/licenses/>.	
 */  
- 
+  
 package com.devaldi.controls.flexpaper
 {
 	import caurina.transitions.Tweener;
@@ -48,6 +48,7 @@ package com.devaldi.controls.flexpaper
 	import com.devaldi.events.SelectionCreatedEvent;
 	import com.devaldi.events.SwfLoadedEvent;
 	import com.devaldi.events.ViewModeChangedEvent;
+	import com.devaldi.events.ViewerInitializedEvent;
 	import com.devaldi.streaming.DupImage;
 	import com.devaldi.streaming.DupLoader;
 	import com.devaldi.streaming.IDocumentLoader;
@@ -110,6 +111,7 @@ package com.devaldi.controls.flexpaper
 	import mx.rpc.http.HTTPService;
 	
 	[Event(name="onDocumentLoaded", type="com.devaldi.events.DocumentLoadedEvent")]
+	[Event(name="onViewerInitialized", type="com.devaldi.events.ViewerInitializedEvent")]
 	[Event(name="onPageLoaded", type="com.devaldi.events.PageLoadedEvent")]
 	[Event(name="onPageLoading", type="com.devaldi.events.PageLoadingEvent")]
 	[Event(name="onDocumentLoading", type="flash.events.Event")]
@@ -202,6 +204,7 @@ package com.devaldi.controls.flexpaper
 		private var _stdsize:Number = 1000;
 		private var _base:UIComponent;
 		private var _linkColor:uint = 0x72e6ff;
+		private var _linkAlpha:Number = 0.4;
 		
 		public function Viewer(){
 			super();
@@ -617,6 +620,26 @@ package com.devaldi.controls.flexpaper
 				}
 			} catch (e:*) {}
 		}
+		
+		[Bindable]
+		public function get LinkAlpha():Number {
+			return _linkAlpha;
+		}
+		
+		public function set LinkAlpha(a:Number):void {
+			if(a==0){a=0.01;}
+			
+			_linkAlpha = a;
+			
+			try{
+				if(UsingExtViewMode){
+					CurrExtViewMode.repaintMarkers();
+				}else{
+					repaintMarkers();
+				}
+			} catch (e:*) {}
+		}
+		
 		
 		public function repaintMarkers():void{
 			
@@ -1383,7 +1406,7 @@ package com.devaldi.controls.flexpaper
 						}else{
 							if(_interactionMarker!=null && _interactionMarker is SearchShapeMarker && !(_interactionMarker as SearchShapeMarker).initialized && SearchPageIndex == i+1){
 								//var snap:TextSnapshot = getPageTextSnapshot((_interactionMarker as SearchShapeMarker).PageIndex-1);
-								var snap:TextSnapshot = _pageList[(_interactionMarker as SearchShapeMarker).PageIndex-1].textSnapshot;
+								snap = _pageList[(_interactionMarker as SearchShapeMarker).PageIndex-1].textSnapshot;
 								
 								if(snap!=null){
 									var flashBlob:String = snap.getText(0,snap.charCount);
@@ -1525,7 +1548,7 @@ package com.devaldi.controls.flexpaper
 					_thissprite = ((e.target as LinkMarker).getChildAt(0) as Sprite);
 					
 					_thissprite.graphics.clear();
-					_thissprite.graphics.beginFill(LinkColor,0.4);
+					_thissprite.graphics.beginFill(LinkColor,_linkAlpha);
 					_thissprite.graphics.drawRect(_this.linkX,_this.linkY,_this.linkEndX-_this.linkX,_this.linkEndY-_this.linkY);
 					
 					// if in design mod show buttons
@@ -1544,6 +1567,8 @@ package com.devaldi.controls.flexpaper
 					
 					_thissprite.graphics.clear();
 					clearCurrentInteractionActions();
+					
+					repaintMarkers();
 					
 					if(DesignMode && _this.allowinteractions){
 						marker.graphics.clear();
@@ -1606,6 +1631,21 @@ package com.devaldi.controls.flexpaper
 				imgLoader.addEventListener(Event.COMPLETE,function(e:Event):void{
 					marker = _img = (e.target.parent as ImageMarker);
 
+					if(_img.hoversrc.length>0){
+						var hoverLoader:SWFLoader = new SWFLoader();
+						marker.addChild(hoverLoader);
+						hoverLoader.addEventListener(Event.COMPLETE,function(e:Event):void{
+							_img.removeChild((e.target as SWFLoader));
+							_img.hoverbitmap = (e.target.content as Bitmap);
+							
+							if(_img.keepaspect){
+								e.target.height = marker.height =  _img.imageEndY - _img.imageY;
+							}
+						});
+						
+						hoverLoader.load(_img.hoversrc);
+					}
+					
 					_img.removeChild((e.target as SWFLoader));
 					_img.isInitialized = true;
 					_img.loading = false;
@@ -1677,6 +1717,11 @@ package com.devaldi.controls.flexpaper
 						marker = _img = (e.target as ImageMarker);
 						_thissprite = ((e.target as ImageMarker).getChildAt(0) as Sprite);
 						
+						if(_img.hoversrc){
+							_img.hovering = true;
+							_img.drawImage(true);
+						}
+						
 						// if in design mod show buttons 
 						if(DesignMode && !_img.dragging && !_img.resizing){
 							_img.graphics.clear();
@@ -1690,6 +1735,11 @@ package com.devaldi.controls.flexpaper
 					marker.addEventListener(MouseEvent.ROLL_OUT, function(e:MouseEvent):void{
 						marker = _img = (e.target as ImageMarker);
 						_thissprite = ((e.target as ImageMarker).getChildAt(0) as Sprite);
+						
+						if(_img.hoversrc){
+							_img.hovering = false;
+							_img.drawImage(true);
+						}
 						
 						if(DesignMode && !_img.dragging && !_img.resizing){
 							clearCurrentInteractionActions();
@@ -2153,6 +2203,8 @@ package com.devaldi.controls.flexpaper
 				reCreateAllPages();
 				_bbusyloading = false;
 				repositionPapers();
+				
+				dispatchEvent(new ViewerInitializedEvent(ViewerInitializedEvent.ON_VIEWER_INITIALIZED));
 				//dispatchEvent(new DocumentLoadedEvent(DocumentLoadedEvent.DOCUMENT_LOADED,numPages));
 			}else{
 				if(event.swfObject.content != null){
@@ -2631,7 +2683,7 @@ package com.devaldi.controls.flexpaper
 				while(_abstracts_spi < numPages && ((_searchAbstracts!=null && _searchAbstracts.length<500)||_searchAbstracts==null)){
 					var dataIndex:int = getJsonPageIndex(searchPageIndex);
 					
-					if(_jsonPageData[_abstracts_spi]!=null){
+					if(_jsonPageData!=null && _jsonPageData[_abstracts_spi]!=null){
 						searchBlob = getCurrentJSONSearchBlob(_abstracts_spi-1);
 						
 						// convert non-breaking space into space
@@ -2720,7 +2772,13 @@ package com.devaldi.controls.flexpaper
 			
 			if(_jsonPageData[dataIndex].hasOwnProperty("text")){
 				for(var spt:int=0;spt<_jsonPageData[dataIndex].text.length;spt++){
-					searchBlob+=(_jsonPageData[dataIndex].text[spt][5]).toString();	
+					if(	Number(_jsonPageData[dataIndex].text[spt][0])>=0 && 
+						Number(_jsonPageData[dataIndex].text[spt][1])>=0 && 
+						Number(_jsonPageData[dataIndex].text[spt][2])>0 &&
+						Number(_jsonPageData[dataIndex].text[spt][3])>0){
+						
+						searchBlob+=(_jsonPageData[dataIndex].text[spt][5]).toString();
+					}
 				}
 			}
 			
@@ -3318,7 +3376,7 @@ package com.devaldi.controls.flexpaper
 			try{
 			
 				for(var i:int=0;i<_markList.length;i++){
-					if(_markList[i]!=null && _markList[i].parent !=null){
+					if(_markList[i]!=null && _markList[i].parent !=null){ 
 						_markList[i].parent.removeChild(_markList[i]);
 					}						
 				}
@@ -3377,7 +3435,9 @@ package com.devaldi.controls.flexpaper
 				
 				repositionPapers();
 				
-			}catch (e:*) {}
+			}catch (e:*) {
+				trace('failed performing highlight');
+			}
 		}
 		
 		public function createPaper(index:int, w:Number, h:Number):DupImage {
@@ -4235,6 +4295,8 @@ package com.devaldi.controls.flexpaper
 			
 			_splitpjPrecaching = precache;
 			_splitpjrange = range;
+			var jobCancelled:Boolean = false;
+			
 			if(_splitpjPrecaching){_splitpjPrecacheFinalized=false;}
 			
 			if(start){
@@ -4251,10 +4313,12 @@ package com.devaldi.controls.flexpaper
 					if(precache)
 						_pp.ProcessingLabel.text = "Please wait.. preparing to print";
 					else{
-						_pp.ProcessingLabel.text = "Setting up print";
-						_splitpj = new PrintJob();
-						_splitpjoptions = new PrintJobOptions();
-						_splitpjoptions.printAsBitmap = PrintPaperAsBitmap;
+						if(_splitpj==null){
+							_pp.ProcessingLabel.text = "Setting up print";
+							_splitpj = new PrintJob();
+							_splitpjoptions = new PrintJobOptions();
+							_splitpjoptions.printAsBitmap = PrintPaperAsBitmap;
+						}
 					}
 					
 					_loaderptr = new Loader();
@@ -4291,11 +4355,16 @@ package com.devaldi.controls.flexpaper
 					}
 					
 					if(!precache){
-						_splitpj.start();
+						jobCancelled = !_splitpj.start();
 					}
 					
 					if(!_splitpjPrecaching)
 						_pp.ProcessingLabel.text = "Please wait..";
+				}
+				
+				if(jobCancelled){
+					PopUpManager.removePopUp(_pp);
+					return;
 				}
 				
 				if(precache){
@@ -4332,7 +4401,11 @@ package com.devaldi.controls.flexpaper
 						_splitpj = new PrintJob();
 						_splitpjoptions = new PrintJobOptions();
 						_splitpjoptions.printAsBitmap = PrintPaperAsBitmap;
-						_splitpj.start();
+						jobCancelled = !_splitpj.start();
+						
+						if(jobCancelled){
+							return;
+						}
 						
 						for(var pi:int = 0;pi<_splitpjPageList.length;pi++){
 							var pageToPrint:* = _splitpjPageList[pi];
@@ -4394,8 +4467,10 @@ package com.devaldi.controls.flexpaper
 		}
 		
 		public function printPaper():void{
-			if(_docLoader.IsSplit)
+			if(_docLoader.IsSplit){
+				_splitpj = null;
 				return printSplitPaper(true,"",true);
+			}
 				
 			if(_libMC.parent is DupImage){(_swfContainer.getChildAt(0) as UIComponent).addChild(_libMC.getDocument());}
 			_libMC.alpha = 1;
@@ -4507,8 +4582,10 @@ package com.devaldi.controls.flexpaper
 		}
 		
 		public function printPaperRange(range:String):void{
-			if(_docLoader.IsSplit)
+			if(_docLoader.IsSplit){
+				_splitpj = null;
 				return printSplitPaper(true,range,true);
+			}
 			
 			if(_libMC.parent is DupImage){(_swfContainer.getChildAt(0) as UIComponent).addChild(_libMC.getDocument());}
 			_libMC.alpha = 1;
@@ -4670,7 +4747,7 @@ package com.devaldi.controls.flexpaper
 			}
 		}
 		
-		public function addImage(page:Number, src:String, x:Number, y:Number, imagewidth:Number, imageheight:Number, keepaspectratio:Boolean, href:String, node:XML):ImageMarker{
+		public function addImage(page:Number, src:String, x:Number, y:Number, imagewidth:Number, imageheight:Number, keepaspectratio:Boolean, href:String, hoversrc:String, node:XML):ImageMarker{
 			if(MarkList==null){
 				initMarkList();
 			}
@@ -4686,6 +4763,7 @@ package com.devaldi.controls.flexpaper
 			im.imageEndX = x+imagewidth;
 			im.imageEndY = y+imageheight;
 			im.src = src;
+			im.hoversrc = hoversrc;
 			im.PageIndex = page;
 			im.xmlNode = node;
 			

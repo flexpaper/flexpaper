@@ -38,6 +38,7 @@ package com.devaldi.controls.flexpaper
 		public var isSearchMarker:Boolean = false;
 		public var flagged:Boolean = false;
 		public var isDragging:Boolean = false;
+		public var association:Object = null;
 		
 		public function ShapeMarker()
 		{

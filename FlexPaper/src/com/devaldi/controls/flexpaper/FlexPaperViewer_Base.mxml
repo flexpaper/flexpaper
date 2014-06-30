@@ -16,13 +16,14 @@
 	     creationComplete="viewercreationCompleteHandler(event)">
 	<mx:Script>
 		<![CDATA[
+			import com.adobe.serialization.json.JSON;
 			import com.devaldi.controls.CadViewPlugin;
 			import com.devaldi.controls.SinglePagePlugin;
 			import com.devaldi.controls.TwoPagePlugin;
 			import com.devaldi.controls.flexpaper.resources.LicenseKey;
 			import com.devaldi.controls.flexpaper.resources.MenuIcons;
-			import com.devaldi.controls.flexpaper.utils.MacMouseWheelHandler;
 			import com.devaldi.controls.flexpaper.utils.BlastedMouseWheelBlock;
+			import com.devaldi.controls.flexpaper.utils.MacMouseWheelHandler;
 			import com.devaldi.controls.flexpaper.utils.StreamUtil;
 			import com.devaldi.controls.flexpaper.utils.VersionHandler;
 			import com.devaldi.events.CurrentPageChangedEvent;
@@ -52,6 +53,9 @@
 			import mx.managers.BrowserManager;
 			import mx.managers.IBrowserManager;
 			import mx.managers.PopUpManager;
+			import mx.rpc.events.FaultEvent;
+			import mx.rpc.events.ResultEvent;
+			import mx.rpc.http.HTTPService;
 			
 			[Bindable]
 			public var Scale:Number = 1;
@@ -163,7 +167,8 @@
 			private var _stageinitialized:Boolean = false;
 			
 			public dynamic function get viewer():com.devaldi.controls.flexpaper.Viewer{return null;}
-		
+			public function get StageInitialized():Boolean{return _stageinitialized;}
+			
 			private function preInit():void{
 				_twopage = new TwoPagePlugin();
 				_singlepage = new SinglePagePlugin();
@@ -428,6 +433,9 @@
 			
 			protected function onCurrPageChanged(event:CurrentPageChangedEvent):void{
 				dispatchEvent(event);
+				if(viewer){
+					jsonCacheHandler(event);
+				}
 			}
 			
 			protected function onCursorModeChanged(event:CursorModeChangedEvent):void{
@@ -499,7 +507,7 @@
 				viewer.rotate();
 			}
 			
-			public function setCurrentCursor(cursor:String):void{
+			public function setCurrentCursor(cursor:String,clientX:Number=-1):void{
 				if(cursor=="TextSelectorCursor"){
 					viewer.TextSelectEnabled = true;
 				}else if (cursor=="ArrowCursor"){
@@ -539,8 +547,8 @@
 				viewer.repositionPapers();
 			}
 			
-			public dynamic function addImage(page:Number,imagePath:String, x:Number, y:Number, imagewidth:Number, imageheight:Number, keepaspectratio:Boolean, href:String, node:XML):ImageMarker{
-				var im:ImageMarker = viewer.addImage(page,imagePath,x,y,imagewidth,imageheight,keepaspectratio,href,null);
+			public dynamic function addImage(page:Number,imagePath:String, x:Number, y:Number, imagewidth:Number, imageheight:Number, keepaspectratio:Boolean, href:String, hoversrc:String, node:XML):ImageMarker{
+				var im:ImageMarker = viewer.addImage(page,imagePath,x,y,imagewidth,imageheight,keepaspectratio,href,hoversrc,null);
 				viewer.clearInteractionMarker();
 				viewer.repositionPapers();
 				
@@ -659,6 +667,106 @@
 			
 			protected function onInteractionElementEditedHandler(event:InteractionElementEditedEvent):void{
 				dispatchEvent(event);
+			}
+			
+			private var jsonTimeoutHandler:uint=0;
+			protected function jsonCacheHandler(e:Event):void{
+				try{
+					var pageIndex:int = viewer.getJsonPageIndex(viewer.currPage)+1;
+					var outOfRange:Boolean = viewer.JSONPageData!=null && viewer.JSONPageData[pageIndex]==null && pageIndex < viewer.numPages;
+					
+					if((viewer.JSONPageData==null || outOfRange) && viewer.JSONFile!=null && jsonTimeoutHandler==0){
+						jsonTimeoutHandler = flash.utils.setTimeout(function():void{
+							if(pageIndex<10){pageIndex++;}
+							
+							var serve:HTTPService = new HTTPService();
+							var json_unescaped = unescape(viewer.JSONFile);
+							
+							serve.url = (json_unescaped.indexOf("{page}")>-1)?json_unescaped.replace("{page}",(pageIndex) + (10 - (pageIndex) % 10)):json_unescaped;
+							serve.method = "GET";
+							serve.resultFormat = "text";
+							serve.addEventListener("result",function searchByJSONResult(evt:ResultEvent):void {
+								var jsonDataString:String = evt.result.toString();
+								if(jsonDataString.indexOf("(")==0){// remove jsonp params
+									jsonDataString = jsonDataString.substr(1,jsonDataString.length-2);
+								}
+								
+								if(viewer.JSONFileSplit()){
+									var jsonData = com.adobe.serialization.json.JSON.decode(jsonDataString);
+									
+									if(viewer.JSONPageData==null)
+										viewer.JSONPageData = new Array(parseInt(jsonData[0].pages));
+									
+									for(var i:int=0;i<jsonData.length;i++){
+										viewer.JSONPageData[parseInt(jsonData[i].number)-1] = jsonData[i];
+										
+										// fix for links in design mode for publisher
+										if(viewer.DesignMode||true){
+											var tf:String = "";
+											var tx:Number = -1;
+											var ty:Number = -1;
+											var tw:Number = -1;
+											var th:Number = -1;
+											var refwidth = -1;
+											var refheight = -1;
+											
+											for(var it:int=0;it<jsonData[i].text.length;it++){
+												tf = jsonData[i].text[it][5].toString();
+												refwidth = Number(jsonData[i].width);
+												refheight = Number(jsonData[i].height);
+												
+												if(tf.indexOf("actionURI")>=0 || tf.indexOf("actionGoToR")>=0 || tf.indexOf("actionGoTo")>=0){
+													tx = viewer.normalizeX(Number(jsonData[i].text[it][1]),refwidth,refheight);
+													ty = viewer.normalizeY(Number(jsonData[i].text[it][0]),refwidth,refheight);
+													tw = viewer.normalizeX(Number(jsonData[i].text[it][1]) + Number(jsonData[i].text[it][2]),refwidth,refheight) - tx;
+													th = viewer.normalizeY(Number(jsonData[i].text[it][3]) + Number(jsonData[i].text[it][0]),refwidth,refheight) - ty;
+													
+													if(tf.indexOf("actionURI")>=0){
+														if(tf.indexOf('actionURI(')>=0 && tf.indexOf('):')>0){
+															tf = tf.substring(tf.indexOf('actionURI(')+10,tf.lastIndexOf("):"));
+														}else{  // pdf2json backwards compatibility
+															if(tf.indexOf(",")>0)
+																tf = tf.substr(tf.indexOf('actionURI'),tf.indexOf(","));
+															else
+																tf = tf.substr(tf.indexOf('actionURI')+10);
+															
+															if(tf.indexOf("http://")==-1 && tf.indexOf("https://")==-1 && tf.indexOf("mailto")==-1){
+																tf = "http://" + tf;
+															}
+														}
+													}
+													
+													if(tf.indexOf("actionGoToR")>=0){
+														if(tf.indexOf(",")>0)
+															tf = tf.substr(tf.indexOf("actionGoToR"),tf.indexOf(',',tf.indexOf('actionGoToR')+13));
+														
+														tf = tf.replace("actionGoToR","actionGoTo"); 
+													}
+													
+													if(tf.indexOf("actionGoTo")>=0){
+														if(tf.indexOf(",")>0)
+															tf = tf.substr(tf.indexOf("actionGoTo"),tf.indexOf(',',tf.indexOf('actionGoTo')+12));
+													}
+													
+													addLink(Number(jsonData[i].number),tf,tx,ty,tw,th,false);
+												}
+											}
+										}
+									}
+								}else{
+									viewer.JSONPageData = com.adobe.serialization.json.JSON.decode(jsonDataString);
+								}
+								
+								// iterate each text fragment and look for actionGoTo/actionGoToR=page and actionURI=url
+								jsonTimeoutHandler = 0;
+							});
+							serve.addEventListener(FaultEvent.FAULT,function searchByJSONFault(evt:FaultEvent):void {
+								
+							});
+							serve.send();
+						},300);
+					}
+				}catch(e:*){}
 			}
 				
 		]]>

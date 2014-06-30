@@ -26,6 +26,7 @@ along with FlexPaper.  If not, see <http://www.gnu.org/licenses/>.
 	<mx:Metadata>
 		[ResourceBundle("FlexPaper")]
 		[Event(name="onDocumentLoaded", type="com.devaldi.events.DocumentLoadedEvent")]
+		[Event(name="onViewerInitialized", type="com.devaldi.events.ViewerInitializedEvent")]
 		[Event(name="onLoadingProgress", type="flash.events.ProgressEvent")]
 		[Event(name="onDocumentLoadedError", type="flash.events.ErrorEvent")]
 		[Event(name="onCurrPageChanged", type="com.devaldi.events.CurrentPageChangedEvent")]
@@ -40,8 +41,9 @@ along with FlexPaper.  If not, see <http://www.gnu.org/licenses/>.
 		<![CDATA[
 			import com.devaldi.controls.flexpaper.Viewer;
 			import com.devaldi.controls.flexpaper.resources.MenuIcons;
-			import com.devaldi.controls.flexpaper.utils.MacMouseWheelHandler;
 			import com.devaldi.controls.flexpaper.utils.BlastedMouseWheelBlock;
+			import com.devaldi.controls.flexpaper.utils.MacMouseWheelHandler;
+			import com.devaldi.controls.flexpaper.utils.ResourceUtil;
 			import com.devaldi.events.CurrentPageChangedEvent;
 			import com.devaldi.events.CursorModeChangedEvent;
 			import com.devaldi.events.DocumentLoadedEvent;
@@ -49,7 +51,7 @@ along with FlexPaper.  If not, see <http://www.gnu.org/licenses/>.
 			import com.devaldi.events.FitModeChangedEvent;
 			import com.devaldi.events.ScaleChangedEvent;
 			import com.devaldi.events.ViewModeChangedEvent;
-			import com.devaldi.controls.flexpaper.utils.ResourceUtil;
+			import com.devaldi.events.ViewerInitializedEvent;
 			
 			import flash.display.StageDisplayState;
 			import flash.net.navigateToURL;
@@ -203,14 +205,19 @@ along with FlexPaper.  If not, see <http://www.gnu.org/licenses/>.
 			
 			private function paperAddedToStageHandler(e:Event):void{
 				if(ExternalInterface.available){
-					var browser : String = ExternalInterface.call("function(){return navigator.appVersion+'-'+navigator.appName;}").toLowerCase();
+					var browser : String = ExternalInterface.call("function(){return navigator.appVersion+'-'+navigator.appName+'-'+navigator.userAgent;}").toLowerCase();
 					
-					if(browser.indexOf("webkit")>0 && ElementId !=null && ElementId.length>0){
+					if((browser.indexOf("webkit")>0 || browser.indexOf("msie")>0 || (browser.indexOf("netscape")>=0 && browser.indexOf("trident")>=0)) && ElementId !=null && ElementId.length>0){
 						BlastedMouseWheelBlock.initialize(stage,paper1.PaperContainer,ElementId);
 					}else{
 						MacMouseWheelHandler.init(stage);
 					}	
 				}
+			}
+			
+			protected function viewerInitializedHandler(event:ViewerInitializedEvent):void
+			{
+				dispatchEvent(event);
 			}
 		]]>
 	</mx:Script>
@@ -276,6 +283,7 @@ along with FlexPaper.  If not, see <http://www.gnu.org/licenses/>.
 					   onPageLoaded="pageLoadedEventHandler(event)"
 					   onPageLoading="pageLoadingEventHandler(event)"
 					   onErrorLoadingPage="errorLoadingPageEventHandler(event)"
+					   onViewerInitialized="viewerInitializedHandler(event)"
 					   
 					   onInteractionElementCreated="onInteractionElementCreatedHandler(event)"
 					   onInteractionElementDeleted="onInteractionElementDeletedHandler(event)"
