@@ -7,4 +7,4 @@ GNU GPL v3
 
 <br/>
 
-<h3>Maintained and sponsored by █▒▓▒░ <a href="http://flowpaper.com/">The FlowPaper Project</a></h3>
+<h3><a href="http://flowpaper.com/">Read more about this PDF viewer at the FlowPaper home page</a></h3>
