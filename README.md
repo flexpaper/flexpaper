@@ -5,7 +5,7 @@ FlowPaper has since then changed to become a flipbook maker and digital publishi
 
 License
 -------------------
-GNU GPL v3
+MIT
 
 <br/>
 
